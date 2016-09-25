@@ -24,6 +24,10 @@ import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabReselectListener;
 import com.roughike.bottombar.OnTabSelectListener;
 
+import awesome.com.pokemonbattle.fragments.BattleHomeFragment;
+import awesome.com.pokemonbattle.fragments.ChatHomeFragment;
+import awesome.com.pokemonbattle.fragments.TeamsHomeFragment;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -37,6 +41,16 @@ public class MainActivity extends AppCompatActivity {
         BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
 
         bottomBar.setDefaultTab(R.id.tab_battle);
+
+        final BattleHomeFragment battleFragment = new BattleHomeFragment();
+        final TeamsHomeFragment teamFragment = new TeamsHomeFragment();
+        final ChatHomeFragment chatFragment = new ChatHomeFragment();
+        final android.app.FragmentManager manger = getFragmentManager();
+
+        manger.beginTransaction()
+                .add(R.id.container,battleFragment,"battle")
+                .commit();
+
         // Listens for a tab touch (Can be first or Nth after)
         bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
@@ -44,12 +58,21 @@ public class MainActivity extends AppCompatActivity {
                 switch (tabId) {
                     case R.id.tab_teams:
                         Toast.makeText(MainActivity.this, "Teams", Toast.LENGTH_SHORT).show();
+                        manger.beginTransaction()
+                                .replace(R.id.container, teamFragment, "team")
+                                .commit();
                         break;
                     case R.id.tab_battle:
                         Toast.makeText(MainActivity.this, "Battle", Toast.LENGTH_SHORT).show();
+                        manger.beginTransaction()
+                                .replace(R.id.container, battleFragment, "battle")
+                                .commit();
                         break;
                     case R.id.tab_chat:
                         Toast.makeText(MainActivity.this, "Chat", Toast.LENGTH_SHORT).show();
+                        manger.beginTransaction()
+                                .replace(R.id.container, chatFragment, "chat")
+                                .commit();
                         break;
                     default:
                         break;
