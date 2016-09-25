@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tabs>
+    <tab
+        id="@+id/tab_teams"
+        icon="@drawable/ic_teams"
+        title="Teams"
+        activeColor="@color/white"
+        inActiveColor="@color/black"
+        barColorWhenSelected="@color/color_charizard" />
+    <tab
+        id="@+id/tab_battle"
+        icon="@drawable/ic_battle"
+        title="Battle"
+        activeColor="@color/white"
+        inActiveColor="@color/black"
+        barColorWhenSelected="@color/color_blastoise"/>
+    <tab
+        id="@+id/tab_chat"
+        icon="@drawable/ic_chat"
+        title="Chat"
+        activeColor="@color/white"
+        inActiveColor="@color/black"
+        barColorWhenSelected="@color/color_venusaur"/>
+</tabs>
