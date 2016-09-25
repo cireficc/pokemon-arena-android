@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabReselectListener;
@@ -35,16 +36,20 @@ public class MainActivity extends AppCompatActivity {
 
         BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
 
+        bottomBar.setDefaultTab(R.id.tab_battle);
         // Listens for a tab touch (Can be first or Nth after)
         bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
                 switch (tabId) {
                     case R.id.tab_teams:
+                        Toast.makeText(MainActivity.this, "Teams", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.tab_battle:
+                        Toast.makeText(MainActivity.this, "Battle", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.tab_chat:
+                        Toast.makeText(MainActivity.this, "Chat", Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         break;
@@ -58,10 +63,13 @@ public class MainActivity extends AppCompatActivity {
             public void onTabReSelected(@IdRes int tabId) {
                 switch (tabId) {
                     case R.id.tab_teams:
+                        Toast.makeText(MainActivity.this, "Teams Again", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.tab_battle:
+                        Toast.makeText(MainActivity.this, "Battle Again", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.tab_chat:
+                        Toast.makeText(MainActivity.this, "Chat Again", Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         break;
@@ -69,27 +77,4 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
 }
