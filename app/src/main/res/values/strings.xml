@@ -4,4 +4,5 @@
     <string name="battle">Battle</string>
     <string name="chat">Chat</string>
     <string name="teams">Teams</string>
+    <string name="loading">loading...</string>
 </resources>

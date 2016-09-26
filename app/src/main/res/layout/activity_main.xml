@@ -36,18 +36,8 @@
             android:id="@+id/container"
             android:layout_above="@+id/bottomBar">
         </FrameLayout>
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/sign_in_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/bottomBar"/>
-        <Button
-            android:id="@+id/sign_out_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign Out"
-            android:visibility="gone"
-            android:layout_toRightOf="@+id/sign_in_button"/>
+
+
         <com.roughike.bottombar.BottomBar
             android:id="@+id/bottomBar"
             android:layout_width="match_parent"
