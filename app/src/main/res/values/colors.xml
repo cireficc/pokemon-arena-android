@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
     <color name="color_charizard">#e64110</color>
     <color name="color_blastoise">#2062ac</color>
     <color name="color_venusaur">#5a9c39</color>
+    <color name="color_pikachu">#f6bd20</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="grey">#222222</color>
 </resources>

@@ -1,6 +1,10 @@
 package awesome.com.pokemonbattle;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.IdRes;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -24,9 +28,12 @@ public class BottomBarActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
 
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitleTextColor(Color.BLACK);
         setSupportActionBar(toolbar);
+
+    final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
+        final
 
         BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
 
