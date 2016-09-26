@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "762804087743",
+    "firebase_url": "https://pokemonbattle-20236906.firebaseio.com",
+    "project_id": "pokemonbattle-20236906",
+    "storage_bucket": "pokemonbattle-20236906.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:762804087743:android:e1aef7d494f30c9d",
+        "android_client_info": {
+          "package_name": "awesome.com.pokemonbattle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "762804087743-6q5fcg1ivhtbtacgscfq82qmaa58tt0m.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "762804087743-marf656cis874rv6e1pce20juen9a9fq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAs6mmD6A83UPqt3PNIKbEbcsaOfExm0cY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
