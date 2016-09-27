@@ -1,4 +1,4 @@
-package awesome.com.pokemonbattle;
+package com.pokemonbattlearena.android;
 
 import android.app.Activity;
 import android.content.Intent;

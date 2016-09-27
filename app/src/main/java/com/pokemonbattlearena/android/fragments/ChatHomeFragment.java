@@ -1,4 +1,4 @@
-package awesome.com.pokemonbattle.fragments;
+package com.pokemonbattlearena.android.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import awesome.com.pokemonbattle.R;
+import com.pokemonbattlearena.android.R;
 
 /**
  * Created by droidowl on 9/25/16.

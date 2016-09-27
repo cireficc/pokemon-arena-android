@@ -1,4 +1,4 @@
-package awesome.com.pokemonbattle;
+package com.pokemonbattlearena.android;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -16,9 +16,7 @@ import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabReselectListener;
 import com.roughike.bottombar.OnTabSelectListener;
 
-import awesome.com.pokemonbattle.fragments.BattleHomeFragment;
-import awesome.com.pokemonbattle.fragments.ChatHomeFragment;
-import awesome.com.pokemonbattle.fragments.TeamsHomeFragment;
+import com.pokemonbattlearena.android.fragments.*;
 
 public class BottomBarActivity extends AppCompatActivity {
 

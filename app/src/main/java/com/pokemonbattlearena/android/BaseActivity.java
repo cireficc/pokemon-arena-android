@@ -1,4 +1,4 @@
-package awesome.com.pokemonbattle;
+package com.pokemonbattlearena.android;
 
 import android.app.ProgressDialog;
 import android.support.annotation.VisibleForTesting;
