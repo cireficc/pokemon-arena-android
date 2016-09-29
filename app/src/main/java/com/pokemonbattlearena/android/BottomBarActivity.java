@@ -1,8 +1,6 @@
 package com.pokemonbattlearena.android;
 
-import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.IdRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -30,10 +28,8 @@ public class BottomBarActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.BLACK);
         setSupportActionBar(toolbar);
 
-    final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
-        final
-
-        BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
+        final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
+        final BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
 
         bottomBar.setDefaultTab(R.id.tab_battle);
 
