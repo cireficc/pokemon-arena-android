@@ -4,7 +4,9 @@
     <color name="color_blastoise">#2062ac</color>
     <color name="color_venusaur">#5a9c39</color>
     <color name="color_pikachu">#f6bd20</color>
+    <color name="color_electabuzz">#ffe639</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="grey">#222222</color>
+    <color name="list_item_background">#909090</color>
 </resources>

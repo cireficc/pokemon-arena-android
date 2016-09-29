@@ -5,4 +5,16 @@
     <string name="chat">Chat</string>
     <string name="teams">Teams</string>
     <string name="loading">loading...</string>
+    <string name="server_client_id">849701103848-dkn13hc3jgt4vvdikvjgru7rc9grnu7v.apps.googleusercontent.com</string>
+    <string name="signin_other_error">There was an issue with sign in, please try again later.</string>
+
+
+    <string name="action_lists">Test lists</string>
+    <string name="action_board">Test board </string>
+    <string name="action_disable_drag">Disable drag</string>
+    <string name="action_enable_drag">Enable drag</string>
+    <string name="action_list">List (drag on touch image icon)</string>
+    <string name="action_grid_vertical">Grid vertical (drag on long press)</string>
+    <string name="action_grid_horizontal">Grid horizontal (drag on long press)</string>
+
 </resources>

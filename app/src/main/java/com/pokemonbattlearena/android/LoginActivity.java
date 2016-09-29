@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -14,12 +15,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.games.Games;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,16 +34,25 @@ import com.google.firebase.auth.GoogleAuthProvider;
  * Created by droidowl on 9/25/16.
  */
 
-public class LoginActivity extends BaseActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+public class LoginActivity extends BaseActivity implements
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        View.OnClickListener {
 
     private static final String TAG = "LoginActivity";
     private static final int RC_SIGN_IN = 9001;
 
-    private FirebaseAuth mAuth;
-
-    private FirebaseAuth.AuthStateListener mAuthListener;
-
     private GoogleApiClient mGoogleApiClient;
+
+    private boolean mResolvingConnectionFailure = false;
+    private boolean mAutoStartSignInFlow = true;
+    private boolean mSignInClicked = false;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,145 +62,76 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.gms_client_id))
-                .requestEmail()
-                .build();
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .build();
-
-        mAuth = FirebaseAuth.getInstance();
-
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Intent intent = new Intent(LoginActivity.this, BottomBarActivity.class);
-                    startActivity(intent);
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-            }
-        };
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            Intent intent = new Intent(LoginActivity.this, BottomBarActivity.class);
-            startActivity(intent);
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = result.getSignInAccount();
-                Toast.makeText(this, "login success", Toast.LENGTH_SHORT).show();
-                firebaseAuthWithGoogle(account);
-            } else {
-                Toast.makeText(this, "login failed", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        showProgressDialog();
-
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                        hideProgressDialog();
-                    }
-                });
-    }
-
-    private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    private void signOut() {
-        // Firebase sign out
-        mAuth.signOut();
-
-        // Google sign out
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        updateUI(null);
-                    }
-                });
-    }
-
-    private void revokeAccess() {
-        // Firebase sign out
-        mAuth.signOut();
-
-        // Google revoke access
-        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        updateUI(null);
-                    }
-                });
-    }
-
-    private void updateUI(FirebaseUser user) {
-        hideProgressDialog();
-        if (user != null) {
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-        } else {
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-        }
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         // An unresolvable error has occurred and Google APIs (including Sign-In) will not
         // be available.
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+        if (mResolvingConnectionFailure) {
+            // Already resolving
+            return;
+        }
+
+        // If the sign in button was clicked or if auto sign-in is enabled,
+        // launch the sign-in flow
+        if (mSignInClicked || mAutoStartSignInFlow) {
+            mAutoStartSignInFlow = false;
+            mSignInClicked = false;
+            mResolvingConnectionFailure = true;
+
+            // Attempt to resolve the connection failure using BaseGameUtils.
+            if (!BaseGameUtils.resolveConnectionFailure(this,
+                    mGoogleApiClient, connectionResult,
+                    RC_SIGN_IN, getString(R.string.signin_other_error))) {
+                mResolvingConnectionFailure = false;
+            }
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent intent) {
+        Log.e(TAG, "Result of activity");
+        if (requestCode == RC_SIGN_IN) {
+            mSignInClicked = false;
+            mResolvingConnectionFailure = false;
+            if (resultCode == RESULT_OK) {
+                mGoogleApiClient.connect();
+            } else {
+                // Bring up an error dialog to alert the user that sign-in
+                // failed. The R.string.signin_failure should reference an error
+                // string in your strings.xml file that tells the user they
+                // could not be signed in, such as "Unable to sign in."
+                BaseGameUtils.showActivityResultError(this,
+                        requestCode, resultCode, R.string.signin_other_error);
+                Log.e(TAG, "Error signing in " + requestCode);
+            }
+        }
     }
 
     @Override
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.sign_in_button) {
-            signIn();
+            Log.e(TAG,"sign in clicked");
+            mSignInClicked = true;
+            mGoogleApiClient.connect();
         }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Intent launchMainAppIntent = new Intent(LoginActivity.this, BottomBarActivity.class);
+        startActivity(launchMainAppIntent);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
 }
