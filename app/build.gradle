@@ -32,22 +32,27 @@ dependencies {
 
     compile project(':BaseGameUtils')
 
-    //UI
+    // UI
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:design:24.2.1'
     compile 'com.android.support:cardview-v7:24.2.1'
     compile 'com.roughike:bottom-bar:2.0.2'
     compile 'com.github.woxthebox:draglistview:1.3'
 
-    //FIREBASE
+    // FIREBASE
     compile 'com.google.firebase:firebase-auth:9.6.1'
-
     compile 'com.google.firebase:firebase-core:9.6.1'
 
     // GOOGLE
     compile 'com.google.android.gms:play-services-auth:9.6.1'
 
-    //TEST
+    // DATABASE (SQLITE)
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
+    compile group: 'com.j256.ormlite', name: 'ormlite-core', version: '5.0'
+    compile group: 'com.j256.ormlite', name: 'ormlite-android', version: '5.0'
+    compile group: 'com.readystatesoftware.sqliteasset', name: 'sqliteassethelper', version: '2.0.1'
+
+    // TEST
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'
