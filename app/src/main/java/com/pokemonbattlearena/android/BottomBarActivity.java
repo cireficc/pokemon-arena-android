@@ -16,7 +16,7 @@ import com.roughike.bottombar.OnTabSelectListener;
 
 import com.pokemonbattlearena.android.fragments.*;
 
-public class BottomBarActivity extends AppCompatActivity {
+public class BottomBarActivity extends BaseActivity {
 
 
     @Override
