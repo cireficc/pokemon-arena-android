@@ -62,21 +62,25 @@
             android:text="move 1"
             android:layout_column="0"
             android:layout_row="0"
+            android:layout_width="150dp"
             />
         <Button android:id="@+id/move_2_button"
             android:text="move 2"
             android:layout_column="1"
             android:layout_row="0"
+            android:layout_width="150dp"
             />
         <Button android:id="@+id/move_3_button"
             android:text="move 3"
             android:layout_column="0"
             android:layout_row="1"
+            android:layout_width="150dp"
             />
         <Button android:id="@+id/move_4_button"
             android:text="move 4"
             android:layout_column="1"
             android:layout_row="1"
+            android:layout_width="150dp"
             />
     </GridLayout>
 </RelativeLayout>

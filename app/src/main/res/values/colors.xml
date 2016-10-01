@@ -4,9 +4,28 @@
     <color name="color_blastoise">#2062ac</color>
     <color name="color_venusaur">#5a9c39</color>
     <color name="color_pikachu">#f6bd20</color>
-    <color name="color_electabuzz">#ffe639</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="grey">#222222</color>
     <color name="list_item_background">#909090</color>
+
+    <color name="normal_type">#ADAD9C</color>
+    <color name="ground_type">#9C8033</color>
+    <color name="poison_type">#D387E9</color>
+    <color name="ice_type">#4BCECD</color>
+    <color name="ghost_type">#A86FF8</color>
+    <color name="grass_type">#396430</color>
+    <color name="flying_type">#68658C</color>
+    <color name="fighting_type">#96241E</color>
+    <color name="fire_type">#E26C16</color>
+    <color name="electric_type">#FDD333</color>
+    <color name="rock_type">#827834</color>
+    <color name="water_type">#0273BE</color>
+    <color name="dragon_type">#5138A9</color>
+    <color name="bug_type">#9BA81F</color>
+    <color name="psychic_type">#F737A7</color>
+
+    <color name="light_type_text">#FFFFF8</color>
+    <color name="dark_type_text">#151515</color>
+
 </resources>
