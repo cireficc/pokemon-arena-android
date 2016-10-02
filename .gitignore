@@ -141,7 +141,3 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-
-
-# Client id files
-/app/src/main/res/values/ids.xml
