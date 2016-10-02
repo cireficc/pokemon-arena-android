@@ -44,8 +44,8 @@ public class BattleUIFragment extends Fragment {
 
         Random random = new Random();
 
-        int randomPokemon = random.nextInt(151);
-        int randomPokemon2 = random.nextInt(151);
+        int randomPokemon = random.nextInt(150);
+        int randomPokemon2 = random.nextInt(150);
         Pokemon p1 = mApplication.getBattleDatabase().getPokemons().get(randomPokemon);
         Pokemon p2 = mApplication.getBattleDatabase().getPokemons().get(randomPokemon2);
 
