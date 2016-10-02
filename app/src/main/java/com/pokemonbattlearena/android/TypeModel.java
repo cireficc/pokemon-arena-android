@@ -1,6 +1,5 @@
 package com.pokemonbattlearena.android;
 
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 

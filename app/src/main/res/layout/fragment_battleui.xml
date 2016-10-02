@@ -6,50 +6,26 @@
     android:layout_height="match_parent"
     tools:context=".BottomBarActivity">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:weightSum="10"
         android:id="@+id/layout_pokemon_battle_ui">
-
-        <ImageView
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="10dp"
-            android:paddingEnd="6dp"
-            android:paddingStart="6dp"
-            android:background="@color/grey"
-            android:src="@android:mipmap/sym_def_app_icon"
-            android:id="@+id/p1_active_pokemon_image"/>
-        <TextView
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/p1_active_pokemon_name"
-            android:layout_below="@+id/p1_active_pokemon_image"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="50dp"
-            android:text="@string/default_pokemon"/>
-        <ImageView
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="10dp"
-            android:paddingEnd="6dp"
-            android:paddingStart="6dp"
-            android:background="@color/grey"
-            android:src="@android:mipmap/sym_def_app_icon"
-            android:id="@+id/p2_active_pokemon_image"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/p2_active_pokemon_name"
-            android:layout_below="@+id/p2_active_pokemon_image"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="50dp"
-            android:text="@string/default_pokemon"/>
-    </RelativeLayout>
+            android:layout_weight="5">
+            <include layout="@layout/pokemon_ui"
+                android:id="@+id/player_1_ui"/>
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_weight="5"
+            android:layout_height="wrap_content">
+            <include layout="@layout/pokemon_ui"
+                android:id="@+id/player_2_ui"/>
+        </FrameLayout>
+    </LinearLayout>
 
     <GridLayout
         android:layout_width="wrap_content"
@@ -57,26 +33,35 @@
         android:columnCount="2"
         android:layout_below="@+id/layout_pokemon_battle_ui"
         android:layout_centerHorizontal="true"
+        android:paddingTop="30dp"
         android:rowCount="2">
         <Button android:id="@+id/move_1_button"
             android:text="move 1"
+            android:elevation="4dp"
+            android:layout_margin="9dp"
             android:layout_column="0"
             android:layout_row="0"
             android:layout_width="150dp"
             />
         <Button android:id="@+id/move_2_button"
             android:text="move 2"
+            android:elevation="4dp"
+            android:layout_margin="9dp"
             android:layout_column="1"
             android:layout_row="0"
             android:layout_width="150dp"
             />
         <Button android:id="@+id/move_3_button"
             android:text="move 3"
+            android:elevation="4dp"
+            android:layout_margin="9dp"
             android:layout_column="0"
             android:layout_row="1"
             android:layout_width="150dp"
             />
         <Button android:id="@+id/move_4_button"
+            android:elevation="4dp"
+            android:layout_margin="9dp"
             android:text="move 4"
             android:layout_column="1"
             android:layout_row="1"
