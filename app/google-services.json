@@ -1,19 +1,19 @@
 {
   "project_info": {
-    "project_number": "849701103848",
-    "project_id": "pokemon-battle-arena"
+    "project_number": "95527716179",
+    "project_id": "pokemon-battle-arena-48093380"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:849701103848:android:752a132bc9754710",
+        "mobilesdk_app_id": "1:95527716179:android:752a132bc9754710",
         "android_client_info": {
           "package_name": "com.pokemonbattlearena.android"
         }
       },
       "oauth_client": [
         {
-          "client_id": "849701103848-dkn13hc3jgt4vvdikvjgru7rc9grnu7v.apps.googleusercontent.com",
+          "client_id": "95527716179-c1g52jjrigpbnnageubl2nmj63unfepq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.pokemonbattlearena.android",
@@ -21,13 +21,13 @@
           }
         },
         {
-          "client_id": "849701103848-pf8hjlehriotjbkkpc0fn3kvum4k2ilq.apps.googleusercontent.com",
+          "client_id": "95527716179-pudp78tkrtkqm2f5gm4c0ejos29nbvqq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC26GJ9o50MHWPwvHSoflXlF94v5vYC2IU"
+          "current_key": "AIzaSyAraZrCGbXcW0Yc8Urk1qPAIhmf7uloSR8"
         }
       ],
       "services": {
