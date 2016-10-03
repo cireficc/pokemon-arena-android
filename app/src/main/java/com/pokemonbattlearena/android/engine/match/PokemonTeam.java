@@ -7,9 +7,8 @@ import java.util.List;
 
 public class PokemonTeam {
 
-    private int size;
-
-    private List<Pokemon> pokemons;
+    protected int size;
+    protected List<Pokemon> pokemons;
 
     public PokemonTeam(int size) {
         this.size = size;
@@ -26,9 +25,5 @@ public class PokemonTeam {
 
     public void removePokemon(Pokemon p) {
         pokemons.remove(p);
-    }
-
-    public Pokemon currentPokemon() {
-        return pokemons.get(0);
     }
 }
