@@ -25,6 +25,7 @@ public class TypeModel {
             "rock",
             "water"
     };
+
     private final static int[] typeColorIds = {
             R.color.bug_type,
             R.color.dragon_type,
