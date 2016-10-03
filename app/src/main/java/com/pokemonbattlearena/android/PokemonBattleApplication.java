@@ -17,6 +17,7 @@ public class PokemonBattleApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        singleton = this;
         mBattleEngine = BattleEngine.getInstance();
         mBattleDatabase = new Database(getApplicationContext());
     }
@@ -27,5 +28,11 @@ public class PokemonBattleApplication extends Application {
 
     public Database getBattleDatabase() {
         return mBattleDatabase;
+    }
+
+    private static PokemonBattleApplication singleton;
+
+    public static PokemonBattleApplication getInstance(){
+        return singleton;
     }
 }

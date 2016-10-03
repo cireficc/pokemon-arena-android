@@ -29,7 +29,7 @@ import java.util.Random;
 
 public class BattleUIFragment extends Fragment implements View.OnClickListener {
 
-    PokemonBattleApplication mApplication;
+    PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
     private TypeModel mTypeModel;
 
@@ -58,7 +58,6 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_battleui, container, false);
-        mApplication = (PokemonBattleApplication) getActivity().getApplication();
 
         View player1View = view.findViewById(R.id.player_1_ui);
         View player2View = view.findViewById(R.id.player_2_ui);
