@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".BottomBarActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="10"
+        android:id="@+id/layout_pokemon_battle_ui">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="5">
+            <include layout="@layout/pokemon_ui"
+                android:id="@+id/player_1_ui"/>
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="5">
+            <include layout="@layout/pokemon_ui"
+                android:id="@+id/player_2_ui"/>
+        </FrameLayout>
+    </LinearLayout>
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:layout_below="@+id/layout_pokemon_battle_ui"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="30dp"
+        android:rowCount="2">
+        <Button android:id="@+id/move_button_0"
+            android:text="move 1"
+            android:visibility="invisible"
+            android:elevation="4dp"
+            android:layout_margin="9dp"
+            android:layout_column="0"
+            android:layout_row="0"
+            android:layout_width="150dp"
+            />
+        <Button android:id="@+id/move_button_1"
+            android:visibility="invisible"
+            android:text="move 2"
+            android:elevation="4dp"
+            android:layout_margin="9dp"
+            android:layout_column="1"
+            android:layout_row="0"
+            android:layout_width="150dp"
+            />
+        <Button android:id="@+id/move_button_2"
+            android:visibility="invisible"
+            android:text="move 3"
+            android:elevation="4dp"
+            android:layout_margin="9dp"
+            android:layout_column="0"
+            android:layout_row="1"
+            android:layout_width="150dp"
+            />
+        <Button android:id="@+id/move_button_3"
+            android:visibility="invisible"
+            android:elevation="4dp"
+            android:layout_margin="9dp"
+            android:text="move 4"
+            android:layout_column="1"
+            android:layout_row="1"
+            android:layout_width="150dp"
+            />
+    </GridLayout>
+</RelativeLayout>
