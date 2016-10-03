@@ -2,11 +2,13 @@ package com.pokemonbattlearena.android.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pokemonbattlearena.android.PokemonBattleApplication;
@@ -54,15 +56,13 @@ public class BattleUIFragment extends Fragment {
         TextView p2Name = (TextView) player2View.findViewById(R.id.active_name_textview);
         p2Name.setText(p2.getName());
 
-
+        ImageView p1Image = (ImageView) player1View.findViewById(R.id.active_imageview);
+        ImageView p2Image = (ImageView) player2View.findViewById(R.id.active_imageview);
+        p1Image.setImageDrawable(getContext().getDrawable(getDrawableForPokemon(p1.getName())));
+        p2Image.setImageDrawable(getContext().getDrawable(getDrawableForPokemon(p2.getName())));
 
         setupMoveButtons(view, p1);
-//        Resources res = getContext().getResources();
-//        Drawable healthbar = res.getDrawable(R.drawable.healthbar);
-//        ImageView p1Health = (ImageView) view.findViewById(R.id.p1_health_bar_container);
-//        ImageView p2Health = (ImageView) view.findViewById(R.id.p2_health_bar_container);
-//        p1Health.setImageDrawable(healthbar);
-//        p2Health.setImageDrawable(healthbar);
+
         return view;
     }
 
@@ -86,5 +86,10 @@ public class BattleUIFragment extends Fragment {
             m3.setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(moves.get(2).getType1())));
             m4.setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(moves.get(3).getType1())));
         }
+    }
+
+    private int getDrawableForPokemon(String name) {
+        String key = "ic_pokemon_" + name.toLowerCase();
+        return getResources().getIdentifier(key,"drawable",getActivity().getPackageName());
     }
 }
