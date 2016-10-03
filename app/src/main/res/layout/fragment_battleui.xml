@@ -20,8 +20,8 @@
         </FrameLayout>
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_weight="5"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_weight="5">
             <include layout="@layout/pokemon_ui"
                 android:id="@+id/player_2_ui"/>
         </FrameLayout>
@@ -35,15 +35,17 @@
         android:layout_centerHorizontal="true"
         android:paddingTop="30dp"
         android:rowCount="2">
-        <Button android:id="@+id/move_1_button"
+        <Button android:id="@+id/move_button_0"
             android:text="move 1"
+            android:visibility="invisible"
             android:elevation="4dp"
             android:layout_margin="9dp"
             android:layout_column="0"
             android:layout_row="0"
             android:layout_width="150dp"
             />
-        <Button android:id="@+id/move_2_button"
+        <Button android:id="@+id/move_button_1"
+            android:visibility="invisible"
             android:text="move 2"
             android:elevation="4dp"
             android:layout_margin="9dp"
@@ -51,7 +53,8 @@
             android:layout_row="0"
             android:layout_width="150dp"
             />
-        <Button android:id="@+id/move_3_button"
+        <Button android:id="@+id/move_button_2"
+            android:visibility="invisible"
             android:text="move 3"
             android:elevation="4dp"
             android:layout_margin="9dp"
@@ -59,7 +62,8 @@
             android:layout_row="1"
             android:layout_width="150dp"
             />
-        <Button android:id="@+id/move_4_button"
+        <Button android:id="@+id/move_button_3"
+            android:visibility="invisible"
             android:elevation="4dp"
             android:layout_margin="9dp"
             android:text="move 4"
