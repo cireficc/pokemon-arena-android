@@ -11,20 +11,26 @@ public class Battle {
     PokemonPlayer opponent;
     List<Turn> turns;
     PokemonPlayer turnOwner;
+    private boolean isAiMatch;
 
 
-    public Battle(PokemonPlayer player1, PokemonPlayer player2, BattleType type) {
+    public Battle(PokemonPlayer player1, PokemonPlayer player2) {
+
+        this.isAiMatch= false;
         this.self = player1;
-
-        if (type == BattleType.AI) {
-            this.opponent = new ArtificialPlayer(self);
-        }
-        else {
-            this.opponent = player2;
-        }
-
+        this.opponent = player2;
+        this.opponent = player2;
         this.turns = new ArrayList<>();
         this.turnOwner = player1;
+    }
+
+    public Battle(PokemonPlayer player1, ArtificialPlayer AI){
+        this.isAiMatch= true;
+        this.self = player1;
+        this.opponent = new ArtificialPlayer(self);
+        this.turns = new ArrayList<>();
+        this.turnOwner = player1;
+
     }
 
     public void takeTurn(Command command) {

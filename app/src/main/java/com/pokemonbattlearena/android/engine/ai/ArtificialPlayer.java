@@ -23,4 +23,5 @@ public class ArtificialPlayer extends PokemonPlayer {
         this.opTeam = opponent.getBattlePokemonTeam();
         //MiniMax decision = new MiniMax(playerOptions, myTeam, opTeam, this);
     }
+    //TODO Create method to return Command
 }
