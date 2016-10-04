@@ -58,6 +58,14 @@ public class Pokemon {
         return type2;
     }
 
+    public ElementalType getElementalType1() {
+        return ElementalType.valueOf(this.type1.toUpperCase());
+    }
+
+    public ElementalType getElementalType2() {
+        return ElementalType.valueOf(this.type2.toUpperCase());
+    }
+
     public int getHp() {
         return hp;
     }
