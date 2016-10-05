@@ -75,6 +75,11 @@ public class Move {
         return category;
     }
 
+    public MoveType getMoveType() {
+
+        return MoveType.valueOf(this.category.toUpperCase());
+    }
+
     public int getPower() {
         return power;
     }
