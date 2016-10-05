@@ -5,10 +5,12 @@ import com.pokemonbattlearena.android.engine.database.Move;
 public class Attack implements Command {
 
     private Move move;
+    private BattlePokemon attacker;
     private BattlePokemon receiver;
 
-    public Attack(Move move, BattlePokemon receiver) {
+    public Attack(BattlePokemon attacker, Move move, BattlePokemon receiver) {
         this.move = move;
+        this.attacker = attacker;
         this.receiver = receiver;
     }
 
