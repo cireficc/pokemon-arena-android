@@ -1,8 +1,5 @@
 package com.pokemonbattlearena.android.engine.match;
 
-import android.util.Log;
-
-import com.pokemonbattlearena.android.engine.BattleEngine;
 import com.pokemonbattlearena.android.engine.database.ElementalType;
 import com.pokemonbattlearena.android.engine.database.Move;
 
