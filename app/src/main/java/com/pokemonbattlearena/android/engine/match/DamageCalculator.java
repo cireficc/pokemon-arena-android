@@ -6,6 +6,8 @@ import com.pokemonbattlearena.android.engine.BattleEngine;
 import com.pokemonbattlearena.android.engine.database.ElementalType;
 import com.pokemonbattlearena.android.engine.database.Move;
 
+import java.util.Random;
+
 public class DamageCalculator {
 
     private static DamageCalculator instance = null;
@@ -29,6 +31,8 @@ public class DamageCalculator {
             {0,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   1,   1,   2,   1},
             {1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2}
     };
+
+    private static final int MAX_ACCURACY = 100;
 
     protected DamageCalculator() {
     }
@@ -65,5 +69,19 @@ public class DamageCalculator {
 
     protected double getOverallTypeEffectiveness(Move move, BattlePokemon target) {
         return getType1Effectiveness(move, target) * getType2Effectiveness(move, target);
+    }
+
+    protected boolean moveHit(Move move, BattlePokemon target) {
+
+        // TODO: Add support for accuracy stages
+
+        // Database converts nulls to 0; null accuracy means it always hits
+        if (move.getAccuracy() == 0) {
+            return true;
+        } else {
+            Random random = new Random();
+            int rolled = random.nextInt(MAX_ACCURACY);
+            return (rolled >= (MAX_ACCURACY - move.getAccuracy()));
+        }
     }
 }
