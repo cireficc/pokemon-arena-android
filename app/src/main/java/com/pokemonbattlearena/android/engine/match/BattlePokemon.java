@@ -15,6 +15,10 @@ public class BattlePokemon {
         this.currentHp = pokemon.getHp();
     }
 
+    public Pokemon getOriginalPokemon() {
+        return originalPokemon;
+    }
+
     public int getCurrentHp() {
         return currentHp;
     }
