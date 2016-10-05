@@ -95,6 +95,10 @@ public class Move {
         return stageChangeStat;
     }
 
+    public StatType getStageChangeStatType() {
+        return StatType.valueOf(this.stageChangeStat.toUpperCase());
+    }
+
     public int getStageChange() {
         return stageChange;
     }
