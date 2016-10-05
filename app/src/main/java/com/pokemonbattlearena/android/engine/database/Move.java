@@ -67,6 +67,10 @@ public class Move {
         return type1;
     }
 
+    public ElementalType getElementalType1() {
+        return ElementalType.valueOf(this.type1.toUpperCase());
+    }
+
     public String getCategory() {
         return category;
     }
