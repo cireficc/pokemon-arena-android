@@ -63,7 +63,11 @@ public class Pokemon {
     }
 
     public ElementalType getElementalType2() {
-        return ElementalType.valueOf(this.type2.toUpperCase());
+        try {
+            return ElementalType.valueOf(this.type2.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public int getHp() {
