@@ -87,8 +87,13 @@ public class Move {
         return powerPoints;
     }
 
-    public String getStatusEffect() {
+    public String getStatusEffectString() {
         return statusEffect;
+    }
+
+    public StatusEffect getStatusEffect() {
+
+        return StatusEffect.valueOf(this.statusEffect.toUpperCase());
     }
 
     public int getStatusEffectChance() {
