@@ -11,6 +11,7 @@ public class DamageCalculator {
 
     private static final String TAG = DamageCalculator.class.getName();
 
+    //Row type effectiveness vs Column type
     private static final double[][] TYPE_MULTIPLIERS = new double[][] {
             {1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, 0.5,   0,   1}, // Normal
             {1, 0.5, 0.5,   1,   2,   2,   1,   1,   1,   1,   1,   2, 0.5,   1, 0.5}, // Fire
