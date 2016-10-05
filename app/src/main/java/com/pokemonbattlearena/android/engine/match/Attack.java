@@ -8,6 +8,8 @@ public class Attack implements Command {
     private BattlePokemon attacker;
     private BattlePokemon receiver;
 
+    private static DamageCalculator damageCalculator = DamageCalculator.getInstance();
+
     public Attack(BattlePokemon attacker, Move move, BattlePokemon receiver) {
         this.move = move;
         this.attacker = attacker;
