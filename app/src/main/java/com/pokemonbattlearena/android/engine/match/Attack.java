@@ -23,5 +23,9 @@ public class Attack implements Command {
         int damage = damageCalculator.calculateDamage(attacker, move, target);
         int remainingHp = target.getCurrentHp() - damage;
         target.setCurrentHp(remainingHp);
+
+        if (target.getCurrentHp() <= 0) {
+            target.setFainted(true);
+        }
     }
 }
