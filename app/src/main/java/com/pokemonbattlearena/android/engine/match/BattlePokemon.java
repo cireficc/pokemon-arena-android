@@ -7,12 +7,14 @@ public class BattlePokemon {
 
     private Pokemon originalPokemon;
     private int currentHp;
+    private boolean fainted;
     private Move[] moveSet = new Move[4];
 
     public BattlePokemon(Pokemon pokemon) {
 
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
+        this.fainted = false;
     }
 
     public Pokemon getOriginalPokemon() {
@@ -26,6 +28,10 @@ public class BattlePokemon {
     public void setCurrentHp(int currentHp) {
         this.currentHp = currentHp;
     }
+
+    public boolean isFainted() { return this.fainted; }
+
+    public void setFainted(boolean fainted) { this.fainted = fainted; }
 
     public Move[] getMoveSet() { return moveSet; }
 
