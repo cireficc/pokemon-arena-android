@@ -1,8 +1,12 @@
 package com.pokemonbattlearena.android.engine.match;
 
+import android.util.Log;
+
 import com.pokemonbattlearena.android.engine.database.Move;
 
 public class Attack implements Command {
+
+    private static final String TAG = Attack.class.getName();
 
     private Move move;
     private BattlePokemon attacker;
@@ -25,6 +29,7 @@ public class Attack implements Command {
         target.setCurrentHp(remainingHp);
 
         if (target.getCurrentHp() <= 0) {
+            Log.d(TAG, target.getOriginalPokemon().getName() + " fainted! (" + target.getCurrentHp() + " hp)");
             target.setFainted(true);
         }
     }
