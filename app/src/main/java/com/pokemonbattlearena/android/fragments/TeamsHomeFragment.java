@@ -21,7 +21,7 @@ public class TeamsHomeFragment extends Fragment implements View.OnClickListener 
 
     private Button mTeamButton;
     private boolean creatingTeam = false;
-    private CreateTeamUIFragment createTeamUIFragment;
+    private TeamSetupFragment teamSetupFragment;
 
     public TeamsHomeFragment() {
         super();
@@ -40,11 +40,12 @@ public class TeamsHomeFragment extends Fragment implements View.OnClickListener 
     public void onClick(View v) {
         if(!creatingTeam) {
             creatingTeam = true;
-            createTeamUIFragment = new CreateTeamUIFragment();
-            getFragmentManager().beginTransaction().replace(R.id.teams_ui_container, createTeamUIFragment).commit();
+            teamSetupFragment = new TeamSetupFragment();
+            getFragmentManager().beginTransaction().add(R.id.teams_ui_container, teamSetupFragment).commit();
+            mTeamButton.setText(R.string.cancel);
         } else {
-            getFragmentManager().beginTransaction().remove(createTeamUIFragment).commit();
-            createTeamUIFragment = null;
+            getFragmentManager().beginTransaction().remove(teamSetupFragment).commit();
+            teamSetupFragment = null;
             mTeamButton.setText(R.string.teams);
             creatingTeam = false;
         }
