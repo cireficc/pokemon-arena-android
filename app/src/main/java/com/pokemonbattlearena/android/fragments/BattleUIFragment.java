@@ -73,7 +73,7 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** select players UI cancelled, " + response);
-//            switchToMainScreen();
+            //TODO: exit the battle
             return;
         }
 
@@ -114,7 +114,7 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
     private void handleInvitationInboxResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
-//            switchToMainScreen();
+            //TODO: Exit the battle
             return;
         }
 
@@ -580,7 +580,7 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
     }
 
     private void sendMessage() {
-        Log.e(TAG, "Sending Message");
+        Log.d(TAG, "Sending Message");
         byte[] message = "Bitch Please".getBytes();
         for (Participant p : mParticipants) {
             if (!p.getParticipantId().equals(mMyId)) {
