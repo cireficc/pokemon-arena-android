@@ -175,7 +175,7 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
         // minimum number of players required for our game
         // For simplicity, we require everyone to join the game before we start it
         // (this is signaled by Integer.MAX_VALUE).
-        final int MIN_PLAYERS = Integer.MAX_VALUE;
+        final int MIN_PLAYERS = 2;
         Intent i = Games.RealTimeMultiplayer.getWaitingRoomIntent(mApplication.getGoogleApiClient(), room, MIN_PLAYERS);
 
         // show waiting room UI
