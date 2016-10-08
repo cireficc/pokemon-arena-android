@@ -12,9 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.os.Bundle;
 
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -53,6 +51,24 @@ public class BottomBarActivity extends BaseActivity implements
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
     private boolean battleBegun = false;
+    // Request codes for the UIs that we show with startActivityForResult:
+    private final static int RC_SELECT_PLAYERS = 10000;
+    private final static int RC_INVITATION_INBOX = 10001;
+    private final static int RC_WAITING_ROOM = 10002;
+    private String mRoomId = null;
+
+    // The participants in the currently active game
+    private ArrayList<Participant> mParticipants = null;
+
+    // My participant ID in the currently active game
+    private String mMyId = null;
+
+    // If non-null, this is the id of the invitation we received via the
+    // invitation listener
+    private String mIncomingInvitationId = null;
+
+    // Message buffer for sending messages
+    private byte[] mMsgBuf = new byte[2];
     private BattleUIFragment battleUIFragment;
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
@@ -154,7 +170,6 @@ public class BottomBarActivity extends BaseActivity implements
             // Already resolving
             return;
         }
-
         // If the sign in button was clicked or if auto sign-in is enabled,
         // launch the sign-in flow
         if (mSignInClicked || mAutoStartSignInFlow) {
@@ -244,26 +259,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     }
 
-
-    // Request codes for the UIs that we show with startActivityForResult:
-    final static int RC_SELECT_PLAYERS = 10000;
-    final static int RC_INVITATION_INBOX = 10001;
-    final static int RC_WAITING_ROOM = 10002;
-    String mRoomId = null;
-
-    // The participants in the currently active game
-    ArrayList<Participant> mParticipants = null;
-
-    // My participant ID in the currently active game
-    String mMyId = null;
-
-    // If non-null, this is the id of the invitation we received via the
-    // invitation listener
-    String mIncomingInvitationId = null;
-
-    // Message buffer for sending messages
-    byte[] mMsgBuf = new byte[2];
-
     // Handle the result of the "Select players UI" we launched when the user clicked the
     // "Invite friends" button. We react by creating a room with those players.
     private void handleSelectPlayersResult(int response, Intent data) {
@@ -291,16 +286,12 @@ public class BottomBarActivity extends BaseActivity implements
 
         // create the room
         Log.d(TAG, "Creating room...");
-        RoomConfig.Builder rtmConfigBuilder = RoomConfig.builder(this);
+        RoomConfig.Builder rtmConfigBuilder = makeBasicRoomConfigBuilder();
         rtmConfigBuilder.addPlayersToInvite(invitees);
-        rtmConfigBuilder.setMessageReceivedListener(this);
-        rtmConfigBuilder.setRoomStatusUpdateListener(this);
         if (autoMatchCriteria != null) {
             rtmConfigBuilder.setAutoMatchCriteria(autoMatchCriteria);
         }
-//        switchToScreen(R.id.screen_wait);
         keepScreenOn();
-//        resetGameVars();
         Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), rtmConfigBuilder.build());
         Log.d(TAG, "Room created, waiting for it to be ready...");
     }
@@ -325,13 +316,9 @@ public class BottomBarActivity extends BaseActivity implements
     void acceptInviteToRoom(String invId) {
         // accept the invitation
         Log.d(TAG, "Accepting invitation: " + invId);
-        RoomConfig.Builder roomConfigBuilder = RoomConfig.builder(this);
-        roomConfigBuilder.setInvitationIdToAccept(invId)
-                .setMessageReceivedListener(this)
-                .setRoomStatusUpdateListener(this);
-//        switchToScreen(R.id.screen_wait);
+        RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+        roomConfigBuilder.setInvitationIdToAccept(invId);
         keepScreenOn();
-//        resetGameVars();
         Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
     }
 
@@ -347,9 +334,6 @@ public class BottomBarActivity extends BaseActivity implements
 
         // save room ID so we can leave cleanly before the game starts.
         mRoomId = room.getRoomId();
-
-        // show the waiting room UI
-        showWaitingRoom(room);
     }
 
     @Override
@@ -360,22 +344,21 @@ public class BottomBarActivity extends BaseActivity implements
             showGameError();
             return;
         }
-
-        // show the waiting room UI
-        showWaitingRoom(room);
+        updateRoom(room);
+        sendMessage();
+        launchBattleFrags();
     }
 
-    // Show the waiting room UI to track the progress of other players as they enter the
-    // room and get connected.
-    void showWaitingRoom(Room room) {
-        // minimum number of players required for our game
-        // For simplicity, we require everyone to join the game before we start it
-        // (this is signaled by Integer.MAX_VALUE).
-        final int MIN_PLAYERS = 2;
-        Intent i = Games.RealTimeMultiplayer.getWaitingRoomIntent(mApplication.getGoogleApiClient(), room, MIN_PLAYERS);
-
-        // show waiting room UI
-        startActivityForResult(i, RC_WAITING_ROOM);
+    private void launchBattleFrags() {
+        if (!battleBegun) {
+            battleBegun = true;
+            battleUIFragment = new BattleUIFragment();
+            getFragmentManager().beginTransaction().add(R.id.battle_ui_container, battleUIFragment).commitAllowingStateLoss();
+        } else {
+            getFragmentManager().beginTransaction().remove(battleUIFragment).commitAllowingStateLoss();
+            battleUIFragment = null;
+            battleBegun = false;
+        }
     }
 
     @Override
@@ -386,7 +369,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onRoomConnected(int statusCode, Room room) {
-
         Log.d(TAG, "onRoomConnected(" + statusCode + ", " + room + ")");
         if (statusCode != GamesStatusCodes.STATUS_OK) {
             Log.e(TAG, "*** Error: onRoomConnected, status " + statusCode);
@@ -420,6 +402,7 @@ public class BottomBarActivity extends BaseActivity implements
     // create a RoomConfigBuilder that's appropriate for your implementation
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder(this)
+                .setRoomStatusUpdateListener(this)
                 .setMessageReceivedListener(this);
     }
 
@@ -466,7 +449,7 @@ public class BottomBarActivity extends BaseActivity implements
         // save room ID if its not initialized in onRoomCreated() so we can leave cleanly before the game starts.
         if(mRoomId==null)
             mRoomId = room.getRoomId();
-
+        launchBattleFrags();
     }
 
     @Override
@@ -503,11 +486,14 @@ public class BottomBarActivity extends BaseActivity implements
     void updateRoom(Room room) {
         if (room != null) {
             mParticipants = room.getParticipants();
+            mRoomId = room.getRoomId();
+            mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
         }
         if (mParticipants != null) {
             // update game states
         }
     }
+
     // Leave the room.
     void leaveRoom() {
         Log.d(TAG, "Leaving room.");
@@ -531,7 +517,23 @@ public class BottomBarActivity extends BaseActivity implements
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
         byte[] buf = rtm.getMessageData();
         String sender = rtm.getSenderParticipantId();
-        Log.d(TAG, "Message received: " + (char) buf[0] + "/" + (int) buf[1]);
+        Log.d(TAG, "Message received:" + buf.toString());
+        Toast.makeText(this, "Message received: " + buf.toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    private void sendMessage() {
+        Log.d(TAG, "Sending Message");
+        byte[] message = "Bitch Please".getBytes();
+        for (Participant p : mParticipants) {
+            Log.w(TAG, "Dis name"  + p.getDisplayName() + ", id " + p.getParticipantId());
+            if (!p.getParticipantId().equals(mMyId)) {
+                Log.w(TAG, "I am not sam: " + p.getParticipantId());
+                Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, message,
+                        mRoomId, p.getParticipantId());
+            } else {
+                Log.w(TAG, "I am who I sam :" + mMyId);
+            }
+        }
     }
 
 }

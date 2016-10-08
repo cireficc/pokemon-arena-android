@@ -158,19 +158,6 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener  
         return c.getDrawable(id);
     }
 
-//    private void sendMessage() {
-//        Log.d(TAG, "Sending Message");
-//        byte[] message = "Bitch Please".getBytes();
-//        for (Participant p : mParticipants) {
-//            if (!p.getParticipantId().equals(mMyId)) {
-//                Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, message,
-//                        mRoomId, p.getParticipantId());
-//            }
-//        }
-//    }
-
-
-
     // Sets the flag to keep this screen on. It's recommended to do that during
     // the
     // handshake when setting up a game, because if the screen turns off, the
