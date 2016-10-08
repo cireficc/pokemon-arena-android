@@ -16,6 +16,10 @@ import com.pokemonbattlearena.android.R;
 
 public class BattleHomeFragment extends Fragment implements View.OnClickListener {
 
+    public Button getmBattleButton() {
+        return mBattleButton;
+    }
+
     private Button mBattleButton;
     private boolean battleBegun = false;
     private BattleUIFragment battleUIFragment;
@@ -28,8 +32,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
-        mBattleButton = (Button) view.findViewById(R.id.quick_battle_button);
-        mBattleButton.setOnClickListener(this);
+//        mBattleButton = (Button) view.findViewById(R.id.quick_battle_button);
         return view;
     }
 
