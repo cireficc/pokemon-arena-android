@@ -25,6 +25,7 @@ import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
@@ -39,12 +40,17 @@ import com.pokemonbattlearena.android.fragments.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
+import static com.google.android.gms.games.GamesStatusCodes.STATUS_REAL_TIME_MESSAGE_SEND_FAILED;
+import static com.google.android.gms.games.GamesStatusCodes.STATUS_REAL_TIME_ROOM_NOT_JOINED;
+
 public class BottomBarActivity extends BaseActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
         RealTimeMessageReceivedListener,
         RoomUpdateListener,
-        RoomStatusUpdateListener  {
+        RoomStatusUpdateListener,
+        RealTimeMultiplayer.ReliableMessageSentCallback {
     private static final int RC_SIGN_IN = 9001;
 
     private boolean mResolvingConnectionFailure = false;
@@ -326,7 +332,7 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onRoomCreated(int statusCode, Room room) {
         Log.d(TAG, "onRoomCreated(" + statusCode + ", " + room + ")");
-        if (statusCode != GamesStatusCodes.STATUS_OK) {
+        if (statusCode != STATUS_OK) {
             Log.e(TAG, "*** Error: onRoomCreated, status " + statusCode);
             showGameError();
             return;
@@ -339,7 +345,7 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onJoinedRoom(int statusCode, Room room) {
         Log.d(TAG, "onJoinedRoom(" + statusCode + ", " + room + ")");
-        if (statusCode != GamesStatusCodes.STATUS_OK) {
+        if (statusCode != STATUS_OK) {
             Log.e(TAG, "*** Error: onRoomConnected, status " + statusCode);
             showGameError();
             return;
@@ -370,7 +376,7 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onRoomConnected(int statusCode, Room room) {
         Log.d(TAG, "onRoomConnected(" + statusCode + ", " + room + ")");
-        if (statusCode != GamesStatusCodes.STATUS_OK) {
+        if (statusCode != STATUS_OK) {
             Log.e(TAG, "*** Error: onRoomConnected, status " + statusCode);
             showGameError();
             return;
@@ -515,23 +521,53 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
+
+        Log.d(TAG, rtm.toString());
         byte[] buf = rtm.getMessageData();
         String sender = rtm.getSenderParticipantId();
         Log.d(TAG, "Message received:" + buf.toString());
         Toast.makeText(this, "Message received: " + buf.toString(), Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onRealTimeMessageSent(int statusCode, int tokenId, String recipientId) {
+
+        Log.d(TAG, "Realtime message sent to " + recipientId + " (onRealTimeMessageSent callback)");
+
+        switch (statusCode) {
+            case STATUS_OK:
+                Log.d(TAG, "Message sent successfully");
+                break;
+            case STATUS_REAL_TIME_MESSAGE_SEND_FAILED:
+                Log.d(TAG, "Message failed to send");
+                break;
+            case STATUS_REAL_TIME_ROOM_NOT_JOINED:
+                Log.d(TAG, "Message failed to send because recipient is not in the room");
+                break;
+            default:
+                break;
+        }
+    }
+
     private void sendMessage() {
         Log.d(TAG, "Sending Message");
         byte[] message = "Bitch Please".getBytes();
+
         for (Participant p : mParticipants) {
-            Log.w(TAG, "Dis name"  + p.getDisplayName() + ", id " + p.getParticipantId());
-            if (!p.getParticipantId().equals(mMyId)) {
-                Log.w(TAG, "I am not sam: " + p.getParticipantId());
+            Log.w(TAG, "Participant: "  + p.getDisplayName() + ", id " + p.getParticipantId());
+
+            if (p.getParticipantId().equals(mMyId)) {
+                Log.w(TAG, "Ignoring sending message to self (" + p.getParticipantId() + ")");
+                continue;
+            }
+
+            if (p.getStatus() !=  Participant.STATUS_JOINED) {
+                Log.d(TAG, "Participant is apparently no longer joined?");
+                continue;
+            } else {
                 Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, message,
                         mRoomId, p.getParticipantId());
-            } else {
-                Log.w(TAG, "I am who I sam :" + mMyId);
+                Log.d(TAG, "Reliable message sent (sendMessage())");
             }
         }
     }
