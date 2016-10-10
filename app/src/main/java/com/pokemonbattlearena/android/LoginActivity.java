@@ -24,16 +24,16 @@ public class LoginActivity extends BaseActivity implements
     private static final String TAG = "LoginActivity";
     private static final int RC_SIGN_IN = 9001;
 
-    private GoogleApiClient mGoogleApiClient;
-
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
 
+    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
+
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        mApplication.getGoogleApiClient().connect();
     }
 
     @Override
@@ -44,11 +44,13 @@ public class LoginActivity extends BaseActivity implements
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .build();
+
+        mApplication.setGoogleApiClient(googleApiClient);
     }
 
     @Override
@@ -69,7 +71,7 @@ public class LoginActivity extends BaseActivity implements
 
             // Attempt to resolve the connection failure using BaseGameUtils.
             if (!BaseGameUtils.resolveConnectionFailure(this,
-                    mGoogleApiClient, connectionResult,
+                    mApplication.getGoogleApiClient(), connectionResult,
                     RC_SIGN_IN, getString(R.string.signin_other_error))) {
                 mResolvingConnectionFailure = false;
             }
@@ -83,7 +85,7 @@ public class LoginActivity extends BaseActivity implements
             mSignInClicked = false;
             mResolvingConnectionFailure = false;
             if (resultCode == RESULT_OK) {
-                mGoogleApiClient.connect();
+                mApplication.getGoogleApiClient().connect();
             } else {
                 // Bring up an error dialog to alert the user that sign-in
                 // failed. The R.string.signin_failure should reference an error
@@ -102,7 +104,7 @@ public class LoginActivity extends BaseActivity implements
         if (i == R.id.sign_in_button) {
             Log.e(TAG,"sign in clicked");
             mSignInClicked = true;
-            mGoogleApiClient.connect();
+            mApplication.getGoogleApiClient().connect();
         }
     }
 

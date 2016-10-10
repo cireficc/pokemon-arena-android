@@ -11,5 +11,5 @@
     <string name="cancel_battle">Cancel Battle</string>
     <string name="cancel">Cancel</string>
     <string name="hp">HP:</string>
-
+    <string name="game_problem">We are sorry to report that the game has had an Internet error. Please try again.</string>
 </resources>
