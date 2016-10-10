@@ -1,5 +1,6 @@
 package com.pokemonbattlearena.android.fragments;
 
+import android.annotation.TargetApi;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.content.Context;
@@ -23,6 +24,7 @@ import com.woxthebox.draglistview.DragListView;
  * @author Mitch Couturier
  * @version 10/07/2016
  */
+@TargetApi(24)
 public class TeamSetupFragment extends Fragment implements View.OnClickListener {
 
     private static final int TOTAL_POKEMON_COUNT = 151;
