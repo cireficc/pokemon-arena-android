@@ -31,6 +31,7 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabReselectListener;
 import com.roughike.bottombar.OnTabSelectListener;
@@ -39,6 +40,7 @@ import com.pokemonbattlearena.android.fragments.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_REAL_TIME_MESSAGE_SEND_FAILED;
@@ -80,6 +82,9 @@ public class BottomBarActivity extends BaseActivity implements
 
     private final static String TAG = BottomBarActivity.class.getSimpleName();
 
+    /*
+        Fragment Methods
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,6 +172,33 @@ public class BottomBarActivity extends BaseActivity implements
         mApplication.getGoogleApiClient().connect();
     }
 
+    /*
+
+        Start GoogleApiClient Callbacks
+
+     */
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (bundle != null) {
+
+            Invitation inv = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
+
+            if (inv != null) {
+                // accept invitation
+                RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+                roomConfigBuilder.setInvitationIdToAccept(inv.getInvitationId());
+                Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
+
+                // prevent screen from sleeping during handshake
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -192,6 +224,11 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
+    /*
+
+        Activity Callbacks
+
+     */
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
         Log.e(TAG, "Result of activity");
@@ -242,28 +279,6 @@ public class BottomBarActivity extends BaseActivity implements
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (bundle != null) {
-
-            Invitation inv = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
-
-            if (inv != null) {
-                // accept invitation
-                RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
-                roomConfigBuilder.setInvitationIdToAccept(inv.getInvitationId());
-                Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
-
-                // prevent screen from sleeping during handshake
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            }
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
 
     // Handle the result of the "Select players UI" we launched when the user clicked the
     // "Invite friends" button. We react by creating a room with those players.
@@ -328,7 +343,11 @@ public class BottomBarActivity extends BaseActivity implements
         Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
     }
 
-    //TODO: Start RoomUpdateListener
+    /*
+
+        Start RoomUpdateListener Callbacks
+
+     */
     @Override
     public void onRoomCreated(int statusCode, Room room) {
         Log.d(TAG, "onRoomCreated(" + statusCode + ", " + room + ")");
@@ -385,33 +404,11 @@ public class BottomBarActivity extends BaseActivity implements
         updateRoom(room);
     }
 
-    private void startQuickGame() {
-        // auto-match criteria to invite one random automatch opponent.
-        // You can also specify more opponents (up to 3).
-        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
+    /*
 
-        // build the room config:
-        RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
-        roomConfigBuilder.setAutoMatchCriteria(am);
-        RoomConfig roomConfig = roomConfigBuilder.build();
+        Start RoomStatusUpdateListener Callbacks
 
-        // create room:
-        Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), roomConfig);
-
-        // prevent screen from sleeping during handshake
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        // go to game screen
-        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(mApplication.getGoogleApiClient(), 1, 3);
-        startActivityForResult(intent, RC_SELECT_PLAYERS);
-    }
-
-    // create a RoomConfigBuilder that's appropriate for your implementation
-    private RoomConfig.Builder makeBasicRoomConfigBuilder() {
-        return RoomConfig.builder(this)
-                .setRoomStatusUpdateListener(this)
-                .setMessageReceivedListener(this);
-    }
+     */
 
     // We treat most of the room update callbacks in the same way: we update our list of
     // participants and update the display. In a real game we would also have to check if that
@@ -490,39 +487,14 @@ public class BottomBarActivity extends BaseActivity implements
         updateRoom(room);
     }
 
-    void updateRoom(Room room) {
-        if (room != null) {
-            mParticipants = room.getParticipants();
-            mRoomId = room.getRoomId();
-            mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
-        }
-        if (mParticipants != null) {
-            // update game states
-        }
-    }
+    /*
 
-    // Leave the room.
-    void leaveRoom() {
-        Log.d(TAG, "Leaving room.");
-        stopKeepingScreenOn();
-        if (mRoomId != null) {
-            Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
-            mRoomId = null;
-        }
-    }
+        MessageListener Callbacks
 
-    void keepScreenOn() {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
-
-    // Clears the flag that keeps the screen on.
-    void stopKeepingScreenOn() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
-
+     */
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
-
+        // Message format: pokemonName1:pokemonName2
         Log.d(TAG, rtm.toString());
         byte[] buf = rtm.getMessageData();
         String bufferString = new String(buf);
@@ -553,7 +525,13 @@ public class BottomBarActivity extends BaseActivity implements
 
     private void sendMessage() {
         Log.d(TAG, "Sending Message");
-        byte[] message = "Bitch Please".getBytes();
+        Random random = new Random();
+        int r1 = random.nextInt(150);
+        int r2 = random.nextInt(150);
+
+        Pokemon p1 = mApplication.getBattleDatabase().getPokemons().get(r1);
+        Pokemon p2 = mApplication.getBattleDatabase().getPokemons().get(r2);
+        byte[] message = (p1.getName() + ":" + p1.getName()).getBytes();
 
         for (Participant p : mParticipants) {
             Log.w(TAG, "Participant: "  + p.getDisplayName() + ", id " + p.getParticipantId());
@@ -574,4 +552,67 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
+
+    /*
+
+        Private Methods
+
+     */
+    private void startQuickGame() {
+        // auto-match criteria to invite one random automatch opponent.
+        // You can also specify more opponents (up to 3).
+        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
+
+        // build the room config:
+        RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+        roomConfigBuilder.setAutoMatchCriteria(am);
+        RoomConfig roomConfig = roomConfigBuilder.build();
+
+        // create room:
+        Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), roomConfig);
+
+        // prevent screen from sleeping during handshake
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // go to game screen
+        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(mApplication.getGoogleApiClient(), 1, 3);
+        startActivityForResult(intent, RC_SELECT_PLAYERS);
+    }
+
+    // create a RoomConfigBuilder that's appropriate for your implementation
+    private RoomConfig.Builder makeBasicRoomConfigBuilder() {
+        return RoomConfig.builder(this)
+                .setRoomStatusUpdateListener(this)
+                .setMessageReceivedListener(this);
+    }
+
+    private void updateRoom(Room room) {
+        if (room != null) {
+            mParticipants = room.getParticipants();
+            mRoomId = room.getRoomId();
+            mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
+        }
+        if (mParticipants != null) {
+            // update game states
+        }
+    }
+
+    // Leave the room.
+    void leaveRoom() {
+        Log.d(TAG, "Leaving room.");
+        stopKeepingScreenOn();
+        if (mRoomId != null) {
+            Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
+            mRoomId = null;
+        }
+    }
+
+    private void keepScreenOn() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    // Clears the flag that keeps the screen on.
+    private void stopKeepingScreenOn() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 }
