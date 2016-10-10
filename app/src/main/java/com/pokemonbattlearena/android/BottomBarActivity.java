@@ -351,7 +351,7 @@ public class BottomBarActivity extends BaseActivity implements
             return;
         }
         updateRoom(room);
-        sendMessage();
+
         launchBattleFrags();
     }
 
@@ -381,6 +381,7 @@ public class BottomBarActivity extends BaseActivity implements
             showGameError();
             return;
         }
+        sendMessage();
         updateRoom(room);
     }
 
@@ -524,9 +525,10 @@ public class BottomBarActivity extends BaseActivity implements
 
         Log.d(TAG, rtm.toString());
         byte[] buf = rtm.getMessageData();
+        String bufferString = new String(buf);
         String sender = rtm.getSenderParticipantId();
-        Log.d(TAG, "Message received:" + buf.toString());
-        Toast.makeText(this, "Message received: " + buf.toString(), Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Message received:" + bufferString);
+        Toast.makeText(this, "Message received: " + bufferString, Toast.LENGTH_LONG).show();
     }
 
     @Override
