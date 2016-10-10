@@ -10,6 +10,12 @@ import android.widget.Button;
 
 import com.pokemonbattlearena.android.R;
 
+import java.util.ArrayList;
+
+import com.woxthebox.draglistview.DragItem;
+import com.woxthebox.draglistview.DragListView;
+
+
 
 /**
  * Created by droidowl on 9/25/16.
@@ -33,8 +39,10 @@ public class TeamsHomeFragment extends Fragment implements View.OnClickListener 
         View view = inflater.inflate(R.layout.fragment_teamshome, container, false);
         mTeamButton = (Button) view.findViewById(R.id.select_team_button);
         mTeamButton.setOnClickListener(this);
+
         return view;
     }
+
 
     @Override
     public void onClick(View v) {
@@ -44,10 +52,10 @@ public class TeamsHomeFragment extends Fragment implements View.OnClickListener 
             getFragmentManager().beginTransaction().add(R.id.teams_ui_container, teamSetupFragment).commit();
             mTeamButton.setText(R.string.cancel);
         } else {
+            creatingTeam = false;
             getFragmentManager().beginTransaction().remove(teamSetupFragment).commit();
             teamSetupFragment = null;
             mTeamButton.setText(R.string.teams);
-            creatingTeam = false;
         }
     }
 }
