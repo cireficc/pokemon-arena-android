@@ -7,14 +7,9 @@
     tools:context=".BottomBarActivity">
 
 
-    <Button
-        android:text="@string/battle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
-        android:id="@+id/quick_battle_button" />
 
     <FrameLayout
+        android:layout_marginTop="100dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/battle_ui_container">

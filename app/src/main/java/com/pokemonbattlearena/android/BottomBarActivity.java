@@ -63,6 +63,7 @@ public class BottomBarActivity extends BaseActivity implements
     private final static int RC_SELECT_PLAYERS = 10000;
     private final static int RC_INVITATION_INBOX = 10001;
     private final static int RC_WAITING_ROOM = 10002;
+    private String mRoomCreatorId = null;
     private String mRoomId = null;
 
     // The participants in the currently active game
@@ -360,6 +361,7 @@ public class BottomBarActivity extends BaseActivity implements
 
         // save room ID so we can leave cleanly before the game starts.
         mRoomId = room.getRoomId();
+        mRoomCreatorId = room.getCreatorId();
     }
 
     @Override
@@ -380,10 +382,6 @@ public class BottomBarActivity extends BaseActivity implements
         if (!battleBegun) {
             battleBegun = true;
             getFragmentManager().beginTransaction().add(R.id.battle_ui_container, battleUIFragment).commitAllowingStateLoss();
-        } else {
-            getFragmentManager().beginTransaction().remove(battleUIFragment).commitAllowingStateLoss();
-            battleUIFragment = null;
-            battleBegun = false;
         }
     }
 
@@ -436,6 +434,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onPeerJoined(Room room, List<String> arg1) {
+        Log.d(TAG, "Peer joined room");
         updateRoom(room);
     }
 
@@ -455,6 +454,8 @@ public class BottomBarActivity extends BaseActivity implements
         // save room ID if its not initialized in onRoomCreated() so we can leave cleanly before the game starts.
         if(mRoomId==null)
             mRoomId = room.getRoomId();
+        if(mRoomCreatorId==null)
+            mRoomCreatorId = room.getCreatorId();
     }
 
     @Override
@@ -480,6 +481,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onPeersConnected(Room room, List<String> peers) {
+        Log.d(TAG, "Peer(S) connected");
         updateRoom(room);
     }
 
@@ -587,6 +589,7 @@ public class BottomBarActivity extends BaseActivity implements
             mParticipants = room.getParticipants();
             mRoomId = room.getRoomId();
             mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
+            mRoomCreatorId = room.getCreatorId();
         }
         if (mParticipants != null) {
             // update game states
@@ -600,6 +603,7 @@ public class BottomBarActivity extends BaseActivity implements
         if (mRoomId != null) {
             Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
             mRoomId = null;
+            mRoomCreatorId = null;
         }
     }
 
