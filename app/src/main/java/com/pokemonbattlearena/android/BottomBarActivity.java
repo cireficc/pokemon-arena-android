@@ -164,6 +164,7 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         });
+        battleUIFragment = new BattleUIFragment();
     }
 
     @Override
@@ -370,14 +371,14 @@ public class BottomBarActivity extends BaseActivity implements
             return;
         }
         updateRoom(room);
-
-        launchBattleFrags();
     }
 
     private void launchBattleFrags() {
+        if (battleUIFragment == null) {
+            battleUIFragment = new BattleUIFragment();
+        }
         if (!battleBegun) {
             battleBegun = true;
-            battleUIFragment = new BattleUIFragment();
             getFragmentManager().beginTransaction().add(R.id.battle_ui_container, battleUIFragment).commitAllowingStateLoss();
         } else {
             getFragmentManager().beginTransaction().remove(battleUIFragment).commitAllowingStateLoss();
@@ -400,6 +401,7 @@ public class BottomBarActivity extends BaseActivity implements
             showGameError();
             return;
         }
+        launchBattleFrags();
         sendMessage();
         updateRoom(room);
     }
@@ -453,7 +455,6 @@ public class BottomBarActivity extends BaseActivity implements
         // save room ID if its not initialized in onRoomCreated() so we can leave cleanly before the game starts.
         if(mRoomId==null)
             mRoomId = room.getRoomId();
-        launchBattleFrags();
     }
 
     @Override
@@ -528,11 +529,7 @@ public class BottomBarActivity extends BaseActivity implements
         Random random = new Random();
         int r1 = random.nextInt(150);
         int r2 = random.nextInt(150);
-
-        Pokemon p1 = mApplication.getBattleDatabase().getPokemons().get(r1);
-        Pokemon p2 = mApplication.getBattleDatabase().getPokemons().get(r2);
-        byte[] message = (p1.getName() + ":" + p1.getName()).getBytes();
-
+        byte[] message = (r1 + ":" + r2).getBytes();
         for (Participant p : mParticipants) {
             Log.w(TAG, "Participant: "  + p.getDisplayName() + ", id " + p.getParticipantId());
 
@@ -547,11 +544,10 @@ public class BottomBarActivity extends BaseActivity implements
             } else {
                 Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, message,
                         mRoomId, p.getParticipantId());
-                Log.d(TAG, "Reliable message sent (sendMessage())");
+                Log.d(TAG, "Reliable message sent (sendMessage()) + " + message);
             }
         }
     }
-
 
     /*
 
@@ -583,7 +579,7 @@ public class BottomBarActivity extends BaseActivity implements
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder(this)
                 .setRoomStatusUpdateListener(this)
-                .setMessageReceivedListener(this);
+                .setMessageReceivedListener(battleUIFragment);
     }
 
     private void updateRoom(Room room) {

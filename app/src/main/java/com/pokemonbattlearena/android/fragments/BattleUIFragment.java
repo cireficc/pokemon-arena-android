@@ -16,11 +16,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.SelectArg;
+import com.pokemonbattlearena.android.BaseActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.database.PokemonMove;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -30,7 +34,9 @@ import java.util.List;
  */
 
 public class BattleUIFragment extends Fragment implements View.OnClickListener, RealTimeMessageReceivedListener  {
-    static final String TAG = "Pokemon Battle Room";
+    private static final String TAG = "Pokemon Battle Room";
+
+    private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
     PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
@@ -53,8 +59,6 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
     private TextView mPlayerPokemonName;
 
     private TextView mOpponentPokemonName;
-
-
 
     // launch the player selection screen
 // minimum: 1 other player; maximum: 3 other players
@@ -119,16 +123,22 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
     }
 
     private void setupMoveButtons(View v) {
-        for (int i = 0; i < mPlayerMoves.size(); i++) {
+        mMoveButtons = new Button[buttonIds.length];
+        for (int i = 0; i < buttonIds.length; i++) {
             if (i < 4) {
-                int buttonId = getResources().getIdentifier("move_button_" + i, "id", getActivity().getPackageName());
+                int buttonId = buttonIds[i];
                 Button b = (Button) v.findViewById(buttonId);
                 b.setVisibility(View.VISIBLE);
                 b.setOnClickListener(this);
                 mMoveButtons[i] = b;
-                b.setText(mPlayerMoves.get(i).getName());
-                b.setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(mPlayerMoves.get(i).getType1())));
             }
+        }
+    }
+
+    private void configureMoveButtons() {
+        for (int i = 0; i < buttonIds.length; i++) {
+            mMoveButtons[i].setText(mPlayerMoves.get(i).getName());
+            mMoveButtons[i].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(mPlayerMoves.get(i).getType1())));
         }
     }
 
@@ -140,19 +150,20 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage realTimeMessage) {
-        // Message format: pokemonName1:pokemonName2
-        Log.d(TAG, "Message Received: " + realTimeMessage.toString());
-        String[] pokemonNames = realTimeMessage.toString().split(":");
-        try {
-            mPlayerPokemon = mApplication.getBattleDatabase().getPokemonDao().queryForId(pokemonNames[0]);
-            mPlayerImage.setImageDrawable(getDrawableForPokemon(getActivity(), pokemonNames[0]));
-            mPlayerPokemonName.setText(mPlayerPokemon.getName());
-
-            mOppenentPokemon = mApplication.getBattleDatabase().getPokemonDao().queryForId(pokemonNames[1]);
-            mPlayerImage.setImageDrawable(getDrawableForPokemon(getActivity(), pokemonNames[1]));
-            mOpponentPokemonName.setText(mOppenentPokemon.getName());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // Message format: pokemonID1:pokemonID2
+        byte[] buf = realTimeMessage.getMessageData();
+        String bufferString = new String(buf);
+        Log.d(TAG, "Message Received: " + bufferString + " from: " + realTimeMessage.getSenderParticipantId());
+        String[] pokemonIds = bufferString.split(":");
+        int playerId = Integer.parseInt(pokemonIds[0]);
+        int opponentId = Integer.parseInt(pokemonIds[1]);
+        mPlayerPokemon = mPokemonList.get(playerId);
+        mPlayerImage.setImageDrawable(getDrawableForPokemon(getActivity(), mPlayerPokemon.getName()));
+        mPlayerPokemonName.setText(mPlayerPokemon.getName());
+        mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(mPlayerPokemon);
+        configureMoveButtons();
+        mOppenentPokemon = mPokemonList.get(opponentId);
+        mOpponentImage.setImageDrawable(getDrawableForPokemon(getActivity(), mOppenentPokemon.getName()));
+        mOpponentPokemonName.setText(mOppenentPokemon.getName());
     }
 }
