@@ -3,14 +3,11 @@ package com.pokemonbattlearena.android;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
-
-import android.os.Bundle;
-
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -18,8 +15,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
-import com.google.android.gms.games.GamesActivityResultCodes;
-import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.google.android.gms.games.multiplayer.Participant;
@@ -31,16 +26,16 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
-import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.fragments.BattleHomeFragment;
+import com.pokemonbattlearena.android.fragments.BattleUIFragment;
+import com.pokemonbattlearena.android.fragments.ChatHomeFragment;
+import com.pokemonbattlearena.android.fragments.TeamsHomeFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabReselectListener;
 import com.roughike.bottombar.OnTabSelectListener;
 
-import com.pokemonbattlearena.android.fragments.*;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_REAL_TIME_MESSAGE_SEND_FAILED;
@@ -54,34 +49,26 @@ public class BottomBarActivity extends BaseActivity implements
         RoomStatusUpdateListener,
         RealTimeMultiplayer.ReliableMessageSentCallback {
     private static final int RC_SIGN_IN = 9001;
-
+    // Request codes for the UIs that we show with startActivityForResult:
+    private final static int RC_SELECT_PLAYERS = 10000;
+    private final static int RC_INVITATION_INBOX = 10001;
+    private final static String TAG = BottomBarActivity.class.getSimpleName();
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
     private boolean battleBegun = false;
-    // Request codes for the UIs that we show with startActivityForResult:
-    private final static int RC_SELECT_PLAYERS = 10000;
-    private final static int RC_INVITATION_INBOX = 10001;
-    private final static int RC_WAITING_ROOM = 10002;
     private String mRoomCreatorId = null;
     private String mRoomId = null;
-
     // The participants in the currently active game
     private ArrayList<Participant> mParticipants = null;
-
     // My participant ID in the currently active game
     private String mMyId = null;
-
     // If non-null, this is the id of the invitation we received via the
     // invitation listener
     private String mIncomingInvitationId = null;
-
     // Message buffer for sending messages
-    private byte[] mMsgBuf = new byte[2];
     private BattleUIFragment battleUIFragment;
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
-
-    private final static String TAG = BottomBarActivity.class.getSimpleName();
 
     /*
         Fragment Methods
@@ -91,11 +78,12 @@ public class BottomBarActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
 
+        battleUIFragment = new BattleUIFragment();
+
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
         setSupportActionBar(toolbar);
 
-        final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
         final BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
 
         bottomBar.setDefaultTab(R.id.tab_battle);
@@ -165,7 +153,6 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         });
-        battleUIFragment = new BattleUIFragment();
     }
 
     @Override
@@ -234,10 +221,6 @@ public class BottomBarActivity extends BaseActivity implements
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
         Log.e(TAG, "Result of activity");
-        if (requestCode == RC_SIGN_IN) {
-
-        }
-
         switch (requestCode) {
             case RC_SIGN_IN:
                 mSignInClicked = false;
@@ -261,21 +244,6 @@ public class BottomBarActivity extends BaseActivity implements
                 // we got the result from the "select invitation" UI (invitation inbox). We're
                 // ready to accept the selected invitation:
                 handleInvitationInboxResult(resultCode, intent);
-                break;
-            case RC_WAITING_ROOM:
-                // we got the result from the "waiting room" UI.
-                if (resultCode == Activity.RESULT_OK) {
-                    // ready to start playing
-                    Log.d(TAG, "Starting game (waiting room returned OK).");
-                } else if (resultCode == GamesActivityResultCodes.RESULT_LEFT_ROOM) {
-                    // player indicated that they want to leave the room
-                    leaveRoom();
-                } else if (resultCode == Activity.RESULT_CANCELED) {
-                    // Dialog was cancelled (user pressed back key, for instance). In our game,
-                    // this means leaving the room too. In more elaborate games, this could mean
-                    // something else (like minimizing the waiting room UI).
-                    leaveRoom();
-                }
                 break;
         }
         super.onActivityResult(requestCode, resultCode, intent);
@@ -332,6 +300,7 @@ public class BottomBarActivity extends BaseActivity implements
         Invitation inv = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
 
         // accept invitation
+        assert inv != null;
         acceptInviteToRoom(inv.getInvitationId());
     }
 
@@ -380,6 +349,7 @@ public class BottomBarActivity extends BaseActivity implements
             battleUIFragment = new BattleUIFragment();
         }
         if (!battleBegun) {
+            Log.d(TAG, "Battle hasn't started yet\nStarting now...");
             battleBegun = true;
             getFragmentManager().beginTransaction().add(R.id.battle_ui_container, battleUIFragment).commitAllowingStateLoss();
         }
@@ -528,10 +498,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     private void sendMessage() {
         Log.d(TAG, "Sending Message");
-        Random random = new Random();
-        int r1 = random.nextInt(150);
-        int r2 = random.nextInt(150);
-        byte[] message = (r1 + ":" + r2).getBytes();
+        byte[] message = ("I am: " + mMyId + " -created the room: " + mRoomCreatorId).getBytes();
         for (Participant p : mParticipants) {
             Log.w(TAG, "Participant: "  + p.getDisplayName() + ", id " + p.getParticipantId());
 
@@ -542,11 +509,10 @@ public class BottomBarActivity extends BaseActivity implements
 
             if (p.getStatus() !=  Participant.STATUS_JOINED) {
                 Log.d(TAG, "Participant is apparently no longer joined?");
-                continue;
             } else {
                 Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, message,
                         mRoomId, p.getParticipantId());
-                Log.d(TAG, "Reliable message sent (sendMessage()) + " + message);
+                Log.d(TAG, "Reliable message sent (sendMessage()) + " + new String(message));
             }
         }
     }

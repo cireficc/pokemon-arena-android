@@ -16,17 +16,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
-import com.pokemonbattlearena.android.BaseActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
-import com.pokemonbattlearena.android.engine.database.PokemonMove;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -91,24 +86,11 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
         mPlayerPokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
         mOpponentPokemonName = (TextView) opponentView.findViewById(R.id.active_name_textview);
 
-
-
         mPlayerImage = (ImageView) playerView.findViewById(R.id.active_imageview);
         mOpponentImage = (ImageView) opponentView.findViewById(R.id.active_imageview);
 
         setupMoveButtons(view);
-        mPlayerPokemon = mPokemonList.get(149);
-        mOppenentPokemon = mPokemonList.get(147);
 
-        mPlayerImage.setImageDrawable(getDrawableForPokemon(getActivity(), mPlayerPokemon.getName()));
-        mPlayerPokemonName.setText(mPlayerPokemon.getName());
-
-
-        mOpponentImage.setImageDrawable(getDrawableForPokemon(getActivity(), mOppenentPokemon.getName()));
-        mOpponentPokemonName.setText(mOppenentPokemon.getName());
-
-        mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(mPlayerPokemon);
-        configureMoveButtons();
         return view;
     }
 
@@ -147,6 +129,7 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
         }
     }
 
+    // set the buttons to the current pokemon
     private void configureMoveButtons() {
         for (int i = 0; i < buttonIds.length; i++) {
             mMoveButtons[i].setText(mPlayerMoves.get(i).getName());
@@ -154,9 +137,16 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
         }
     }
 
+    /**
+     * Create a drawable for a pokemon
+     *
+     * @param c    Context (Activity)
+     * @param name Pokemon
+     * @return Drawable image of a pokemon
+     */
     private Drawable getDrawableForPokemon(Context c, String name) {
         String key = "ic_pokemon_" + name.toLowerCase();
-        int id = getResources().getIdentifier(key, "drawable", c.getPackageName());
+        int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
         return c.getDrawable(id);
     }
 
@@ -166,21 +156,5 @@ public class BattleUIFragment extends Fragment implements View.OnClickListener, 
         byte[] buf = realTimeMessage.getMessageData();
         String bufferString = new String(buf);
         Log.d(TAG, "Message Received: " + bufferString + " from: " + realTimeMessage.getSenderParticipantId());
-        String[] pokemonIds = bufferString.split(":");
-        int playerId = Integer.parseInt(pokemonIds[0]);
-        int opponentId = Integer.parseInt(pokemonIds[1]);
-
-        mPlayerPokemon = mPokemonList.get(149);
-        mOppenentPokemon = mPokemonList.get(147);
-
-        mPlayerImage.setImageDrawable(getDrawableForPokemon(getActivity(), mPlayerPokemon.getName()));
-        mPlayerPokemonName.setText(mPlayerPokemon.getName());
-
-
-        mOpponentImage.setImageDrawable(getDrawableForPokemon(getActivity(), mOppenentPokemon.getName()));
-        mOpponentPokemonName.setText(mOppenentPokemon.getName());
-
-        mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(mPlayerPokemon);
-        configureMoveButtons();
     }
 }
