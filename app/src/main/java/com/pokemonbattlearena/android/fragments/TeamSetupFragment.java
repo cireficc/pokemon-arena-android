@@ -17,6 +17,7 @@ import com.pokemonbattlearena.android.ItemAdapter;
 
 import java.util.ArrayList;
 
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.woxthebox.draglistview.DragItem;
 import com.woxthebox.draglistview.DragListView;
 
@@ -31,7 +32,7 @@ public class TeamSetupFragment extends Fragment implements View.OnClickListener 
 
     private Button selectButton;
     private DragListView mDragListView;
-    private ArrayList<String> mItemArray;
+    private ArrayList<Pokemon> mItemArray;
     private PokemonBattleApplication mApplication;
 
     public TeamSetupFragment() {
@@ -47,12 +48,9 @@ public class TeamSetupFragment extends Fragment implements View.OnClickListener 
         //TODO: THIS vvv
 //        mDragListView.setDragListListener(new DragListView.DragListListenerAdapter());
 
-//        mApplication = PokemonBattleApplication.getInstance();
+        mApplication = PokemonBattleApplication.getInstance();
+        mItemArray = (ArrayList<Pokemon>) mApplication.getBattleDatabase().getPokemons();
 
-        mItemArray = new ArrayList<>(TOTAL_POKEMON_COUNT);
-        for(int i = 0; i < TOTAL_POKEMON_COUNT; i++) {
-            mItemArray.add(i, "Test Name"+(i+1));
-        }
         setupGridVerticalRecyclerView();
 
         return view;
