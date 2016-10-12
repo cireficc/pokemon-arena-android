@@ -26,10 +26,10 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
-import com.pokemonbattlearena.android.fragments.BattleHomeFragment;
-import com.pokemonbattlearena.android.fragments.BattleUIFragment;
-import com.pokemonbattlearena.android.fragments.ChatHomeFragment;
-import com.pokemonbattlearena.android.fragments.TeamsHomeFragment;
+import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
+import com.pokemonbattlearena.android.fragments.battle.BattleUIFragment;
+import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
+import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabReselectListener;
 import com.roughike.bottombar.OnTabSelectListener;
@@ -67,9 +67,11 @@ public class BottomBarActivity extends BaseActivity implements
     // invitation listener
     private String mIncomingInvitationId = null;
     // Message buffer for sending messages
-    private BattleUIFragment battleUIFragment;
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
+    private BattleHomeFragment mBattleHomeFragment;
+    private TeamsHomeFragment mTeamsHomeFragment;
+    private ChatHomeFragment mChatHomeFragment;
     /*
         Fragment Methods
      */
@@ -77,8 +79,6 @@ public class BottomBarActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
-
-        battleUIFragment = new BattleUIFragment();
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
@@ -88,9 +88,9 @@ public class BottomBarActivity extends BaseActivity implements
 
         bottomBar.setDefaultTab(R.id.tab_battle);
 
-        final BattleHomeFragment battleFragment = new BattleHomeFragment();
-        final TeamsHomeFragment teamFragment = new TeamsHomeFragment();
-        final ChatHomeFragment chatFragment = new ChatHomeFragment();
+        mBattleHomeFragment = new BattleHomeFragment();
+        mTeamsHomeFragment = new TeamsHomeFragment();
+        mChatHomeFragment = new ChatHomeFragment();
         final android.app.FragmentManager manger = getFragmentManager();
 
         // Button listeners
@@ -103,7 +103,7 @@ public class BottomBarActivity extends BaseActivity implements
 
         mApplication.setGoogleApiClient(googleApiClient);
         manger.beginTransaction()
-                .add(R.id.container, battleFragment, "battle")
+                .add(R.id.container, mBattleHomeFragment, "battle")
                 .commit();
 
 
@@ -114,17 +114,17 @@ public class BottomBarActivity extends BaseActivity implements
                 switch (tabId) {
                     case R.id.tab_teams:
                         manger.beginTransaction()
-                                .replace(R.id.container, teamFragment, "team")
+                                .replace(R.id.container, mTeamsHomeFragment, "team")
                                 .commit();
                         break;
                     case R.id.tab_battle:
                         manger.beginTransaction()
-                                .replace(R.id.container, battleFragment, "battle")
+                                .replace(R.id.container, mBattleHomeFragment, "battle")
                                 .commit();
                         break;
                     case R.id.tab_chat:
                         manger.beginTransaction()
-                                .replace(R.id.container, chatFragment, "chat")
+                                .replace(R.id.container, mChatHomeFragment, "chat")
                                 .commit();
                         break;
                     default:
@@ -142,7 +142,6 @@ public class BottomBarActivity extends BaseActivity implements
                         Toast.makeText(BottomBarActivity.this, "Teams Again", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.tab_battle:
-                        startQuickGame();
                         Toast.makeText(BottomBarActivity.this, "Battle Again", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.tab_chat:
@@ -174,9 +173,11 @@ public class BottomBarActivity extends BaseActivity implements
 
             if (inv != null) {
                 // accept invitation
+                mBattleHomeFragment.startBattle();
                 RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
                 roomConfigBuilder.setInvitationIdToAccept(inv.getInvitationId());
                 Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
+
 
                 // prevent screen from sleeping during handshake
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -344,17 +345,6 @@ public class BottomBarActivity extends BaseActivity implements
         updateRoom(room);
     }
 
-    private void launchBattleFrags() {
-        if (battleUIFragment == null) {
-            battleUIFragment = new BattleUIFragment();
-        }
-        if (!battleBegun) {
-            Log.d(TAG, "Battle hasn't started yet\nStarting now...");
-            battleBegun = true;
-            getFragmentManager().beginTransaction().add(R.id.battle_ui_container, battleUIFragment).commitAllowingStateLoss();
-        }
-    }
-
     @Override
     public void onLeftRoom(int statusCode, String s) {
         // we have left the room; return to main screen.
@@ -369,7 +359,7 @@ public class BottomBarActivity extends BaseActivity implements
             showGameError();
             return;
         }
-        launchBattleFrags();
+        mBattleHomeFragment.startBattle();
         sendMessage();
         updateRoom(room);
     }
@@ -522,32 +512,12 @@ public class BottomBarActivity extends BaseActivity implements
         Private Methods
 
      */
-    private void startQuickGame() {
-        // auto-match criteria to invite one random automatch opponent.
-        // You can also specify more opponents (up to 3).
-        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
-
-        // build the room config:
-        RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
-        roomConfigBuilder.setAutoMatchCriteria(am);
-        RoomConfig roomConfig = roomConfigBuilder.build();
-
-        // create room:
-        Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), roomConfig);
-
-        // prevent screen from sleeping during handshake
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        // go to game screen
-        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(mApplication.getGoogleApiClient(), 1, 3);
-        startActivityForResult(intent, RC_SELECT_PLAYERS);
-    }
 
     // create a RoomConfigBuilder that's appropriate for your implementation
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder(this)
                 .setRoomStatusUpdateListener(this)
-                .setMessageReceivedListener(battleUIFragment);
+                .setMessageReceivedListener(mBattleHomeFragment.getBattleUIFragment());
     }
 
     private void updateRoom(Room room) {
