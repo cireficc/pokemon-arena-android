@@ -10,10 +10,6 @@ import android.widget.Button;
 
 import com.pokemonbattlearena.android.R;
 
-import java.util.ArrayList;
-
-import com.woxthebox.draglistview.DragItem;
-import com.woxthebox.draglistview.DragListView;
 
 
 
