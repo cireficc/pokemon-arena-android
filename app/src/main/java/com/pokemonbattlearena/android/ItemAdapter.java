@@ -21,21 +21,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.woxthebox.draglistview.DragItemAdapter;
 
+import com.pokemonbattlearena.android.engine.database.Pokemon;
+
 import java.util.ArrayList;
 
 
-public class ItemAdapter extends DragItemAdapter {
+public class ItemAdapter extends DragItemAdapter<Pokemon, ItemAdapter.ViewHolder> {
 
     private int mLayoutId;
     private int mGrabHandleId;
     private boolean mDragOnLongPress;
 
 
-    public ItemAdapter (ArrayList<String> pokemons, int layoutId, int grabHandleId, boolean dragOnLongPress) {
+    public ItemAdapter (ArrayList<Pokemon> pokemons, int layoutId, int grabHandleId, boolean dragOnLongPress) {
         super(false);
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
@@ -50,11 +53,29 @@ public class ItemAdapter extends DragItemAdapter {
         return new ViewHolder(view);
     }
 
+    @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-        String text = (String) mItemList.get(position);
-        holder.mText.setText(text);
-        holder.itemView.setTag(text);
+
+        //get info from pokemon object
+        int pId = mItemList.get(position).getId();
+        String pName =mItemList.get(position).getName();
+        String pType1 = mItemList.get(position).getType1();
+        String pType2 = mItemList.get(position).getType2();
+
+        //set views with pokemon info
+        holder.mName.setText(pName);
+        holder.mId.setText("#"+pId);
+
+        int imageId = holder.mImage.getContext().getResources().getIdentifier("ic_pokemon_"+pName.toLowerCase(), "drawable", holder.mImage.getContext().getPackageName());
+        holder.mImage.setImageResource(imageId);
+
+        int type1Id = holder.mType1.getContext().getResources().getIdentifier("ic_type_"+pType1.toLowerCase(), "drawable", holder.mType1.getContext().getPackageName());
+        holder.mType1.setImageResource(type1Id);
+        int type2Id = holder.mType2.getContext().getResources().getIdentifier("ic_type_"+pType2.toLowerCase(), "drawable", holder.mType2.getContext().getPackageName());
+        holder.mType2.setImageResource(type2Id);
+
+        holder.itemView.setTag(pName);
     }
 
     @Override
@@ -63,11 +84,19 @@ public class ItemAdapter extends DragItemAdapter {
     }
 
     public class ViewHolder extends DragItemAdapter.ViewHolder {
-        public TextView mText;
+        public TextView mId;
+        public TextView mName;
+        public ImageView mImage;
+        public ImageView mType1;
+        public ImageView mType2;
 
         public ViewHolder(final View itemView) {
             super(itemView, mGrabHandleId);
-            mText = (TextView) itemView.findViewById(R.id.pokemon_name_title_textview);
+            mId = (TextView) itemView.findViewById(R.id.pokemon_number_textview);
+            mName = (TextView) itemView.findViewById(R.id.pokemon_name_title_textview);
+            mImage = (ImageView) itemView.findViewById(R.id.pokemon_grid_imageview);
+            mType1 = (ImageView) itemView.findViewById(R.id.pokemon_type1_imageview);
+            mType2 = (ImageView) itemView.findViewById(R.id.pokemon_type2_imageview);
         }
 
         @Override
