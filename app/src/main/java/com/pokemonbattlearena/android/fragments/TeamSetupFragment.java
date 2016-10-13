@@ -3,24 +3,19 @@ package com.pokemonbattlearena.android.fragments;
 import android.annotation.TargetApi;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v7.widget.CardView;
 
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
-import com.pokemonbattlearena.android.ItemAdapter;
 
 import java.util.ArrayList;
 
 import com.pokemonbattlearena.android.engine.database.Pokemon;
-import com.woxthebox.draglistview.DragItem;
-import com.woxthebox.draglistview.DragListView;
 
 /**
  * @author Mitch Couturier
@@ -29,7 +24,6 @@ import com.woxthebox.draglistview.DragListView;
 @TargetApi(24)
 public class TeamSetupFragment extends Fragment implements View.OnClickListener {
 
-    private DragListView mDragListView;
     private ArrayList<Pokemon> mItemArray;
     private PokemonBattleApplication mApplication;
 
@@ -51,27 +45,6 @@ public class TeamSetupFragment extends Fragment implements View.OnClickListener 
 
         return view;
     }
-
-//    private void setupGridVerticalRecyclerView() {
-//        mDragListView.setLayoutManager(new GridLayoutManager(getContext(), 3));
-//        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
-//        mDragListView.setAdapter(listAdapter, true);
-//        mDragListView.setCanDragHorizontally(true);
-//        mDragListView.setCustomDragItem(null);
-//    }
-//
-//    private static class MyDragItem extends DragItem {
-//
-//        public MyDragItem(Context context, int layoutId) {
-//            super(context, layoutId);
-//        }
-//
-//        @Override
-//        public void onBindDragView(View clickedView, View dragView) {
-//            CharSequence text = ((TextView) clickedView.findViewById(R.id.pokemon_name_title_textview)).getText();
-//            ((TextView) dragView.findViewById(R.id.pokemon_name_title_textview)).setText(text);
-//        }
-//    }
 
     @Override
     public void onClick(View v) {
