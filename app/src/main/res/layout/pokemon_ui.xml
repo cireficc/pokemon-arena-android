@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/active_name_textview"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="@string/default_pokemon"
+        android:fontFamily="serif-monospace"
+        android:textColor="@color/black"
+        android:textAllCaps="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+
+        android:layout_marginStart="@dimen/marginStart"
+        android:layout_marginTop="@dimen/marginStart"
+        android:layout_marginBottom="@dimen/hpTopMargin"
+        />
+
+    <ImageView
+        android:id="@+id/active_imageview"
+
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+
+        android:background="@color/grey"
+        android:src="@android:mipmap/sym_def_app_icon"
+
+        android:layout_below="@+id/active_name_textview"
+        android:layout_alignParentStart="true"
+
+        android:layout_marginStart="@dimen/marginStart"
+        />
+
+    <TextView
+        android:id="@+id/hp_textview"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="@string/hp"
+
+        android:layout_alignStart="@id/active_imageview"
+        android:layout_alignBottom="@+id/hp_imageview"
+        android:layout_marginTop="@dimen/hpTopMargin"
+        />
+
+    <ImageView
+        android:id="@+id/hp_imageview"
+
+        android:layout_width="120dp"
+        android:layout_height="20dp"
+
+        android:src="@drawable/healthbar"
+        android:layout_below="@+id/active_imageview"
+        android:layout_toEndOf="@+id/hp_textview"
+        android:layout_marginTop="@dimen/hpTopMargin"
+        android:layout_marginStart="@dimen/marginStart"
+        />
+</RelativeLayout>

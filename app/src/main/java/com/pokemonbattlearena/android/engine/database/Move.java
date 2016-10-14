@@ -67,8 +67,17 @@ public class Move {
         return type1;
     }
 
+    public ElementalType getElementalType1() {
+        return ElementalType.valueOf(this.type1.toUpperCase());
+    }
+
     public String getCategory() {
         return category;
+    }
+
+    public MoveType getMoveType() {
+
+        return MoveType.valueOf(this.category.toUpperCase());
     }
 
     public int getPower() {
@@ -83,8 +92,13 @@ public class Move {
         return powerPoints;
     }
 
-    public String getStatusEffect() {
+    public String getStatusEffectString() {
         return statusEffect;
+    }
+
+    public StatusEffect getStatusEffect() {
+
+        return StatusEffect.valueOf(this.statusEffect.toUpperCase());
     }
 
     public int getStatusEffectChance() {
@@ -93,6 +107,10 @@ public class Move {
 
     public String getStageChangeStat() {
         return stageChangeStat;
+    }
+
+    public StatType getStageChangeStatType() {
+        return StatType.valueOf(this.stageChangeStat.toUpperCase());
     }
 
     public int getStageChange() {
