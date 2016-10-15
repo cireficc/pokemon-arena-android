@@ -27,7 +27,6 @@ import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListene
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
-import com.pokemonbattlearena.android.fragments.battle.BattleUIFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.roughike.bottombar.BottomBar;
@@ -50,7 +49,7 @@ public class BottomBarActivity extends BaseActivity implements
         RealTimeMultiplayer.ReliableMessageSentCallback {
     private static final int RC_SIGN_IN = 9001;
     // Request codes for the UIs that we show with startActivityForResult:
-    private final static int RC_SELECT_PLAYERS = 10000;
+    private final static int RC_SELECT_PLAYERS = 7789;
     private final static int RC_INVITATION_INBOX = 10001;
     private final static String TAG = BottomBarActivity.class.getSimpleName();
     private boolean mResolvingConnectionFailure = false;
@@ -156,8 +155,13 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     protected void onStart() {
+        if (mApplication.getGoogleApiClient() != null && mApplication.getGoogleApiClient().isConnected()) {
+            Log.w(TAG, "GameHelper: client was already connected on onStart()");
+        } else {
+            Log.d(TAG,"Connecting client.");
+            mApplication.getGoogleApiClient().connect();
+        }
         super.onStart();
-        mApplication.getGoogleApiClient().connect();
     }
 
     /*
@@ -187,7 +191,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        mApplication.getGoogleApiClient().connect();
     }
 
     @Override
@@ -255,12 +259,12 @@ public class BottomBarActivity extends BaseActivity implements
     // "Invite friends" button. We react by creating a room with those players.
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
-            Log.w(TAG, "*** select players UI cancelled, " + response);
             //TODO: exit the battle
             return;
         }
-
-        Log.d(TAG, "Select players UI succeeded.");
+        if (data == null || data.getExtras() == null || data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS) == null) {
+            return;
+        }
 
         // get the invitee list
         final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
