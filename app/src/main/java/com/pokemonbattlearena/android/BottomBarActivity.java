@@ -46,7 +46,7 @@ public class BottomBarActivity extends BaseActivity implements
         RealTimeMessageReceivedListener,
         RoomUpdateListener,
         RoomStatusUpdateListener,
-        RealTimeMultiplayer.ReliableMessageSentCallback {
+        RealTimeMultiplayer.ReliableMessageSentCallback, TeamsHomeFragment.OnPokemonTeamSelectedListener {
     private static final int RC_SIGN_IN = 9001;
     // Request codes for the UIs that we show with startActivityForResult:
     private final static int RC_SELECT_PLAYERS = 7789;
@@ -71,6 +71,12 @@ public class BottomBarActivity extends BaseActivity implements
     private BattleHomeFragment mBattleHomeFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
+
+    public void onTeamSelected(int pokemonId) {
+        // Stubb
+        // stubb
+        //TODO: setup the battle
+    }
     /*
         Fragment Methods
      */
