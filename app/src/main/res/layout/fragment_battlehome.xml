@@ -13,12 +13,6 @@
         android:layout_marginTop="70dp"
         android:id="@+id/battle_now_button" />
 
-
-    <FrameLayout
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/battle_ui_container">
-    </FrameLayout>
+    <include layout="@layout/fragment_battleui"/>
 
 </LinearLayout>

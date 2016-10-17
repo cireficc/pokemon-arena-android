@@ -521,7 +521,7 @@ public class BottomBarActivity extends BaseActivity implements
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder(this)
                 .setRoomStatusUpdateListener(this)
-                .setMessageReceivedListener(mBattleHomeFragment.getBattleUIFragment());
+                .setMessageReceivedListener(mBattleHomeFragment);
     }
 
     private void updateRoom(Room room) {

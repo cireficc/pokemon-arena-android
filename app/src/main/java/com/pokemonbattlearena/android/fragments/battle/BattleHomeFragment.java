@@ -2,7 +2,9 @@ package com.pokemonbattlearena.android.fragments.battle;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -11,31 +13,60 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.Multiplayer;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.TypeModel;
+import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by droidowl on 9/25/16.
  */
 
-public class BattleHomeFragment extends Fragment implements View.OnClickListener {
-    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
+public class BattleHomeFragment extends Fragment implements View.OnClickListener, RealTimeMessageReceivedListener {
+    PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static int RC_SELECT_PLAYERS = 10000;
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
     private Button mBattleButton;
     private boolean battleBegun = false;
-    private BattleUIFragment mBattleUIFragment;
     private Bundle mBattleArgs;
+    private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
+
+
+    private TypeModel mTypeModel;
+
+    private List<Pokemon> mPokemonList;
+
+    private List<Move> mPlayerMoves;
+
+    private Button[] mMoveButtons;
+
+    private ImageView mPlayerImage;
+
+    private ImageView mOpponentImage;
+
+    private TextView mPlayerPokemonName;
+
+    private TextView mOpponentPokemonName;
+
 
     public BattleHomeFragment() {
         super();
+        mTypeModel = new TypeModel();
+        mPokemonList = mApplication.getBattleDatabase().getPokemons();
     }
 
     @Override
@@ -50,37 +81,87 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
         mBattleButton.setOnClickListener(this);
-        mBattleUIFragment = new BattleUIFragment();
+        View playerView = view.findViewById(R.id.player_1_ui);
+        View opponentView = view.findViewById(R.id.player_2_ui);
+
+        mPlayerPokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
+        mOpponentPokemonName = (TextView) opponentView.findViewById(R.id.active_name_textview);
+
+        mPlayerImage = (ImageView) playerView.findViewById(R.id.active_imageview);
+        mOpponentImage = (ImageView) opponentView.findViewById(R.id.active_imageview);
+
+        setupMoveButtons(view);
+
         return view;
     }
 
     @Override
     public void onClick(View v) {
         if (!battleBegun) {
+            battleBegun = true;
             startBattle();
             mBattleButton.setText(R.string.battle);
         } else {
             mBattleButton.setText(R.string.cancel_battle);
         }
-    }
-
-    private void setupBattleUI() {
-        if (!mBattleUIFragment.isAdded()) {
-            getFragmentManager().beginTransaction().add(R.id.battle_ui_container, mBattleUIFragment).commit();
-            mBattleButton.setText(R.string.cancel_battle);
+        switch (v.getId()) {
+            case R.id.move_button_0:
+                break;
+            case R.id.move_button_1:
+                break;
+            case R.id.move_button_2:
+                break;
+            case R.id.move_button_3:
+                break;
+            default:
+                break;
         }
-    }
-
-    public BattleUIFragment getBattleUIFragment() {
-        return mBattleUIFragment;
     }
 
     public void startBattle() {
-        setupBattleUI();
-        if (!battleBegun) {
-            battleBegun = true;
-            startMatchMaking();
+        startMatchMaking();
+    }
+
+    private void setupMoveButtons(View v) {
+        mMoveButtons = new Button[buttonIds.length];
+        for (int i = 0; i < buttonIds.length; i++) {
+            if (i < 4) {
+                int buttonId = buttonIds[i];
+                Button b = (Button) v.findViewById(buttonId);
+                b.setVisibility(View.VISIBLE);
+                b.setOnClickListener(this);
+                mMoveButtons[i] = b;
+            }
         }
+    }
+
+    // set the buttons to the current pokemon
+    private void configureMoveButtons() {
+        for (int i = 0; i < buttonIds.length; i++) {
+            mMoveButtons[i].setText(mPlayerMoves.get(i).getName());
+            mMoveButtons[i].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(mPlayerMoves.get(i).getType1())));
+        }
+    }
+
+    /**
+     * Create a drawable for a pokemon
+     *
+     * @param c    Context (Activity)
+     * @param name Pokemon
+     * @return Drawable image of a pokemon
+     */
+    private Drawable getDrawableForPokemon(Context c, String name) {
+        String key = "ic_pokemon_" + name.toLowerCase();
+        int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
+        return c.getDrawable(id);
+    }
+
+    @Override
+    public void onRealTimeMessageReceived(RealTimeMessage realTimeMessage) {
+        // Message format: pokemonID1:pokemonID2
+        byte[] buf = realTimeMessage.getMessageData();
+        String bufferString = new String(buf);
+        Log.d(TAG, "Message Received: " + bufferString + " from: " + realTimeMessage.getSenderParticipantId());
     }
 
     private void startMatchMaking() {
@@ -156,6 +237,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder((BottomBarActivity) getActivity())
                 .setRoomStatusUpdateListener((BottomBarActivity) getActivity())
-                .setMessageReceivedListener(mBattleUIFragment);
+                .setMessageReceivedListener(this);
     }
 }
