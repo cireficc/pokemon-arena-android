@@ -1,21 +1,22 @@
 package com.pokemonbattlearena.android.fragments.team;
 
 import android.annotation.TargetApi;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.support.v7.widget.CardView;
 
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 import java.util.ArrayList;
-
-import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 /**
  * @author Mitch Couturier
@@ -25,7 +26,7 @@ import com.pokemonbattlearena.android.engine.database.Pokemon;
 public class TeamSetupFragment extends Fragment implements View.OnClickListener {
 
     private ArrayList<Pokemon> mItemArray;
-    private PokemonBattleApplication mApplication;
+    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
     public TeamSetupFragment() {
         super();
@@ -35,7 +36,6 @@ public class TeamSetupFragment extends Fragment implements View.OnClickListener 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_team_setup, container, false);
 
-        mApplication = PokemonBattleApplication.getInstance();
         mItemArray = (ArrayList<Pokemon>) mApplication.getBattleDatabase().getPokemons();
 
         for(Pokemon pokemon : mItemArray) {
@@ -65,12 +65,29 @@ public class TeamSetupFragment extends Fragment implements View.OnClickListener 
         ImageView mImage = (ImageView) gridItem.findViewById(R.id.pokemon_grid_imageview);
         ImageView mType1 = (ImageView) gridItem.findViewById(R.id.pokemon_type1_imageview);
         ImageView mType2 = (ImageView) gridItem.findViewById(R.id.pokemon_type2_imageview);
+        CheckBox mCheckbox = (CheckBox) gridItem.findViewById(R.id.select_checkbox);
 
         //set TextView components
         mId.setText("#"+pokemon.getId());
         mName.setText(pokemon.getName());
+        mCheckbox.setClickable(true);
+        mCheckbox.setOnClickListener(this);
 
-        //set ImageView components
+        switch (pokemon.getId() % 3) {
+            case 0:
+                card.setBackgroundColor(getActivity().getColor(R.color.color_blastoise));
+                break;
+            case 1:
+                card.setBackgroundColor(getActivity().getColor(R.color.color_charizard));
+                break;
+            case 2:
+                card.setBackgroundColor(getActivity().getColor(R.color.color_venusaur));
+                break;
+            default:
+                card.setBackgroundColor(Color.BLACK);
+                break;
+        }
+
         int imageId = mImage.getContext().getResources().getIdentifier("ic_pokemon_"+pokemon.getName().toLowerCase(), "drawable", mImage.getContext().getPackageName());
         mImage.setImageResource(imageId);
         int Type1Id = mType1.getContext().getResources().getIdentifier("ic_type_"+pokemon.getType1().toLowerCase(), "drawable", mType1.getContext().getPackageName());
