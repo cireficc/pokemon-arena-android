@@ -6,5 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".BottomBarActivity">
 
-    <include layout="@layout/fragment_team_setup"/>
+    <include layout="@layout/fragment_team_setup"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
 </LinearLayout>

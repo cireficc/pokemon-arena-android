@@ -1,32 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".BottomBarActivity">
+    >
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="70dp">
-        <GridLayout
-            android:id="@+id/team_grid_layout"
+    <!--<ScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_marginTop="70dp">-->
+        <GridView
+            android:id="@+id/team_gridview"
+            android:layout_marginTop="@dimen/appBarTopPadding"
+            android:layout_marginEnd="@dimen/gridMargin"
+            android:layout_marginStart="@dimen/gridMargin"
+            android:numColumns="3"
+            android:verticalSpacing="8dp"
+            android:horizontalSpacing="8dp"
+            android:stretchMode="columnWidth"
+            android:gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="@dimen/gridMargin"
-            android:layout_marginRight="@dimen/gridMargin"
-            android:columnCount="3">
+            android:layout_height="wrap_content">
 
-        </GridLayout>
-    </ScrollView>
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/save_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_menu_save"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="10dp"
-        />
+        </GridView>
+    <!--</ScrollView>-->
 </RelativeLayout>

@@ -73,9 +73,6 @@ public class BottomBarActivity extends BaseActivity implements
     private ChatHomeFragment mChatHomeFragment;
 
     public void onTeamSelected(int pokemonId) {
-        // Stubb
-        // stubb
-        //TODO: setup the battle
     }
     /*
         Fragment Methods
