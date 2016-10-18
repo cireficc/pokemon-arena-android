@@ -6,9 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
@@ -44,37 +44,50 @@ public class PokemonGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) this.mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        final Pokemon pokemon = mItemList.get(position);
+        PokemonGridViewItem holder;
 
         if (convertView == null) {
-            convertView = createGridItem(inflater, parent, mItemList.get(position));
+            LayoutInflater inflater = (LayoutInflater) this.mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.grid_item, parent, false);
+            holder = new PokemonGridViewItem();
+
+            holder.card = (CardView) convertView.findViewById(R.id.item_layout);
+            holder.mId = (TextView) convertView.findViewById(R.id.pokemon_number_textview);
+            holder.mName = (TextView) convertView.findViewById(R.id.pokemon_name_title_textview);
+            holder.mImage = (ImageView) convertView.findViewById(R.id.pokemon_grid_imageview);
+            holder.mType1 = (ImageView) convertView.findViewById(R.id.pokemon_type1_imageview);
+            holder.mType2 = (ImageView) convertView.findViewById(R.id.pokemon_type2_imageview);
+            holder.pokemon = pokemon;
+
+            convertView.setTag(holder);
+        } else {
+            holder = (PokemonGridViewItem) convertView.getTag();
         }
-        convertView.setTag(mItemList.get(position));
+
+        // Set TextView components
+        holder.mId.setText("#" + pokemon.getId());
+        holder.mName.setText(pokemon.getName());
+
+        // Set ImageView components
+        int imageId = holder.mImage.getContext().getResources().getIdentifier("ic_pokemon_" + pokemon.getName().toLowerCase(), "drawable", holder.mImage.getContext().getPackageName());
+        holder.mImage.setImageResource(imageId);
+        int Type1Id = holder.mType1.getContext().getResources().getIdentifier("ic_type_" + pokemon.getType1().toLowerCase(), "drawable", holder.mType1.getContext().getPackageName());
+        holder.mType1.setImageResource(Type1Id);
+        int Type2Id = holder.mType2.getContext().getResources().getIdentifier("ic_type_" + pokemon.getType2().toLowerCase(), "drawable", holder.mType2.getContext().getPackageName());
+        holder.mType2.setImageResource(Type2Id);
+
+        View.OnClickListener onClick = new View.OnClickListener() {
+            public void onClick(View v) {
+                PokemonGridViewItem item = (PokemonGridViewItem) v.getTag();
+                Toast.makeText(mContext, item.pokemon.getName(), Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        convertView.setClickable(true);
+        convertView.setOnClickListener(onClick);
+
         return convertView;
-    }
-
-    private View createGridItem(LayoutInflater inflater, ViewGroup container, Pokemon pokemon) {
-        View gridItem = inflater.inflate(R.layout.grid_item, container, false);
-
-        CardView card = (CardView) gridItem.findViewById(R.id.item_layout);
-        TextView mId = (TextView) gridItem.findViewById(R.id.pokemon_number_textview);
-        TextView mName = (TextView) gridItem.findViewById(R.id.pokemon_name_title_textview);
-        ImageView mImage = (ImageView) gridItem.findViewById(R.id.pokemon_grid_imageview);
-        ImageView mType1 = (ImageView) gridItem.findViewById(R.id.pokemon_type1_imageview);
-        ImageView mType2 = (ImageView) gridItem.findViewById(R.id.pokemon_type2_imageview);
-
-        //set TextView components
-        mId.setText("#"+pokemon.getId());
-        mName.setText(pokemon.getName());
-
-        //set ImageView components
-        int imageId = mImage.getContext().getResources().getIdentifier("ic_pokemon_"+pokemon.getName().toLowerCase(), "drawable", mImage.getContext().getPackageName());
-        mImage.setImageResource(imageId);
-        int Type1Id = mType1.getContext().getResources().getIdentifier("ic_type_"+pokemon.getType1().toLowerCase(), "drawable", mType1.getContext().getPackageName());
-        mType1.setImageResource(Type1Id);
-        int Type2Id = mType2.getContext().getResources().getIdentifier("ic_type_"+pokemon.getType2().toLowerCase(), "drawable", mType2.getContext().getPackageName());
-        mType2.setImageResource(Type2Id);
-
-        return gridItem;
     }
 }
