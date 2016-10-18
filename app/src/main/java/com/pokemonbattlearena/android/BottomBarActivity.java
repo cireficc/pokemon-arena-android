@@ -26,6 +26,7 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
@@ -73,6 +74,7 @@ public class BottomBarActivity extends BaseActivity implements
     private ChatHomeFragment mChatHomeFragment;
 
     public void onTeamSelected(int pokemonId) {
+        Log.d(TAG, "Selected: " + pokemonId);
     }
     /*
         Fragment Methods

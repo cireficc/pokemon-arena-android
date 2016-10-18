@@ -45,6 +45,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     private Bundle mBattleArgs;
     private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
+    private Pokemon mPlayerPokemon;
 
     private TypeModel mTypeModel;
 
@@ -96,6 +97,11 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    @Override
     public void onClick(View v) {
         if (!battleBegun) {
             battleBegun = true;
@@ -143,13 +149,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         }
     }
 
-    /**
-     * Create a drawable for a pokemon
-     *
-     * @param c    Context (Activity)
-     * @param name Pokemon
-     * @return Drawable image of a pokemon
-     */
     private Drawable getDrawableForPokemon(Context c, String name) {
         String key = "ic_pokemon_" + name.toLowerCase();
         int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());

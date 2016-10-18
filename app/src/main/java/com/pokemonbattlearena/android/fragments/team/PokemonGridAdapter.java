@@ -44,9 +44,13 @@ public class PokemonGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = LayoutInflater.from(mContext);
+        LayoutInflater inflater = (LayoutInflater) this.mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        return createGridItem(inflater, parent, mItemList.get(position));
+        if (convertView == null) {
+            convertView = createGridItem(inflater, parent, mItemList.get(position));
+        }
+        convertView.setTag(mItemList.get(position));
+        return convertView;
     }
 
     private View createGridItem(LayoutInflater inflater, ViewGroup container, Pokemon pokemon) {
@@ -71,11 +75,6 @@ public class PokemonGridAdapter extends BaseAdapter {
         int Type2Id = mType2.getContext().getResources().getIdentifier("ic_type_"+pokemon.getType2().toLowerCase(), "drawable", mType2.getContext().getPackageName());
         mType2.setImageResource(Type2Id);
 
-        gridItem.setTag(pokemon.getName());
-
-        gridItem.setClickable(true);
-
-        //add gridItem to gridLayout
         return gridItem;
     }
 }
