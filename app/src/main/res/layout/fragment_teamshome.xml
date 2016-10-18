@@ -6,16 +6,5 @@
     android:layout_height="match_parent"
     tools:context=".BottomBarActivity">
 
-    <Button
-        android:text="@string/teams"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
-        android:id="@+id/select_team_button" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/teams_ui_container">
-    </FrameLayout>
+    <include layout="@layout/fragment_team_setup"/>
 </LinearLayout>
