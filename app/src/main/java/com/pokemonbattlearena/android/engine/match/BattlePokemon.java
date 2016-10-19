@@ -40,6 +40,10 @@ public class BattlePokemon {
         this.statusEffect = statusEffect;
     }
 
+    public boolean hasStatusEffect() {
+        return statusEffect != null;
+    }
+
     public int getStatusEffectTurns() {
         return statusEffectTurns;
     }
