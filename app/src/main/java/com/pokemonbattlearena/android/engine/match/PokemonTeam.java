@@ -12,7 +12,7 @@ public class PokemonTeam {
 
     public PokemonTeam(int size) {
         this.size = size;
-        this.pokemons = new ArrayList<>();
+        this.pokemons = new ArrayList<>(size);
     }
 
     public List<Pokemon> getPokemons() {
