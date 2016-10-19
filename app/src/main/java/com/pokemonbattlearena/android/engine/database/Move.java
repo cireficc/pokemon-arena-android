@@ -100,8 +100,11 @@ public class Move {
     }
 
     public StatusEffect getStatusEffect() {
-
-        return StatusEffect.valueOf(this.statusEffect.toUpperCase());
+        try {
+            return StatusEffect.valueOf(this.statusEffect.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public int getStatusEffectChance() {
