@@ -65,7 +65,7 @@ public class StatusEffectCalculator {
         final int MAX_TURNS_SLEEP = 3;
         final int MAX_TURNS_CONFUSION = 4;
         int turns = 0;
-        
+
         switch (effect) {
             // Burn, Freeze, Paralyze and Poison are all infinitely-lasting effects until removed
             // either by chance, by a Pokemon move, or by an item

@@ -35,6 +35,8 @@ public class Attack implements Command {
         Log.i(TAG, move.getName() + " caused flinch? " + flinched);
         Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
 
+        target.setFlinched(true);
+
         if (applyStatusEffect) {
             StatusEffect effect = move.getStatusEffect();
             int turns = statusEffectCalculator.getStatusEffectTurns(effect);

@@ -12,6 +12,7 @@ public class BattlePokemon {
     private int statusEffectTurns;
     private boolean confused;
     private int confusedTurns;
+    private boolean flinched;
     private boolean fainted;
     private Move[] moveSet = new Move[4];
 
@@ -20,6 +21,7 @@ public class BattlePokemon {
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
         this.confused = false;
+        this.flinched = false;
         this.fainted = false;
     }
 
@@ -69,6 +71,14 @@ public class BattlePokemon {
 
     public void setConfusedTurns(int confusedTurns) {
         this.confusedTurns = confusedTurns;
+    }
+
+    public boolean isFlinched() {
+        return flinched;
+    }
+
+    public void setFlinched(boolean flinched) {
+        this.flinched = flinched;
     }
 
     public boolean isFainted() { return this.fainted; }
