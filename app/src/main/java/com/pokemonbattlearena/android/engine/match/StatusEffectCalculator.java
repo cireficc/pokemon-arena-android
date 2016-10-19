@@ -36,4 +36,21 @@ public class StatusEffectCalculator {
             return (rolled >= (MAX_CHANCE - FLINCH_CHANCE));
         }
     }
+
+    /*
+     * Calculate any status effect produced by using a move against a target Pokemon
+     * http://bulbapedia.bulbagarden.net/wiki/Status_move
+     */
+    protected boolean doesApplyStatusEffect(Move move, BattlePokemon target) {
+
+        // TODO: Take into account a Pokemon's current status effect if it has one
+
+        if (move.getStatusEffect() == null) {
+            return false;
+        } else {
+            Random random = new Random();
+            int rolled = random.nextInt(MAX_CHANCE);
+            return (rolled >= (MAX_CHANCE - move.getStatusEffectChance()));
+        }
+    }
 }

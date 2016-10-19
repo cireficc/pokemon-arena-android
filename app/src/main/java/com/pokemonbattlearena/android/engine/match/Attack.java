@@ -3,6 +3,7 @@ package com.pokemonbattlearena.android.engine.match;
 import android.util.Log;
 
 import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
 public class Attack implements Command {
 
@@ -29,7 +30,14 @@ public class Attack implements Command {
         int remainingHp = target.getCurrentHp() - damage;
         target.setCurrentHp(remainingHp);
         boolean flinched = statusEffectCalculator.doesApplyFlinch(move);
+        boolean applyStatusEffect = statusEffectCalculator.doesApplyStatusEffect(move, target);
+
         Log.i(TAG, move.getName() + " caused flinch? " + flinched);
+        Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
+
+        if (applyStatusEffect) {
+            Log.i(TAG, move.getName() + " applies " + move.getStatusEffect());
+        }
 
         if (target.getCurrentHp() <= 0) {
             Log.d(TAG, target.getOriginalPokemon().getName() + " fainted! (" + target.getCurrentHp() + " hp)");
