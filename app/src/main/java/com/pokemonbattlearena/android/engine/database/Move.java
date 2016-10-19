@@ -19,6 +19,7 @@ public class Move {
     protected final static String STAGE_CHANGE_STAT_FIELD_NAME = "stage_change_stat";
     protected final static String STAGE_CHANGE_FIELD_NAME = "stage_change";
     protected final static String STAGE_CHANGE_CHANCE_FIELD_NAME = "stage_change_chance";
+    protected final static String CAN_FLINCH_FIELD_NAME = "can_flinch";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
@@ -46,6 +47,8 @@ public class Move {
     private int stageChange;
     @DatabaseField(columnName = STAGE_CHANGE_CHANCE_FIELD_NAME)
     private int stageChangeChance;
+    @DatabaseField(columnName = CAN_FLINCH_FIELD_NAME)
+    private boolean canFlinch;
 
     public Move() {
         // Constructor for ORMLite
@@ -121,6 +124,8 @@ public class Move {
         return stageChangeChance;
     }
 
+    public boolean canFlinch() { return canFlinch; }
+
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
@@ -136,6 +141,7 @@ public class Move {
         sb.append(" - StageChangeStat: " + stageChangeStat + "\n");
         sb.append(" - StageChange: " + stageChange + "\n");
         sb.append(" - StageChangeChance: " + stageChangeChance + "\n");
+        sb.append(" - CanFlinch: " + canFlinch + "\n");
 
         return sb.toString();
     }
