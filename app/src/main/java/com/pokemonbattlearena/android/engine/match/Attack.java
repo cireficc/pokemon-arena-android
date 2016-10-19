@@ -13,6 +13,7 @@ public class Attack implements Command {
     private BattlePokemon target;
 
     private static DamageCalculator damageCalculator = DamageCalculator.getInstance();
+    private static StatusEffectCalculator statusEffectCalculator = StatusEffectCalculator.getInstance();
 
     public Attack(BattlePokemon attacker, Move move, BattlePokemon target) {
         this.move = move;
@@ -27,6 +28,8 @@ public class Attack implements Command {
         int damage = damageCalculator.calculateDamage(attacker, move, target);
         int remainingHp = target.getCurrentHp() - damage;
         target.setCurrentHp(remainingHp);
+        boolean flinched = statusEffectCalculator.doesApplyFlinch(move);
+        Log.i(TAG, move.getName() + " caused flinch? " + flinched);
 
         if (target.getCurrentHp() <= 0) {
             Log.d(TAG, target.getOriginalPokemon().getName() + " fainted! (" + target.getCurrentHp() + " hp)");
