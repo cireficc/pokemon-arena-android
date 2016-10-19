@@ -36,8 +36,12 @@ public class Attack implements Command {
         Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
 
         if (applyStatusEffect) {
-            Log.i(TAG, move.getName() + " applies " + move.getStatusEffect());
-            target.setStatusEffect(move.getStatusEffect());
+            StatusEffect effect = move.getStatusEffect();
+            Log.i(TAG, move.getName() + " applies " + effect);
+            target.setStatusEffect(effect);
+            int turns = statusEffectCalculator.getStatusEffectTurns(effect);
+            Log.i(TAG, "Effect: " + effect + " applied for " + turns + " turns");
+            target.setStatusEffectTurns(turns);
         }
 
         if (target.getCurrentHp() <= 0) {

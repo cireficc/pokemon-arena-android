@@ -1,8 +1,10 @@
 package com.pokemonbattlearena.android.engine.match;
 
 import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class StatusEffectCalculator {
 
@@ -52,5 +54,35 @@ public class StatusEffectCalculator {
             int rolled = random.nextInt(MAX_CHANCE);
             return (rolled >= (MAX_CHANCE - move.getStatusEffectChance()));
         }
+    }
+
+    /*
+     * Calculate the number of turns that a status effect will last
+     */
+    protected int getStatusEffectTurns(StatusEffect effect) {
+
+        final int MIN_TURNS = 1;
+        final int MAX_TURNS_SLEEP = 3;
+        final int MAX_TURNS_CONFUSION = 4;
+        int turns = 0;
+        
+        switch (effect) {
+            // Burn, Freeze, Paralyze and Poison are all infinitely-lasting effects until removed
+            // either by chance, by a Pokemon move, or by an item
+            case BURN:
+            case FREEZE:
+            case PARALYZE:
+            case POISON:
+                turns = Integer.MAX_VALUE;
+                break;
+            case SLEEP:
+                turns = ThreadLocalRandom.current().nextInt(MIN_TURNS, MAX_TURNS_SLEEP + 1);
+                break;
+            case CONFUSION:
+                turns = ThreadLocalRandom.current().nextInt(MIN_TURNS, MAX_TURNS_CONFUSION + 1);
+                break;
+        }
+
+        return turns;
     }
 }

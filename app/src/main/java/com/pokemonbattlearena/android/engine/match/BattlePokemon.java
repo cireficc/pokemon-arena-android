@@ -9,6 +9,7 @@ public class BattlePokemon {
     private Pokemon originalPokemon;
     private int currentHp;
     private StatusEffect statusEffect;
+    private int statusEffectTurns;
     private boolean fainted;
     private Move[] moveSet = new Move[4];
 
@@ -37,6 +38,14 @@ public class BattlePokemon {
 
     public void setStatusEffect(StatusEffect statusEffect) {
         this.statusEffect = statusEffect;
+    }
+
+    public int getStatusEffectTurns() {
+        return statusEffectTurns;
+    }
+
+    public void setStatusEffectTurns(int statusEffectTurns) {
+        this.statusEffectTurns = statusEffectTurns;
     }
 
     public boolean isFainted() { return this.fainted; }
