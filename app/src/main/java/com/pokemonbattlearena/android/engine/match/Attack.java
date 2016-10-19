@@ -37,6 +37,7 @@ public class Attack implements Command {
 
         if (applyStatusEffect) {
             Log.i(TAG, move.getName() + " applies " + move.getStatusEffect());
+            target.setStatusEffect(move.getStatusEffect());
         }
 
         if (target.getCurrentHp() <= 0) {
