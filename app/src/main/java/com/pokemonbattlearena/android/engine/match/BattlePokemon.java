@@ -10,6 +10,8 @@ public class BattlePokemon {
     private int currentHp;
     private StatusEffect statusEffect;
     private int statusEffectTurns;
+    private boolean confused;
+    private int confusedTurns;
     private boolean fainted;
     private Move[] moveSet = new Move[4];
 
@@ -17,6 +19,7 @@ public class BattlePokemon {
 
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
+        this.confused = false;
         this.fainted = false;
     }
 
@@ -50,6 +53,22 @@ public class BattlePokemon {
 
     public void setStatusEffectTurns(int statusEffectTurns) {
         this.statusEffectTurns = statusEffectTurns;
+    }
+
+    public boolean isConfused() {
+        return confused;
+    }
+
+    public void setConfused(boolean confused) {
+        this.confused = confused;
+    }
+
+    public int getConfusedTurns() {
+        return confusedTurns;
+    }
+
+    public void setConfusedTurns(int confusedTurns) {
+        this.confusedTurns = confusedTurns;
     }
 
     public boolean isFainted() { return this.fainted; }
