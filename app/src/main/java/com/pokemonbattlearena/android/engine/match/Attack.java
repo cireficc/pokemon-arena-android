@@ -37,11 +37,18 @@ public class Attack implements Command {
 
         if (applyStatusEffect) {
             StatusEffect effect = move.getStatusEffect();
-            Log.i(TAG, move.getName() + " applies " + effect);
-            target.setStatusEffect(effect);
             int turns = statusEffectCalculator.getStatusEffectTurns(effect);
+
+            // Confusion can be applied separately from other status effects
+            if (effect == StatusEffect.CONFUSION) {
+                target.setConfused(true);
+                target.setConfusedTurns(turns);
+            } else {
+                target.setStatusEffect(effect);
+                target.setStatusEffectTurns(turns);
+            }
+
             Log.i(TAG, "Effect: " + effect + " applied for " + turns + " turns");
-            target.setStatusEffectTurns(turns);
         }
 
         if (target.getCurrentHp() <= 0) {
