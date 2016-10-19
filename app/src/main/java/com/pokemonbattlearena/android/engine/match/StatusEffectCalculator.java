@@ -45,9 +45,9 @@ public class StatusEffectCalculator {
      */
     protected boolean doesApplyStatusEffect(Move move, BattlePokemon target) {
 
-        // TODO: Take into account a Pokemon's current status effect if it has one
+        boolean alreadyConfused = (target.isConfused() && move.getStatusEffect() == StatusEffect.CONFUSION);
 
-        if (move.getStatusEffect() == null) {
+        if (alreadyConfused || target.hasStatusEffect() || move.getStatusEffect() == null) {
             return false;
         } else {
             Random random = new Random();
