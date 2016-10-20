@@ -26,7 +26,13 @@ public class Attack implements Command {
     public void execute() {
 
         // TODO: Actually use real damage/effect calculations
-        int damage = damageCalculator.calculateDamage(attacker, move, target);
+        int damage = 0;
+        for (int i = 0; i <= damageCalculator.getTimesHit(move); i++){
+            int partialDamage = damageCalculator.calculateDamage(attacker, move, target);
+            Log.i(TAG, "Partial damage: " + partialDamage);
+            damage += partialDamage;
+        }
+
         int remainingHp = target.getCurrentHp() - damage;
         target.setCurrentHp(remainingHp);
         boolean flinched = statusEffectCalculator.doesApplyFlinch(move);

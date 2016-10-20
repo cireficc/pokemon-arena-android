@@ -8,6 +8,7 @@ import com.pokemonbattlearena.android.engine.database.MoveType;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class DamageCalculator {
 
@@ -86,6 +87,10 @@ public class DamageCalculator {
             int rolled = random.nextInt(MAX_ACCURACY);
             return (rolled >= (MAX_ACCURACY - move.getAccuracy()));
         }
+    }
+
+    protected int getTimesHit(Move move){
+        return ThreadLocalRandom.current().nextInt(move.getMinHits(), move.getMaxHits() + 1);
     }
 
     protected int calculateDamage(BattlePokemon attacker, Move move, BattlePokemon target) {
