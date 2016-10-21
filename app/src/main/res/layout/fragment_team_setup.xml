@@ -11,7 +11,6 @@
         <!--android:layout_marginTop="70dp">-->
         <GridView
             android:id="@+id/team_gridview"
-            android:layout_marginTop="@dimen/appBarTopPadding"
             android:layout_marginEnd="@dimen/gridMargin"
             android:layout_marginStart="@dimen/gridMargin"
             android:numColumns="3"

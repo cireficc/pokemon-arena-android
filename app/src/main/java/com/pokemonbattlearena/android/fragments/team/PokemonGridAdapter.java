@@ -21,11 +21,15 @@ import java.util.ArrayList;
 
 public class PokemonGridAdapter extends BaseAdapter {
     private ArrayList<Pokemon> mItemList;
+    private ArrayList<Integer> mSelectedTeamArrayList;
+    private int[] mSelectedTeam;
     private Context mContext;
 
-    public PokemonGridAdapter(Context c, ArrayList<Pokemon> pokemon) {
+    public PokemonGridAdapter(Context c, ArrayList<Pokemon> pokemon, int teamSize) {
         mContext = c;
         mItemList = pokemon;
+        mSelectedTeamArrayList = new ArrayList<>();
+        mSelectedTeam = new int[teamSize];
     }
     @Override
     public int getCount() {
@@ -82,6 +86,13 @@ public class PokemonGridAdapter extends BaseAdapter {
             public void onClick(View v) {
                 PokemonGridViewItem item = (PokemonGridViewItem) v.getTag();
                 Toast.makeText(mContext, item.pokemon.getName(), Toast.LENGTH_SHORT).show();
+                mSelectedTeamArrayList.add(item.pokemon.getId());
+                if (mSelectedTeamArrayList.size() == mSelectedTeam.length) {
+                    Toast.makeText(mContext, "Team of 6 Selected: ", Toast.LENGTH_SHORT).show();
+                    for (int i = 0; i < mSelectedTeam.length; i++) {
+                        mSelectedTeam[i] = mSelectedTeamArrayList.get(i);
+                    }
+                }
             }
         };
 
@@ -89,5 +100,9 @@ public class PokemonGridAdapter extends BaseAdapter {
         convertView.setOnClickListener(onClick);
 
         return convertView;
+    }
+
+    public int[] getSelectedTeam() {
+        return mSelectedTeam;
     }
 }

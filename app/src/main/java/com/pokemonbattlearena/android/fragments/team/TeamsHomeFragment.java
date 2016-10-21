@@ -11,10 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
@@ -35,16 +37,17 @@ public class TeamsHomeFragment extends Fragment {
     private ArrayList<Pokemon> mItemArray;
     private PokemonBattleApplication mApplication;
     private GridView mGridView;
+    private Button mSaveButton;
     private PokemonGridAdapter mAdapter;
-    private int savedPokemonId = -1;
     private OnPokemonTeamSelectedListener mCallback;
+    private int mTeamSize = 1;
 
     public TeamsHomeFragment() {
         super();
     }
 
     public interface OnPokemonTeamSelectedListener {
-        void onTeamSelected(int pokemonId);
+        void onTeamSelected(int[] pokemonIDs);
     }
 
     @Nullable
@@ -52,19 +55,18 @@ public class TeamsHomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_teamshome, container, false);
         mGridView = (GridView)  view.findViewById(R.id.team_gridview);
+        mSaveButton = (Button) view.findViewById(R.id.save_team_button);
 
         mApplication = PokemonBattleApplication.getInstance();
         mItemArray = (ArrayList<Pokemon>) mApplication.getBattleDatabase().getPokemons();
-        mAdapter = new PokemonGridAdapter(getActivity(), mItemArray);
+        mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, mTeamSize);
         mGridView.setAdapter(mAdapter);
-        mGridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Pokemon p = (Pokemon) parent.getItemAtPosition(position);
-                Log.d(TAG, "Clicked Pokemon: " + p.getName());
-                savedPokemonId = p.getId();
-                mCallback.onTeamSelected(savedPokemonId);
-                return true;
+            public void onClick(View v) {
+                if (mCallback != null && mAdapter != null) {
+                    mCallback.onTeamSelected(mAdapter.getSelectedTeam());
+                }
             }
         });
 
@@ -81,5 +83,11 @@ public class TeamsHomeFragment extends Fragment {
             Log.e(TAG, e.getMessage());
             throw new ClassCastException(context.toString() +"must implement listener");
         }
+    }
+
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+        mTeamSize = args.getInt("teamSize");
     }
 }
