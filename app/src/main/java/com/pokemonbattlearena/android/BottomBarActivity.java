@@ -6,13 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -93,7 +97,7 @@ public class BottomBarActivity extends BaseActivity implements
             SharedPreferences.Editor editor = mPreferences.edit();
             editor.putString("pokemonTeamJSON", pokemonJSON).apply();
             editor.commit();
-
+            setSavedTeam();
         }
     }
 
@@ -189,7 +193,28 @@ public class BottomBarActivity extends BaseActivity implements
         });
 
         mPreferences = getPreferences(Context.MODE_PRIVATE);
+
+        setSavedTeam();
     }
+
+    private void setSavedTeam() {
+        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
+        if (!teamJSON.equals("mew")) {
+            TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
+            ImageView savedImage = (ImageView) findViewById(R.id.saved_team_imageview);
+            savedText.setVisibility(View.VISIBLE);
+            savedImage.setVisibility(View.VISIBLE);
+            PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
+            savedImage.setImageDrawable(getDrawableForPokemon(this, pokemonTeam.getPokemons().get(0).getName()));
+        }
+    }
+
+    private Drawable getDrawableForPokemon(Context c, String name) {
+        String key = "ic_pokemon_" + name.toLowerCase();
+        int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
+        return c.getDrawable(id);
+    }
+
 
     private TeamsHomeFragment createTeamsHomeFragment() {
         TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
