@@ -18,10 +18,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.PokemonMove;
+import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 
 import java.util.ArrayList;
 
@@ -30,7 +32,7 @@ import java.util.ArrayList;
  * Created by droidowl on 9/25/16.
  */
 
-public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickListener {
+public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickListener, View.OnClickListener {
 
     private static final String TAG = "Teams Fragment";
 
@@ -48,7 +50,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     }
 
     public interface OnPokemonTeamSelectedListener {
-        void onTeamSelected(int[] pokemonIDs);
+        void onTeamSelected(String pokemonJSON);
     }
 
     @Nullable
@@ -63,15 +65,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, mTeamSize);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(this);
-        mSaveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCallback != null && mAdapter != null) {
-                    mCallback.onTeamSelected(mAdapter.getSelectedTeam());
-                }
-            }
-        });
-
+        mSaveButton.setOnClickListener(this);
         return view;
     }
 
@@ -94,6 +88,17 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     }
 
     @Override
+    public void onClick(View v) {
+        if (selectedTeamArrayList.size() >= mTeamSize) {
+            PokemonTeam pokemonTeam = new PokemonTeam(mTeamSize);
+            for (Pokemon pokemon : selectedTeamArrayList) {
+                pokemonTeam.addPokemon(pokemon);
+            }
+            mCallback.onTeamSelected(new Gson().toJson(pokemonTeam));
+        }
+    }
+
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Pokemon selectedPokemon = (Pokemon) mAdapter.getItem(position);
         PokemonGridViewItem item = (PokemonGridViewItem) view.getTag();
@@ -104,9 +109,5 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
             item.mCheckbox.setChecked(false);
             selectedTeamArrayList.remove(selectedPokemon);
         }
-        if (selectedTeamArrayList.size() == mTeamSize) {
-            mCallback.onTeamSelected(new int[] {3});
-        }
-        Toast.makeText(mApplication, selectedPokemon.getName(), Toast.LENGTH_SHORT).show();
     }
 }

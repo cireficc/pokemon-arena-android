@@ -27,7 +27,9 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.google.gson.Gson;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
@@ -49,8 +51,7 @@ public class BottomBarActivity extends BaseActivity implements
         RoomUpdateListener,
         RoomStatusUpdateListener,
         RealTimeMultiplayer.ReliableMessageSentCallback,
-        TeamsHomeFragment.OnPokemonTeamSelectedListener,
-        BattleHomeFragment.OnBattleReadyToStartListener {
+        TeamsHomeFragment.OnPokemonTeamSelectedListener {
 
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BottomBarActivity.class.getSimpleName();
@@ -63,16 +64,11 @@ public class BottomBarActivity extends BaseActivity implements
     private String mRoomId = null;
     private String mMyId = null;
     private ArrayList<Participant> mParticipants = null;
-    private String mIncomingInvitationId = null;
 
     // GOOGLE PLAY SIGN IN FIELDS
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
-
-    private boolean battleBegun = false;
-    private boolean teamReady = false;
-    private int[] teamIDs;
 
     private FragmentManager mFragmentManager;
     private BattleHomeFragment mBattleHomeFragment;
@@ -81,24 +77,17 @@ public class BottomBarActivity extends BaseActivity implements
 
     private BottomBar mBottomBar;
 
-    public void onTeamSelected(int[] pokemonIDs) {
-        Log.d(TAG, "Selected: " + pokemonIDs.toString());
-        teamIDs = pokemonIDs;
-        teamReady = true;
+    public void onTeamSelected(String pokemonJSON) {
+        Log.d(TAG, "Selected: " + pokemonJSON);
         if (mFragmentManager != null) {
             mBattleHomeFragment = new BattleHomeFragment();
             Bundle battleArgs = new Bundle();
-            battleArgs.putIntArray("pokemonIDs", pokemonIDs);
+            battleArgs.putString("pokemonTeamJSON", pokemonJSON);
             mBattleHomeFragment.setArguments(battleArgs);
             mFragmentManager.beginTransaction().replace(R.id.container, mBattleHomeFragment, "battle").commit();
             mBottomBar.selectTabWithId(R.id.tab_battle);
             mBattleHomeFragment.setBattleVisible(true);
         }
-    }
-
-    @Override
-    public void onBattleReady(int[] pokemonIDs) {
-
     }
 
     /*
@@ -113,7 +102,7 @@ public class BottomBarActivity extends BaseActivity implements
         toolbar.setTitleTextColor(Color.BLACK);
         setSupportActionBar(toolbar);
 
-       mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
+        mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
 
         mBottomBar.setDefaultTab(R.id.tab_battle);
 

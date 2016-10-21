@@ -19,18 +19,11 @@ public class BattleViewItem {
     ImageView pokemonHPImage;
     Pokemon pokemon;
 
-    public BattleViewItem(ImageView pokemonImage, TextView pokemonName, Pokemon pokemon) {
-        this.pokemonImage = pokemonImage;
-        this.pokemonName = pokemonName;
-        this.pokemon = pokemon;
-    }
-
-    public BattleViewItem(ImageView pokemonImage, TextView pokemonName, TextView pokemonHPText, ImageView pokemonHPImage, Pokemon pokemon) {
+    public BattleViewItem(ImageView pokemonImage, TextView pokemonName, TextView pokemonHPText, ImageView pokemonHPImage) {
         this.pokemonImage = pokemonImage;
         this.pokemonName = pokemonName;
         this.pokemonHPText = pokemonHPText;
         this.pokemonHPImage = pokemonHPImage;
-        this.pokemon = pokemon;
     }
 
     public ImageView getPokemonImage() {
@@ -51,6 +44,10 @@ public class BattleViewItem {
 
     public Pokemon getPokemon() {
         return pokemon;
+    }
+
+    public void setPokemon(Pokemon pokemon) {
+        this.pokemon = pokemon;
     }
 
     public void setVisibility(boolean visibility) {
