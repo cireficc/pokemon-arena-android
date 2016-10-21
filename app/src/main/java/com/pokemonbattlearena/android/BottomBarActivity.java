@@ -1,6 +1,7 @@
 package com.pokemonbattlearena.android;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
@@ -46,31 +48,59 @@ public class BottomBarActivity extends BaseActivity implements
         RealTimeMessageReceivedListener,
         RoomUpdateListener,
         RoomStatusUpdateListener,
-        RealTimeMultiplayer.ReliableMessageSentCallback {
+        RealTimeMultiplayer.ReliableMessageSentCallback,
+        TeamsHomeFragment.OnPokemonTeamSelectedListener,
+        BattleHomeFragment.OnBattleReadyToStartListener {
+
+    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
+    private final static String TAG = BottomBarActivity.class.getSimpleName();
+
+    // GOOGLE PLAY GAMES FIELDS
     private static final int RC_SIGN_IN = 9001;
-    // Request codes for the UIs that we show with startActivityForResult:
     private final static int RC_SELECT_PLAYERS = 7789;
     private final static int RC_INVITATION_INBOX = 10001;
-    private final static String TAG = BottomBarActivity.class.getSimpleName();
+    private String mRoomCreatorId = null;
+    private String mRoomId = null;
+    private String mMyId = null;
+    private ArrayList<Participant> mParticipants = null;
+    private String mIncomingInvitationId = null;
+
+    // GOOGLE PLAY SIGN IN FIELDS
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
-    private boolean battleBegun = false;
-    private String mRoomCreatorId = null;
-    private String mRoomId = null;
-    // The participants in the currently active game
-    private ArrayList<Participant> mParticipants = null;
-    // My participant ID in the currently active game
-    private String mMyId = null;
-    // If non-null, this is the id of the invitation we received via the
-    // invitation listener
-    private String mIncomingInvitationId = null;
-    // Message buffer for sending messages
-    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
+    private boolean battleBegun = false;
+    private boolean teamReady = false;
+    private int[] teamIDs;
+
+    private FragmentManager mFragmentManager;
     private BattleHomeFragment mBattleHomeFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
+
+    private BottomBar mBottomBar;
+
+    public void onTeamSelected(int[] pokemonIDs) {
+        Log.d(TAG, "Selected: " + pokemonIDs.toString());
+        teamIDs = pokemonIDs;
+        teamReady = true;
+        if (mFragmentManager != null) {
+            mBattleHomeFragment = new BattleHomeFragment();
+            Bundle battleArgs = new Bundle();
+            battleArgs.putIntArray("pokemonIDs", pokemonIDs);
+            mBattleHomeFragment.setArguments(battleArgs);
+            mFragmentManager.beginTransaction().replace(R.id.container, mBattleHomeFragment, "battle").commit();
+            mBottomBar.selectTabWithId(R.id.tab_battle);
+            mBattleHomeFragment.setBattleVisible(true);
+        }
+    }
+
+    @Override
+    public void onBattleReady(int[] pokemonIDs) {
+
+    }
+
     /*
         Fragment Methods
      */
@@ -83,14 +113,11 @@ public class BottomBarActivity extends BaseActivity implements
         toolbar.setTitleTextColor(Color.BLACK);
         setSupportActionBar(toolbar);
 
-        final BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
+       mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
 
-        bottomBar.setDefaultTab(R.id.tab_battle);
+        mBottomBar.setDefaultTab(R.id.tab_battle);
 
-        mBattleHomeFragment = new BattleHomeFragment();
-        mTeamsHomeFragment = new TeamsHomeFragment();
-        mChatHomeFragment = new ChatHomeFragment();
-        final android.app.FragmentManager manger = getFragmentManager();
+        mFragmentManager = getFragmentManager();
 
         // Button listeners
 
@@ -101,30 +128,43 @@ public class BottomBarActivity extends BaseActivity implements
                 .build();
 
         mApplication.setGoogleApiClient(googleApiClient);
-        manger.beginTransaction()
-                .add(R.id.container, mBattleHomeFragment, "battle")
-                .commit();
-
 
         // Listens for a tab touch (Only first touch of new tab)
-        bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
+        mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
                 switch (tabId) {
                     case R.id.tab_teams:
-                        manger.beginTransaction()
-                                .replace(R.id.container, mTeamsHomeFragment, "team")
-                                .commit();
+                        if (mTeamsHomeFragment == null) {
+                            mTeamsHomeFragment = createTeamsHomeFragment();
+                            mFragmentManager.beginTransaction()
+                                    .add(R.id.container, mTeamsHomeFragment, "team")
+                                    .commit();
+                        } else {
+                            mFragmentManager.beginTransaction()
+                                    .replace(R.id.container, mTeamsHomeFragment, "team")
+                                    .commit();
+                        }
                         break;
                     case R.id.tab_battle:
-                        manger.beginTransaction()
-                                .replace(R.id.container, mBattleHomeFragment, "battle")
-                                .commit();
+                        if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
+                            mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
+                        }
+                        if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
+                            mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
+                        }
                         break;
                     case R.id.tab_chat:
-                        manger.beginTransaction()
-                                .replace(R.id.container, mChatHomeFragment, "chat")
-                                .commit();
+                        if (mChatHomeFragment == null) {
+                            mChatHomeFragment = new ChatHomeFragment();
+                            mFragmentManager.beginTransaction()
+                                    .add(R.id.container, mChatHomeFragment, "battle")
+                                    .commit();
+                        } else {
+                            mFragmentManager.beginTransaction()
+                                    .replace(R.id.container, mChatHomeFragment, "chat")
+                                    .commit();
+                        }
                         break;
                     default:
                         break;
@@ -133,7 +173,7 @@ public class BottomBarActivity extends BaseActivity implements
         });
 
         // Listens for a tab touch (Only when 'reselected')
-        bottomBar.setOnTabReselectListener(new OnTabReselectListener() {
+        mBottomBar.setOnTabReselectListener(new OnTabReselectListener() {
             @Override
             public void onTabReSelected(@IdRes int tabId) {
                 switch (tabId) {
@@ -151,6 +191,15 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         });
+    }
+
+    private TeamsHomeFragment createTeamsHomeFragment() {
+        TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
+        // Set the team size
+        Bundle teamArgs = new Bundle();
+        teamArgs.putInt("teamSize", 6);
+        teamsHomeFragment.setArguments(teamArgs);
+        return teamsHomeFragment;
     }
 
     @Override
@@ -521,7 +570,7 @@ public class BottomBarActivity extends BaseActivity implements
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder(this)
                 .setRoomStatusUpdateListener(this)
-                .setMessageReceivedListener(mBattleHomeFragment.getBattleUIFragment());
+                .setMessageReceivedListener(mBattleHomeFragment);
     }
 
     private void updateRoom(Room room) {

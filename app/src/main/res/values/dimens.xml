@@ -7,4 +7,5 @@
     <dimen name="marginStart">15dp</dimen>
     <dimen name="hpTopMargin">5dp</dimen>
     <dimen name="gridMargin">8dp</dimen>
+    <dimen name="appBarTopPadding">70dp</dimen>
 </resources>
