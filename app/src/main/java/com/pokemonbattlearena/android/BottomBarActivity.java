@@ -186,7 +186,7 @@ public class BottomBarActivity extends BaseActivity implements
         TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
         // Set the team size
         Bundle teamArgs = new Bundle();
-        teamArgs.putInt("teamSize", 6);
+        teamArgs.putInt("teamSize", 1);
         teamsHomeFragment.setArguments(teamArgs);
         return teamsHomeFragment;
     }
