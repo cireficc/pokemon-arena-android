@@ -2,7 +2,9 @@ package com.pokemonbattlearena.android.fragments.battle;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -11,37 +13,66 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.Multiplayer;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
+import com.google.gson.Gson;
 import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.TypeModel;
+import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.PokemonTeam;
+import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by droidowl on 9/25/16.
  */
 
-public class BattleHomeFragment extends Fragment implements View.OnClickListener {
-    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
+public class BattleHomeFragment extends Fragment implements View.OnClickListener, RealTimeMessageReceivedListener {
+    PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static int RC_SELECT_PLAYERS = 10000;
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
     private Button mBattleButton;
     private boolean battleBegun = false;
-    private BattleUIFragment mBattleUIFragment;
-    private Bundle mBattleArgs;
+    private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
+
+    private TypeModel mTypeModel;
+
+    private PokemonTeam mPlayerTeam;
+
+    private List<Move> mPlayerMoves;
+
+    private Button[] mMoveButtons;
+
+    private BattleViewItem mPlayerBattleView;
+
+    private BattleViewItem mOpponentBattleView;
 
     public BattleHomeFragment() {
         super();
+        mTypeModel = new TypeModel();
     }
 
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
-        mBattleArgs = args;
+        String json = args.getString("pokemonTeamJSON");
+        if (json != null) {
+            mPlayerTeam = new Gson().fromJson(json, PokemonTeam.class);
+        }
     }
 
     @Nullable
@@ -50,37 +81,135 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
         mBattleButton.setOnClickListener(this);
-        mBattleUIFragment = new BattleUIFragment();
+        View playerView = view.findViewById(R.id.player_1_ui);
+        View opponentView = view.findViewById(R.id.player_2_ui);
+
+        TextView pokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
+        ImageView pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
+        ImageView pokemonHPImage = (ImageView) playerView.findViewById(R.id.hp_imageview);
+        TextView pokemonHPText = (TextView) playerView.findViewById(R.id.hp_textview);
+
+        mPlayerBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
+        mPlayerBattleView.setVisibility(false);
+        pokemonName = (TextView) opponentView.findViewById(R.id.active_name_textview);
+        pokemonImage = (ImageView) opponentView.findViewById(R.id.active_imageview);
+        pokemonHPImage = (ImageView)  opponentView.findViewById(R.id.hp_imageview);
+        pokemonHPText = (TextView)  opponentView.findViewById(R.id.hp_textview);
+
+        //TODO: don't create opponent until match starts
+
+        mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
+        mOpponentBattleView.setVisibility(false);
+
         return view;
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Pokemon pokemon = mPlayerTeam.getPokemons().get(0);
+        mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(pokemon);
+        int length = mPlayerMoves.size() >= 4 ? 4 : mPlayerMoves.size();
+        setupMoveButtons(view,length);
+        configureMoveButtons(length);
+        if (mPlayerBattleView != null) {
+            mPlayerBattleView.setPokemon(pokemon);
+            mPlayerBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), pokemon.getName()));
+            mPlayerBattleView.getPokemonName().setText(pokemon.getName());
+            mPlayerBattleView.setVisibility(true);
+        }
+        if (mOpponentBattleView != null) {
+            mOpponentBattleView.setPokemon(pokemon);
+            mOpponentBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), "mew"));
+            mOpponentBattleView.getPokemonName().setText("Mew");
+            mOpponentBattleView.setVisibility(true);
+        }
+    }
+
+    @Override
     public void onClick(View v) {
-        if (!battleBegun) {
-            startBattle();
-            mBattleButton.setText(R.string.battle);
-        } else {
-            mBattleButton.setText(R.string.cancel_battle);
+        int id = v.getId();
+        switch (id) {
+            case R.id.battle_now_button:
+                if (!battleBegun) {
+                    battleBegun = true;
+                    startBattle();
+                    mBattleButton.setText(R.string.battle);
+                } else {
+                    mBattleButton.setText(R.string.cancel_battle);
+                }
+                break;
+            case R.id.move_button_0:
+                break;
+            case R.id.move_button_1:
+                break;
+            case R.id.move_button_2:
+                break;
+            case R.id.move_button_3:
+                break;
+            default:
+                break;
         }
     }
 
-    private void setupBattleUI() {
-        if (!mBattleUIFragment.isAdded()) {
-            getFragmentManager().beginTransaction().add(R.id.battle_ui_container, mBattleUIFragment).commit();
-            mBattleButton.setText(R.string.cancel_battle);
+    public void onActivityResult(int requestCode, int resultCode,
+                                 Intent intent) {
+        switch (requestCode) {
+            case RC_SELECT_PLAYERS:
+                // we got the result from the "select players" UI -- ready to create the room
+                handleSelectPlayersResult(resultCode, intent);
+                break;
         }
-    }
-
-    public BattleUIFragment getBattleUIFragment() {
-        return mBattleUIFragment;
+        super.onActivityResult(requestCode, resultCode, intent);
     }
 
     public void startBattle() {
-        setupBattleUI();
-        if (!battleBegun) {
-            battleBegun = true;
-            startMatchMaking();
+        startMatchMaking();
+    }
+
+    @Override
+    public void onRealTimeMessageReceived(RealTimeMessage realTimeMessage) {
+        // Message format: pokemonID1:pokemonID2
+        byte[] buf = realTimeMessage.getMessageData();
+        String bufferString = new String(buf);
+        Log.d(TAG, "Message Received: " + bufferString + " from: " + realTimeMessage.getSenderParticipantId());
+
+    }
+
+    private void setupMoveButtons(View v, int count) {
+        mMoveButtons = new Button[buttonIds.length];
+        for (int i = 0; i < count; i++) {
+            if (i < 4) {
+                int buttonId = buttonIds[i];
+                Button b = (Button) v.findViewById(buttonId);
+                b.setVisibility(View.VISIBLE);
+                b.setOnClickListener(this);
+                mMoveButtons[i] = b;
+            }
         }
+    }
+
+    // set the buttons to the current pokemon
+    private void configureMoveButtons(int count) {
+        if (mPlayerMoves == null) {
+            Log.e(TAG, "Player doesn't have moves");
+        } else {
+            for (int i = 0; i < count; i++) {
+                mMoveButtons[i].setText(mPlayerMoves.get(i).getName());
+                mMoveButtons[i].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(mPlayerMoves.get(i).getType1())));
+            }
+        }
+    }
+
+    private Drawable getDrawableForPokemon(Context c, String name) {
+        String key = "ic_pokemon_" + name.toLowerCase();
+        int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
+        return c.getDrawable(id);
     }
 
     private void startMatchMaking() {
@@ -102,17 +231,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         // go to game screen
         Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(mApplication.getGoogleApiClient(), 1, 3);
         startActivityForResult(intent, RC_SELECT_PLAYERS);
-    }
-
-    public void onActivityResult(int requestCode, int resultCode,
-                                    Intent intent) {
-        switch (requestCode) {
-            case RC_SELECT_PLAYERS:
-                // we got the result from the "select players" UI -- ready to create the room
-                handleSelectPlayersResult(resultCode, intent);
-                break;
-        }
-        super.onActivityResult(requestCode, resultCode, intent);
     }
 
     // Handle the result of the "Select players UI" we launched when the user clicked the
@@ -156,6 +274,13 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder((BottomBarActivity) getActivity())
                 .setRoomStatusUpdateListener((BottomBarActivity) getActivity())
-                .setMessageReceivedListener(mBattleUIFragment);
+                .setMessageReceivedListener(this);
+    }
+
+    public void setBattleVisible(boolean visible) {
+        if (mPlayerBattleView != null && mOpponentBattleView != null) {
+            mPlayerBattleView.setVisibility(visible);
+            mOpponentBattleView.setVisibility(visible);
+        }
     }
 }
