@@ -1,6 +1,7 @@
 package com.pokemonbattlearena.android.engine.database;
 
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.types.StringBytesType;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "moves")
@@ -19,6 +20,9 @@ public class Move {
     protected final static String STAGE_CHANGE_STAT_FIELD_NAME = "stage_change_stat";
     protected final static String STAGE_CHANGE_FIELD_NAME = "stage_change";
     protected final static String STAGE_CHANGE_CHANCE_FIELD_NAME = "stage_change_chance";
+    protected final static String CAN_FLINCH_FIELD_NAME = "can_flinch";
+    protected final static String MIN_HITS_FIELD_NAME = "min_hits";
+    protected final static String MAX_HITS_FIELD_NAME = "max_hits";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
@@ -46,6 +50,12 @@ public class Move {
     private int stageChange;
     @DatabaseField(columnName = STAGE_CHANGE_CHANCE_FIELD_NAME)
     private int stageChangeChance;
+    @DatabaseField(columnName = CAN_FLINCH_FIELD_NAME)
+    private boolean canFlinch;
+    @DatabaseField(columnName = MIN_HITS_FIELD_NAME)
+    private int minHits;
+    @DatabaseField(columnName = MAX_HITS_FIELD_NAME)
+    private int maxHits;
 
     public Move() {
         // Constructor for ORMLite
@@ -97,8 +107,11 @@ public class Move {
     }
 
     public StatusEffect getStatusEffect() {
-
-        return StatusEffect.valueOf(this.statusEffect.toUpperCase());
+        try {
+            return StatusEffect.valueOf(this.statusEffect.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public int getStatusEffectChance() {
@@ -121,6 +134,16 @@ public class Move {
         return stageChangeChance;
     }
 
+    public boolean canFlinch() { return canFlinch; }
+
+    public int getMinHits() {
+        return minHits;
+    }
+
+    public int getMaxHits() {
+        return maxHits;
+    }
+
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
@@ -136,6 +159,10 @@ public class Move {
         sb.append(" - StageChangeStat: " + stageChangeStat + "\n");
         sb.append(" - StageChange: " + stageChange + "\n");
         sb.append(" - StageChangeChance: " + stageChangeChance + "\n");
+        sb.append(" - CanFlinch: " + canFlinch + "\n");
+        sb.append(" - MaxHits: " + maxHits + "\n");
+        sb.append(" - MinHits: " + minHits + "\n");
+
 
         return sb.toString();
     }
