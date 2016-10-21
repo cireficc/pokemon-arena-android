@@ -102,13 +102,13 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Pokemon selectedPokemon = (Pokemon) mAdapter.getItem(position);
         PokemonGridViewItem item = (PokemonGridViewItem) view.getTag();
-        if (selectedTeamArrayList.size() >= mTeamSize) {
-            Toast.makeText(mApplication, "You can only select: " + mTeamSize + " pokemon for your team", Toast.LENGTH_SHORT).show();
-            return;
-        }
         if (!selectedTeamArrayList.contains(selectedPokemon)) {
+            if (selectedTeamArrayList.size() >= mTeamSize) {
+                Toast.makeText(mApplication, "You can only select: " + mTeamSize + " pokemon for your team", Toast.LENGTH_SHORT).show();
+            } else {
                 selectedTeamArrayList.add(selectedPokemon);
                 item.mCheckbox.setChecked(true);
+            }
         } else {
             item.mCheckbox.setChecked(false);
             selectedTeamArrayList.remove(selectedPokemon);

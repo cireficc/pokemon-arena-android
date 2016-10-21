@@ -100,7 +100,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
         mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
         mOpponentBattleView.setVisibility(false);
-        setupMoveButtons(view);
 
         return view;
     }
@@ -115,7 +114,9 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         super.onViewCreated(view, savedInstanceState);
         Pokemon pokemon = mPlayerTeam.getPokemons().get(0);
         mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(pokemon);
-        configureMoveButtons();
+        int length = mPlayerMoves.size() >= 4 ? 4 : mPlayerMoves.size();
+        setupMoveButtons(view,length);
+        configureMoveButtons(length);
         if (mPlayerBattleView != null) {
             mPlayerBattleView.setPokemon(pokemon);
             mPlayerBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), pokemon.getName()));
@@ -180,9 +181,9 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     }
 
-    private void setupMoveButtons(View v) {
+    private void setupMoveButtons(View v, int count) {
         mMoveButtons = new Button[buttonIds.length];
-        for (int i = 0; i < buttonIds.length; i++) {
+        for (int i = 0; i < count; i++) {
             if (i < 4) {
                 int buttonId = buttonIds[i];
                 Button b = (Button) v.findViewById(buttonId);
@@ -194,11 +195,11 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     // set the buttons to the current pokemon
-    private void configureMoveButtons() {
+    private void configureMoveButtons(int count) {
         if (mPlayerMoves == null) {
             Log.e(TAG, "Player doesn't have moves");
         } else {
-            for (int i = 0; i < buttonIds.length; i++) {
+            for (int i = 0; i < count; i++) {
                 mMoveButtons[i].setText(mPlayerMoves.get(i).getName());
                 mMoveButtons[i].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(mPlayerMoves.get(i).getType1())));
             }
