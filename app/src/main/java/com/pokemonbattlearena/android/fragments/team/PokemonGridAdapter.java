@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,6 +64,7 @@ public class PokemonGridAdapter extends BaseAdapter {
             holder.mImage = (ImageView) convertView.findViewById(R.id.pokemon_grid_imageview);
             holder.mType1 = (ImageView) convertView.findViewById(R.id.pokemon_type1_imageview);
             holder.mType2 = (ImageView) convertView.findViewById(R.id.pokemon_type2_imageview);
+            holder.mCheckbox = (CheckBox) convertView.findViewById(R.id.pokemon_grid_item_checkbox);
             holder.pokemon = pokemon;
 
             convertView.setTag(holder);
@@ -81,23 +83,6 @@ public class PokemonGridAdapter extends BaseAdapter {
         holder.mType1.setImageResource(Type1Id);
         int Type2Id = holder.mType2.getContext().getResources().getIdentifier("ic_type_" + pokemon.getType2().toLowerCase(), "drawable", holder.mType2.getContext().getPackageName());
         holder.mType2.setImageResource(Type2Id);
-
-        View.OnClickListener onClick = new View.OnClickListener() {
-            public void onClick(View v) {
-                PokemonGridViewItem item = (PokemonGridViewItem) v.getTag();
-                Toast.makeText(mContext, item.pokemon.getName(), Toast.LENGTH_SHORT).show();
-                mSelectedTeamArrayList.add(item.pokemon.getId());
-                if (mSelectedTeamArrayList.size() == mSelectedTeam.length) {
-                    Toast.makeText(mContext, "Team of 6 Selected: ", Toast.LENGTH_SHORT).show();
-                    for (int i = 0; i < mSelectedTeam.length; i++) {
-                        mSelectedTeam[i] = mSelectedTeamArrayList.get(i);
-                    }
-                }
-            }
-        };
-
-        convertView.setClickable(true);
-        convertView.setOnClickListener(onClick);
 
         return convertView;
     }

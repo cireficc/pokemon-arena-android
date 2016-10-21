@@ -108,7 +108,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
         mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage, opponentPokemon);
 
-
         setupMoveButtons(view);
 
         mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(pokemon);
@@ -153,7 +152,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
             default:
                 break;
         }
-
     }
 
     public void onActivityResult(int requestCode, int resultCode,

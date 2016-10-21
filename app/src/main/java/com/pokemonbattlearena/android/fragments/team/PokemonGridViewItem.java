@@ -1,6 +1,7 @@
 package com.pokemonbattlearena.android.fragments.team;
 
 import android.support.v7.widget.CardView;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,5 +15,6 @@ public class PokemonGridViewItem {
     ImageView mImage;
     ImageView mType1;
     ImageView mType2;
+    CheckBox mCheckbox;
     Pokemon pokemon;
 }

@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * Created by droidowl on 9/25/16.
  */
 
-public class TeamsHomeFragment extends Fragment {
+public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickListener {
 
     private static final String TAG = "Teams Fragment";
 
@@ -41,6 +41,7 @@ public class TeamsHomeFragment extends Fragment {
     private PokemonGridAdapter mAdapter;
     private OnPokemonTeamSelectedListener mCallback;
     private int mTeamSize = 1;
+    private ArrayList<Pokemon> selectedTeamArrayList;
 
     public TeamsHomeFragment() {
         super();
@@ -56,11 +57,12 @@ public class TeamsHomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_teamshome, container, false);
         mGridView = (GridView)  view.findViewById(R.id.team_gridview);
         mSaveButton = (Button) view.findViewById(R.id.save_team_button);
-
+        selectedTeamArrayList = new ArrayList<>(mTeamSize);
         mApplication = PokemonBattleApplication.getInstance();
         mItemArray = (ArrayList<Pokemon>) mApplication.getBattleDatabase().getPokemons();
         mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, mTeamSize);
         mGridView.setAdapter(mAdapter);
+        mGridView.setOnItemClickListener(this);
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,7 +83,7 @@ public class TeamsHomeFragment extends Fragment {
             Log.d(TAG, "Worked");
         } catch (ClassCastException e) {
             Log.e(TAG, e.getMessage());
-            throw new ClassCastException(context.toString() +"must implement listener");
+            throw new ClassCastException(context.toString() + "must implement listener");
         }
     }
 
@@ -89,5 +91,22 @@ public class TeamsHomeFragment extends Fragment {
     public void setArguments(Bundle args) {
         super.setArguments(args);
         mTeamSize = args.getInt("teamSize");
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Pokemon selectedPokemon = (Pokemon) mAdapter.getItem(position);
+        PokemonGridViewItem item = (PokemonGridViewItem) view.getTag();
+        if (!selectedTeamArrayList.contains(selectedPokemon)) {
+            selectedTeamArrayList.add(selectedPokemon);
+            item.mCheckbox.setChecked(true);
+        } else {
+            item.mCheckbox.setChecked(false);
+            selectedTeamArrayList.remove(selectedPokemon);
+        }
+        if (selectedTeamArrayList.size() == mTeamSize) {
+            mCallback.onTeamSelected(new int[] {3});
+        }
+        Toast.makeText(mApplication, selectedPokemon.getName(), Toast.LENGTH_SHORT).show();
     }
 }
