@@ -2,7 +2,9 @@ package com.pokemonbattlearena.android;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -76,6 +78,7 @@ public class BottomBarActivity extends BaseActivity implements
     private ChatHomeFragment mChatHomeFragment;
 
     private BottomBar mBottomBar;
+    private SharedPreferences mPreferences;
 
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
@@ -87,6 +90,10 @@ public class BottomBarActivity extends BaseActivity implements
             mFragmentManager.beginTransaction().replace(R.id.container, mBattleHomeFragment, "battle").commit();
             mBottomBar.selectTabWithId(R.id.tab_battle);
             mBattleHomeFragment.setBattleVisible(true);
+            SharedPreferences.Editor editor = mPreferences.edit();
+            editor.putString("pokemonTeamJSON", pokemonJSON).apply();
+            editor.commit();
+
         }
     }
 
@@ -180,6 +187,8 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         });
+
+        mPreferences = getPreferences(Context.MODE_PRIVATE);
     }
 
     private TeamsHomeFragment createTeamsHomeFragment() {
@@ -219,7 +228,6 @@ public class BottomBarActivity extends BaseActivity implements
                 RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
                 roomConfigBuilder.setInvitationIdToAccept(inv.getInvitationId());
                 Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
-
 
                 // prevent screen from sleeping during handshake
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
