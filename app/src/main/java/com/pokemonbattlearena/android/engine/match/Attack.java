@@ -25,6 +25,11 @@ public class Attack implements Command {
     @Override
     public void execute() {
 
+        if (move.isChargingMove()) {
+            Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
+            attacker.setChargingForTurns(move.getChargingTurns());
+        }
+
         // TODO: Actually use real damage/effect calculations
         int damage = 0;
         for (int i = 0; i <= damageCalculator.getTimesHit(move); i++){
