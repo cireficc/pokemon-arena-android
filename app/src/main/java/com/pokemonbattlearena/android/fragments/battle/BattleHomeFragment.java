@@ -1,9 +1,7 @@
 package com.pokemonbattlearena.android.fragments.battle;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,30 +9,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.games.Games;
-import com.google.android.gms.games.multiplayer.Multiplayer;
-import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
-import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
-import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.gson.Gson;
-import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -117,13 +103,13 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         setupMoveButtons(view,length);
         configureMoveButtons(length);
         if (mPlayerBattleView != null) {
-            mPlayerBattleView.setPokemon(pokemon);
+            mPlayerBattleView.setActivePokemon(pokemon);
             mPlayerBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), pokemon.getName()));
             mPlayerBattleView.getPokemonName().setText(pokemon.getName());
             mPlayerBattleView.setVisibility(true);
         }
         if (mOpponentBattleView != null) {
-            mOpponentBattleView.setPokemon(pokemon);
+            mOpponentBattleView.setActivePokemon(pokemon);
             mOpponentBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), "mew"));
             mOpponentBattleView.getPokemonName().setText("Mew");
             mOpponentBattleView.setVisibility(true);
@@ -168,7 +154,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         }
     }
 
-    // set the buttons to the current pokemon
+    // set the buttons to the current activePokemon
     private void configureMoveButtons(int count) {
         if (mPlayerMoves == null) {
             Log.e(TAG, "Player doesn't have moves");

@@ -59,6 +59,7 @@ public class BottomBarActivity extends BaseActivity implements
         RealTimeMultiplayer.ReliableMessageSentCallback,
         TeamsHomeFragment.OnPokemonTeamSelectedListener {
 
+    private static final int TEAM_SIZE_INT = 1;
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BottomBarActivity.class.getSimpleName();
 
@@ -225,7 +226,7 @@ public class BottomBarActivity extends BaseActivity implements
                 Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
 
                 // prevent screen from sleeping during handshake
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                keepScreenOn();
             }
         }
     }
@@ -612,7 +613,7 @@ public class BottomBarActivity extends BaseActivity implements
         TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
         // Set the team size
         Bundle teamArgs = new Bundle();
-        teamArgs.putInt("teamSize", 1);
+        teamArgs.putInt("teamSize", TEAM_SIZE_INT);
         teamsHomeFragment.setArguments(teamArgs);
         return teamsHomeFragment;
     }
