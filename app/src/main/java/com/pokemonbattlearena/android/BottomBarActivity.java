@@ -158,7 +158,7 @@ public class BottomBarActivity extends BaseActivity implements
                         if (mChatHomeFragment == null) {
                             mChatHomeFragment = new ChatHomeFragment();
                             mFragmentManager.beginTransaction()
-                                    .add(R.id.container, mChatHomeFragment, "battle")
+                                    .add(R.id.container, mChatHomeFragment, "chat")
                                     .commit();
                         } else {
                             mFragmentManager.beginTransaction()
