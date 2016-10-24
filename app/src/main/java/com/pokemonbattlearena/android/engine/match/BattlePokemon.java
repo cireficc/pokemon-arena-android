@@ -14,6 +14,7 @@ public class BattlePokemon {
     private int confusedTurns;
     private boolean flinched;
     private int chargingForTurns;
+    private int rechargingForTurns;
     private boolean fainted;
     private Move[] moveSet = new Move[4];
 
@@ -92,6 +93,18 @@ public class BattlePokemon {
 
     public boolean isCharging() {
         return this.chargingForTurns > 0;
+    }
+
+    public int getRechargingForTurns() {
+        return rechargingForTurns;
+    }
+
+    public void setRechargingForTurns(int rechargingForTurns) {
+        this.rechargingForTurns = rechargingForTurns;
+    }
+
+    public boolean isRecharging() {
+        return this.rechargingForTurns > 0;
     }
 
     public boolean isFainted() { return this.fainted; }
