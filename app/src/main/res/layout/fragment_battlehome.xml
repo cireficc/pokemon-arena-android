@@ -7,11 +7,10 @@
     tools:context=".BottomBarActivity">
 
     <Button
-        android:text="@string/battle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
-        android:id="@+id/battle_now_button" />
+    android:text="@string/battle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/battle_now_button" />
 
     <include layout="@layout/fragment_battleui"/>
 

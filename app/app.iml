@@ -168,10 +168,15 @@
     <orderEntry type="library" exported="" name="support-core-utils-24.2.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="javax.inject-1" level="project" />
 <<<<<<< HEAD
+<<<<<<< HEAD
     <orderEntry type="library" exported="" name="draglistview-1.1.8" level="project" />
 =======
     <orderEntry type="library" exported="" name="gson-2.7" level="project" />
 >>>>>>> match-api-integration
+=======
+    <orderEntry type="library" exported="" name="gson-2.7" level="project" />
+    <orderEntry type="library" exported="" name="draglistview-1.1.8" level="project" />
+>>>>>>> master-dev
     <orderEntry type="library" exported="" name="play-services-tasks-9.6.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-basement-9.6.1" level="project" />
     <orderEntry type="library" exported="" name="firebase-auth-common-9.6.1" level="project" />
