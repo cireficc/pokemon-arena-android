@@ -7,21 +7,18 @@ import java.util.List;
 
 public class Battle {
 
-    PokemonPlayer self;
-    PokemonPlayer opponent;
+    BattlePokemonPlayer self;
+    BattlePokemonPlayer opponent;
     List<Turn> turns;
-    PokemonPlayer turnOwner;
-    private boolean isAiMatch;
+    BattlePokemonPlayer turnOwner;
 
+    public Battle() { }
 
     public Battle(PokemonPlayer player1, PokemonPlayer player2) {
-
-        this.isAiMatch= false;
-        this.self = player1;
-        this.opponent = player2;
-        this.opponent = player2;
+        this.self = new BattlePokemonPlayer(player1);
+        this.opponent = new BattlePokemonPlayer(player2);
         this.turns = new ArrayList<>();
-        this.turnOwner = player1;
+        this.turnOwner = new BattlePokemonPlayer(player1);
     }
 
     public Battle(PokemonPlayer player1, ArtificialPlayer AI){
@@ -41,7 +38,7 @@ public class Battle {
         changeTurn();
     }
 
-    private void changeTurn() {
+    protected void changeTurn() {
         this.turnOwner = (turnOwner == self) ? opponent : self;
     }
 }

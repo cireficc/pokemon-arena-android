@@ -38,7 +38,7 @@ public class Pokemon {
     @DatabaseField(columnName = SPEED_FIELD_NAME)
     private int speed;
 
-    protected Pokemon() {
+    public Pokemon() {
         // Constructor for ORMLite
     }
 
