@@ -23,6 +23,7 @@ public class Move {
     protected final static String CAN_FLINCH_FIELD_NAME = "can_flinch";
     protected final static String MIN_HITS_FIELD_NAME = "min_hits";
     protected final static String MAX_HITS_FIELD_NAME = "max_hits";
+    protected final static String CHARGING_TURNS_FIELD_NAME = "charging_turns";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
@@ -56,6 +57,8 @@ public class Move {
     private int minHits;
     @DatabaseField(columnName = MAX_HITS_FIELD_NAME)
     private int maxHits;
+    @DatabaseField(columnName = CHARGING_TURNS_FIELD_NAME)
+    private int chargingTurns;
 
     public Move() {
         // Constructor for ORMLite
@@ -142,6 +145,10 @@ public class Move {
 
     public int getMaxHits() {
         return maxHits;
+    }
+
+    public int getChargingTurns() {
+        return chargingTurns;
     }
 
     public String toString() {
