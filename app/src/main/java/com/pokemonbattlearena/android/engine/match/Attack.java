@@ -30,6 +30,11 @@ public class Attack implements Command {
             attacker.setChargingForTurns(move.getChargingTurns());
         }
 
+        if (move.isRechargeMove()) {
+            Log.i(TAG, move.getName() + " is recharge move (for " + move.getRechargeTurns() + " turns)");
+            attacker.setRechargingForTurns(move.getRechargeTurns());
+        }
+
         // TODO: Actually use real damage/effect calculations
         int damage = 0;
         for (int i = 0; i <= damageCalculator.getTimesHit(move); i++){
