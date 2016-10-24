@@ -84,6 +84,8 @@ public class BottomBarActivity extends BaseActivity implements
     private BottomBar mBottomBar;
     private SharedPreferences mPreferences;
 
+
+    //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
         if (mFragmentManager != null) {
@@ -100,10 +102,9 @@ public class BottomBarActivity extends BaseActivity implements
             setSavedTeam();
         }
     }
+    //endregion
 
-    /*
-        Fragment Methods
-     */
+    //region Activity hooks
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -197,34 +198,6 @@ public class BottomBarActivity extends BaseActivity implements
         setSavedTeam();
     }
 
-    private void setSavedTeam() {
-        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
-        if (!teamJSON.equals("mew")) {
-            TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
-            ImageView savedImage = (ImageView) findViewById(R.id.saved_team_imageview);
-            savedText.setVisibility(View.VISIBLE);
-            savedImage.setVisibility(View.VISIBLE);
-            PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
-            savedImage.setImageDrawable(getDrawableForPokemon(this, pokemonTeam.getPokemons().get(0).getName()));
-        }
-    }
-
-    private Drawable getDrawableForPokemon(Context c, String name) {
-        String key = "ic_pokemon_" + name.toLowerCase();
-        int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
-        return c.getDrawable(id);
-    }
-
-
-    private TeamsHomeFragment createTeamsHomeFragment() {
-        TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
-        // Set the team size
-        Bundle teamArgs = new Bundle();
-        teamArgs.putInt("teamSize", 1);
-        teamsHomeFragment.setArguments(teamArgs);
-        return teamsHomeFragment;
-    }
-
     @Override
     protected void onStart() {
         if (mApplication.getGoogleApiClient() != null && mApplication.getGoogleApiClient().isConnected()) {
@@ -235,21 +208,18 @@ public class BottomBarActivity extends BaseActivity implements
         }
         super.onStart();
     }
+    //endregion
 
-    /*
-
-        Start GoogleApiClient Callbacks
-
-     */
+    //region Google API Client
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (bundle != null) {
 
             Invitation inv = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
 
+            // check to see if we have an invite
             if (inv != null) {
                 // accept invitation
-                mBattleHomeFragment.startBattle();
                 RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
                 roomConfigBuilder.setInvitationIdToAccept(inv.getInvitationId());
                 Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
@@ -288,12 +258,9 @@ public class BottomBarActivity extends BaseActivity implements
             }
         }
     }
+    //endregion
 
-    /*
-
-        Activity Callbacks
-
-     */
+    //region Activity Result Callback
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
         Log.e(TAG, "Result of activity");
@@ -389,12 +356,9 @@ public class BottomBarActivity extends BaseActivity implements
         keepScreenOn();
         Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
     }
+    //endregion
 
-    /*
-
-        Start RoomUpdateListener Callbacks
-
-     */
+    //region RoomUpdateListener Callbacks
     @Override
     public void onRoomCreated(int statusCode, Room room) {
         Log.d(TAG, "onRoomCreated(" + statusCode + ", " + room + ")");
@@ -434,17 +398,11 @@ public class BottomBarActivity extends BaseActivity implements
             showGameError();
             return;
         }
-        mBattleHomeFragment.startBattle();
-        sendMessage();
         updateRoom(room);
     }
+    //endregion
 
-    /*
-
-        Start RoomStatusUpdateListener Callbacks
-
-     */
-
+    //region RoomStatusUpdateListener Callbacks
     // We treat most of the room update callbacks in the same way: we update our list of
     // participants and update the display. In a real game we would also have to check if that
     // change requires some action like removing the corresponding player avatar from the screen,
@@ -524,12 +482,9 @@ public class BottomBarActivity extends BaseActivity implements
     public void onPeersDisconnected(Room room, List<String> peers) {
         updateRoom(room);
     }
+    //endregion
 
-    /*
-
-        MessageListener Callbacks
-
-     */
+    //region RealTimeMessageListener Callbacks
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
         // Message format: pokemonName1:pokemonName2
@@ -560,7 +515,9 @@ public class BottomBarActivity extends BaseActivity implements
                 break;
         }
     }
+    //endregion
 
+    //region Private Helper Methods
     private void sendMessage() {
         Log.d(TAG, "Sending Message");
         byte[] message = ("I am: " + mMyId + " -created the room: " + mRoomCreatorId).getBytes();
@@ -582,17 +539,11 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
-    /*
-
-        Private Methods
-
-     */
-
     // create a RoomConfigBuilder that's appropriate for your implementation
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder(this)
                 .setRoomStatusUpdateListener(this)
-                .setMessageReceivedListener(mBattleHomeFragment);
+                .setMessageReceivedListener(this);
     }
 
     private void updateRoom(Room room) {
@@ -618,6 +569,54 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
+    private void startMatchMaking() {
+        // auto-match criteria to invite one random automatch opponent.
+        // You can also specify more opponents (up to 3).
+        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
+
+        // build the room config:
+        RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+        roomConfigBuilder.setAutoMatchCriteria(am);
+        RoomConfig roomConfig = roomConfigBuilder.build();
+
+        // create room:
+        Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), roomConfig);
+
+        // prevent screen from sleeping during handshake
+        keepScreenOn();
+        // go to game screen
+        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(mApplication.getGoogleApiClient(), 1, 3);
+        startActivityForResult(intent, RC_SELECT_PLAYERS);
+    }
+
+    private void setSavedTeam() {
+        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
+        if (!teamJSON.equals("mew")) {
+            TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
+            ImageView savedImage = (ImageView) findViewById(R.id.saved_team_imageview);
+            savedText.setVisibility(View.VISIBLE);
+            savedImage.setVisibility(View.VISIBLE);
+            PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
+            savedImage.setImageDrawable(getDrawableForPokemon(this, pokemonTeam.getPokemons().get(0).getName()));
+        }
+    }
+
+    private Drawable getDrawableForPokemon(Context c, String name) {
+        String key = "ic_pokemon_" + name.toLowerCase();
+        int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
+        return c.getDrawable(id);
+    }
+
+
+    private TeamsHomeFragment createTeamsHomeFragment() {
+        TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
+        // Set the team size
+        Bundle teamArgs = new Bundle();
+        teamArgs.putInt("teamSize", 1);
+        teamsHomeFragment.setArguments(teamArgs);
+        return teamsHomeFragment;
+    }
+
     private void keepScreenOn() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -626,4 +625,5 @@ public class BottomBarActivity extends BaseActivity implements
     private void stopKeepingScreenOn() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
+    //endregion
 }
