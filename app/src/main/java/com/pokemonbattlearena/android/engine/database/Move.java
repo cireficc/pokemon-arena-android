@@ -151,6 +151,10 @@ public class Move {
         return chargingTurns;
     }
 
+    public boolean isChargingMove() {
+        return chargingTurns > 0;
+    }
+
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
