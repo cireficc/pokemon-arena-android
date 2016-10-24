@@ -1,6 +1,5 @@
 package com.pokemonbattlearena.android;
 
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
@@ -34,7 +33,9 @@ import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListene
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
+import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
@@ -57,16 +58,16 @@ public class BottomBarActivity extends BaseActivity implements
         RoomUpdateListener,
         RoomStatusUpdateListener,
         RealTimeMultiplayer.ReliableMessageSentCallback,
-        TeamsHomeFragment.OnPokemonTeamSelectedListener {
+        TeamsHomeFragment.OnPokemonTeamSelectedListener,
+        BattleHomeFragment.OnBattleFragmentTouchListener {
 
     private static final int TEAM_SIZE_INT = 1;
+    private static final int MIN_PLAYERS = 2;
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BottomBarActivity.class.getSimpleName();
 
     // GOOGLE PLAY GAMES FIELDS
     private static final int RC_SIGN_IN = 9001;
-    private final static int RC_SELECT_PLAYERS = 7789;
-    private final static int RC_INVITATION_INBOX = 10001;
     private String mRoomCreatorId = null;
     private String mRoomId = null;
     private String mMyId = null;
@@ -85,23 +86,28 @@ public class BottomBarActivity extends BaseActivity implements
     private BottomBar mBottomBar;
     private SharedPreferences mPreferences;
 
+    private PokemonPlayer mCurrentPokemonPlayer;
 
     //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
         if (mFragmentManager != null) {
-            mBattleHomeFragment = new BattleHomeFragment();
-            Bundle battleArgs = new Bundle();
-            battleArgs.putString("pokemonTeamJSON", pokemonJSON);
-            mBattleHomeFragment.setArguments(battleArgs);
-            mFragmentManager.beginTransaction().replace(R.id.container, mBattleHomeFragment, "battle").commit();
             mBottomBar.selectTabWithId(R.id.tab_battle);
-            mBattleHomeFragment.setBattleVisible(true);
-            SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putString("pokemonTeamJSON", pokemonJSON).apply();
-            editor.commit();
-            setSavedTeam();
+            setSavedTeam(pokemonJSON);
+            displaySavedTeam();
+            setCurrentPokemonPlayer();
         }
+    }
+
+    @Override
+    public void onBattleNowClicked() {
+        showProgressDialog();
+        startMatchMaking();
+    }
+
+    @Override
+    public void onMoveClicked(Move move) {
+
     }
     //endregion
 
@@ -110,6 +116,12 @@ public class BottomBarActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
+
+        mPreferences = getPreferences(Context.MODE_PRIVATE);
+
+        if (displaySavedTeam()) {
+            setCurrentPokemonPlayer();
+        }
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
@@ -131,24 +143,38 @@ public class BottomBarActivity extends BaseActivity implements
 
         mApplication.setGoogleApiClient(googleApiClient);
 
+        mTeamsHomeFragment = createTeamsHomeFragment();
+        mBattleHomeFragment = new BattleHomeFragment();
+        mChatHomeFragment = new ChatHomeFragment();
+
+        mFragmentManager.beginTransaction()
+                .add(R.id.container, mBattleHomeFragment, "battle")
+                .commit();
+
         // Listens for a tab touch (Only first touch of new tab)
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
                 switch (tabId) {
                     case R.id.tab_teams:
-                        if (mTeamsHomeFragment == null) {
-                            mTeamsHomeFragment = createTeamsHomeFragment();
-                            mFragmentManager.beginTransaction()
-                                    .add(R.id.container, mTeamsHomeFragment, "team")
-                                    .commit();
-                        } else {
+                        if (mTeamsHomeFragment != null && !mTeamsHomeFragment.isAdded()) {
                             mFragmentManager.beginTransaction()
                                     .replace(R.id.container, mTeamsHomeFragment, "team")
                                     .commit();
                         }
+                        if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
+                            mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
+                        }
+                        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+                            mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+                        }
                         break;
                     case R.id.tab_battle:
+                        if (mBattleHomeFragment != null && !mBattleHomeFragment.isAdded()) {
+                            mFragmentManager.beginTransaction()
+                                    .replace(R.id.container, mBattleHomeFragment, "battle")
+                                    .commit();
+                        }
                         if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                             mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
                         }
@@ -157,15 +183,16 @@ public class BottomBarActivity extends BaseActivity implements
                         }
                         break;
                     case R.id.tab_chat:
-                        if (mChatHomeFragment == null) {
-                            mChatHomeFragment = new ChatHomeFragment();
-                            mFragmentManager.beginTransaction()
-                                    .add(R.id.container, mChatHomeFragment, "battle")
-                                    .commit();
-                        } else {
+                        if (mChatHomeFragment != null && !mChatHomeFragment.isAdded()) {
                             mFragmentManager.beginTransaction()
                                     .replace(R.id.container, mChatHomeFragment, "chat")
                                     .commit();
+                        }
+                        if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
+                            mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
+                        }
+                        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+                            mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
                         }
                         break;
                     default:
@@ -193,10 +220,11 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         });
+    }
 
-        mPreferences = getPreferences(Context.MODE_PRIVATE);
-
-        setSavedTeam();
+    private void setCurrentPokemonPlayer() {
+        mCurrentPokemonPlayer = new PokemonPlayer();
+        mCurrentPokemonPlayer.setPokemonTeam(getSavedTeam());
     }
 
     @Override
@@ -280,82 +308,8 @@ public class BottomBarActivity extends BaseActivity implements
                             requestCode, resultCode, R.string.signin_other_error);
                     Log.e(TAG, "Error signing in " + requestCode);
                 }
-            case RC_SELECT_PLAYERS:
-                // we got the result from the "select players" UI -- ready to create the room
-                handleSelectPlayersResult(resultCode, intent);
-                break;
-            case RC_INVITATION_INBOX:
-                // we got the result from the "select invitation" UI (invitation inbox). We're
-                // ready to accept the selected invitation:
-                handleInvitationInboxResult(resultCode, intent);
-                break;
         }
         super.onActivityResult(requestCode, resultCode, intent);
-    }
-
-
-    // Handle the result of the "Select players UI" we launched when the user clicked the
-    // "Invite friends" button. We react by creating a room with those players.
-    private void handleSelectPlayersResult(int response, Intent data) {
-        if (response != Activity.RESULT_OK) {
-            //TODO: exit the battle
-            return;
-        }
-        if (data == null || data.getExtras() == null || data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS) == null) {
-            return;
-        }
-
-        // get the invitee list
-        final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
-        Log.d(TAG, "Invitee count: " + invitees.size());
-
-        // get the automatch criteria
-        Bundle autoMatchCriteria = null;
-        int minAutoMatchPlayers = data.getIntExtra(Multiplayer.EXTRA_MIN_AUTOMATCH_PLAYERS, 0);
-        int maxAutoMatchPlayers = data.getIntExtra(Multiplayer.EXTRA_MAX_AUTOMATCH_PLAYERS, 0);
-        if (minAutoMatchPlayers > 0 || maxAutoMatchPlayers > 0) {
-            autoMatchCriteria = RoomConfig.createAutoMatchCriteria(
-                    minAutoMatchPlayers, maxAutoMatchPlayers, 0);
-            Log.d(TAG, "Automatch criteria: " + autoMatchCriteria);
-        }
-
-        // create the room
-        Log.d(TAG, "Creating room...");
-        RoomConfig.Builder rtmConfigBuilder = makeBasicRoomConfigBuilder();
-        rtmConfigBuilder.addPlayersToInvite(invitees);
-        if (autoMatchCriteria != null) {
-            rtmConfigBuilder.setAutoMatchCriteria(autoMatchCriteria);
-        }
-        keepScreenOn();
-        Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), rtmConfigBuilder.build());
-        Log.d(TAG, "Room created, waiting for it to be ready...");
-    }
-
-    // Handle the result of the invitation inbox UI, where the player can pick an invitation
-    // to accept. We react by accepting the selected invitation, if any.
-    private void handleInvitationInboxResult(int response, Intent data) {
-        if (response != Activity.RESULT_OK) {
-            Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
-            //TODO: Exit the battle
-            return;
-        }
-
-        Log.d(TAG, "Invitation inbox UI succeeded.");
-        Invitation inv = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
-
-        // accept invitation
-        assert inv != null;
-        acceptInviteToRoom(inv.getInvitationId());
-    }
-
-    // Accept the given invitation.
-    void acceptInviteToRoom(String invId) {
-        // accept the invitation
-        Log.d(TAG, "Accepting invitation: " + invId);
-        RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
-        roomConfigBuilder.setInvitationIdToAccept(invId);
-        keepScreenOn();
-        Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
     }
     //endregion
 
@@ -400,6 +354,10 @@ public class BottomBarActivity extends BaseActivity implements
             return;
         }
         updateRoom(room);
+        if (shouldStartGame(room)) {
+            Log.d(TAG, "We are going to start!");
+            sendMessage();
+        }
     }
     //endregion
 
@@ -488,13 +446,20 @@ public class BottomBarActivity extends BaseActivity implements
     //region RealTimeMessageListener Callbacks
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
-        // Message format: pokemonName1:pokemonName2
-        Log.d(TAG, rtm.toString());
         byte[] buf = rtm.getMessageData();
         String bufferString = new String(buf);
-        String sender = rtm.getSenderParticipantId();
-        Log.d(TAG, "Message received:" + bufferString);
-        Toast.makeText(this, "Message received: " + bufferString, Toast.LENGTH_LONG).show();
+        PokemonPlayer opponentPlayer = new Gson().fromJson(bufferString, PokemonPlayer.class);
+        Log.d(TAG, "Message Received: " + bufferString);
+        setupBattleUI(mCurrentPokemonPlayer, opponentPlayer);
+        hideProgressDialog();
+    }
+
+    private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
+        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+            mBattleHomeFragment.setPlayer(player);
+            mBattleHomeFragment.setOpponent(opponent);
+            mBattleHomeFragment.setBattleVisible(true);
+        }
     }
 
     @Override
@@ -521,18 +486,13 @@ public class BottomBarActivity extends BaseActivity implements
     //region Private Helper Methods
     private void sendMessage() {
         Log.d(TAG, "Sending Message");
-        byte[] message = ("I am: " + mMyId + " -created the room: " + mRoomCreatorId).getBytes();
+        PokemonTeam team = getSavedTeam();
+        PokemonPlayer currentPlayer = new PokemonPlayer();
+        currentPlayer.setPokemonTeam(team);
+        String player = new Gson().toJson(currentPlayer);
+        byte[] message = player.getBytes();
         for (Participant p : mParticipants) {
-            Log.w(TAG, "Participant: "  + p.getDisplayName() + ", id " + p.getParticipantId());
-
-            if (p.getParticipantId().equals(mMyId)) {
-                Log.w(TAG, "Ignoring sending message to self (" + p.getParticipantId() + ")");
-                continue;
-            }
-
-            if (p.getStatus() !=  Participant.STATUS_JOINED) {
-                Log.d(TAG, "Participant is apparently no longer joined?");
-            } else {
+            if (!p.getParticipantId().equals(mMyId)) {
                 Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, message,
                         mRoomId, p.getParticipantId());
                 Log.d(TAG, "Reliable message sent (sendMessage()) + " + new String(message));
@@ -559,8 +519,28 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
+    private boolean displaySavedTeam() {
+        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
+        if (!teamJSON.equals("mew")) {
+            TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
+            ImageView savedImage = (ImageView) findViewById(R.id.saved_team_imageview);
+            savedText.setVisibility(View.VISIBLE);
+            savedImage.setVisibility(View.VISIBLE);
+            PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
+            savedImage.setImageDrawable(getDrawableForPokemon(this, pokemonTeam.getPokemons().get(0).getName()));
+            return true;
+        }
+        return false;
+    }
+
+    private void setSavedTeam(String pokemonJSON) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString("pokemonTeamJSON", pokemonJSON).apply();
+        editor.commit();
+    }
+
     // Leave the room.
-    void leaveRoom() {
+    private void leaveRoom() {
         Log.d(TAG, "Leaving room.");
         stopKeepingScreenOn();
         if (mRoomId != null) {
@@ -585,21 +565,14 @@ public class BottomBarActivity extends BaseActivity implements
 
         // prevent screen from sleeping during handshake
         keepScreenOn();
-        // go to game screen
-        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(mApplication.getGoogleApiClient(), 1, 3);
-        startActivityForResult(intent, RC_SELECT_PLAYERS);
     }
 
-    private void setSavedTeam() {
+    private PokemonTeam getSavedTeam() {
         String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
         if (!teamJSON.equals("mew")) {
-            TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
-            ImageView savedImage = (ImageView) findViewById(R.id.saved_team_imageview);
-            savedText.setVisibility(View.VISIBLE);
-            savedImage.setVisibility(View.VISIBLE);
-            PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
-            savedImage.setImageDrawable(getDrawableForPokemon(this, pokemonTeam.getPokemons().get(0).getName()));
+            return new Gson().fromJson(teamJSON, PokemonTeam.class);
         }
+        return null;
     }
 
     private Drawable getDrawableForPokemon(Context c, String name) {
@@ -616,6 +589,14 @@ public class BottomBarActivity extends BaseActivity implements
         teamArgs.putInt("teamSize", TEAM_SIZE_INT);
         teamsHomeFragment.setArguments(teamArgs);
         return teamsHomeFragment;
+    }
+
+    private boolean shouldStartGame(Room room) {
+        int connectedPlayers = 0;
+        for (Participant p : room.getParticipants()) {
+            if (p.isConnectedToRoom()) ++connectedPlayers;
+        }
+        return connectedPlayers >= MIN_PLAYERS;
     }
 
     private void keepScreenOn() {

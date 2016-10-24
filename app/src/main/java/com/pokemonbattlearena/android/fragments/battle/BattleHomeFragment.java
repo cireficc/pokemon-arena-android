@@ -14,12 +14,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
+import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
+import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 
 import java.util.List;
 
@@ -36,7 +40,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private TypeModel mTypeModel;
 
-    private PokemonTeam mPlayerTeam;
+    private BattlePokemonTeam mPlayerBattleTeam;
 
     private List<Move> mPlayerMoves;
 
@@ -46,18 +50,17 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private BattleViewItem mOpponentBattleView;
 
+    private OnBattleFragmentTouchListener mCallback;
+    private Pokemon activePokemon;
+
     public BattleHomeFragment() {
         super();
         mTypeModel = new TypeModel();
     }
 
-    @Override
-    public void setArguments(Bundle args) {
-        super.setArguments(args);
-        String json = args.getString("pokemonTeamJSON");
-        if (json != null) {
-            mPlayerTeam = new Gson().fromJson(json, PokemonTeam.class);
-        }
+    public interface OnBattleFragmentTouchListener {
+        void onBattleNowClicked();
+        void onMoveClicked(Move move);
     }
 
     @Nullable
@@ -76,6 +79,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
         mPlayerBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
         mPlayerBattleView.setVisibility(false);
+
         pokemonName = (TextView) opponentView.findViewById(R.id.active_name_textview);
         pokemonImage = (ImageView) opponentView.findViewById(R.id.active_imageview);
         pokemonHPImage = (ImageView)  opponentView.findViewById(R.id.hp_imageview);
@@ -86,34 +90,25 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
         mOpponentBattleView.setVisibility(false);
 
+        setupMoveButtons(view);
         return view;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        try {
+            mCallback = (BattleHomeFragment.OnBattleFragmentTouchListener) context;
+        } catch (ClassCastException e) {
+            Log.e(TAG, e.getMessage());
+            throw new ClassCastException(context.toString() + "must implement listener");
+        }
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        Pokemon pokemon = mPlayerTeam.getPokemons().get(0);
-        mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(pokemon);
-        int length = mPlayerMoves.size() >= 4 ? 4 : mPlayerMoves.size();
-        setupMoveButtons(view,length);
-        configureMoveButtons(length);
-        if (mPlayerBattleView != null) {
-            mPlayerBattleView.setActivePokemon(pokemon);
-            mPlayerBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), pokemon.getName()));
-            mPlayerBattleView.getPokemonName().setText(pokemon.getName());
-            mPlayerBattleView.setVisibility(true);
-        }
-        if (mOpponentBattleView != null) {
-            mOpponentBattleView.setActivePokemon(pokemon);
-            mOpponentBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), "mew"));
-            mOpponentBattleView.getPokemonName().setText("Mew");
-            mOpponentBattleView.setVisibility(true);
-        }
+    public void onDetach() {
+        super.onDetach();
+        //TODO: Leave the Room
     }
 
     @Override
@@ -121,12 +116,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         int id = v.getId();
         switch (id) {
             case R.id.battle_now_button:
-                if (!battleBegun) {
-                    battleBegun = true;
-                    mBattleButton.setText(R.string.battle);
-                } else {
-                    mBattleButton.setText(R.string.cancel_battle);
-                }
+                mCallback.onBattleNowClicked();
                 break;
             case R.id.move_button_0:
                 break;
@@ -141,13 +131,13 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         }
     }
 
-    private void setupMoveButtons(View v, int count) {
+    private void setupMoveButtons(View v) {
         mMoveButtons = new Button[buttonIds.length];
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < buttonIds.length; i++) {
             if (i < 4) {
                 int buttonId = buttonIds[i];
                 Button b = (Button) v.findViewById(buttonId);
-                b.setVisibility(View.VISIBLE);
+                b.setVisibility(View.INVISIBLE);
                 b.setOnClickListener(this);
                 mMoveButtons[i] = b;
             }   
@@ -155,13 +145,15 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     // set the buttons to the current activePokemon
-    private void configureMoveButtons(int count) {
-        if (mPlayerMoves == null) {
-            Log.e(TAG, "Player doesn't have moves");
-        } else {
-            for (int i = 0; i < count; i++) {
-                mMoveButtons[i].setText(mPlayerMoves.get(i).getName());
-                mMoveButtons[i].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(mPlayerMoves.get(i).getType1())));
+    private void configureMoveButtons() {
+        if (mPlayerMoves != null) {
+            for (int i = 0; i < buttonIds.length; i++) {
+                Move m = mPlayerMoves.get(i);
+                if (m != null) {
+                    mMoveButtons[i].setText(m.getName());
+                    mMoveButtons[i].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(m.getType1())));
+                    mMoveButtons[i].setVisibility(View.VISIBLE);
+                }
             }
         }
     }
@@ -170,6 +162,24 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         String key = "ic_pokemon_" + name.toLowerCase();
         int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
         return c.getDrawable(id);
+    }
+
+    public void setPlayer(PokemonPlayer player) {
+        mPlayerBattleView.setActivePlayer(player);
+        Pokemon activePokemon = player.getPokemonTeam().getPokemons().get(0);
+        mPlayerBattleView.setActivePokemon(activePokemon);
+        mPlayerBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), activePokemon.getName()));
+        mPlayerBattleView.getPokemonName().setText(activePokemon.getName());
+        mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(activePokemon);
+        configureMoveButtons();
+    }
+
+    public void setOpponent(PokemonPlayer opponent) {
+        mOpponentBattleView.setActivePlayer(opponent);
+        Pokemon activePokemon = opponent.getPokemonTeam().getPokemons().get(0);
+        mOpponentBattleView.setActivePokemon(activePokemon);
+        mOpponentBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), activePokemon.getName()));
+        mOpponentBattleView.getPokemonName().setText(activePokemon.getName());
     }
 
     public void setBattleVisible(boolean visible) {

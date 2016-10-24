@@ -74,7 +74,6 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         super.onAttach(context);
         try {
             mCallback = (OnPokemonTeamSelectedListener) context;
-            Log.d(TAG, "Worked");
         } catch (ClassCastException e) {
             Log.e(TAG, e.getMessage());
             throw new ClassCastException(context.toString() + "must implement listener");
