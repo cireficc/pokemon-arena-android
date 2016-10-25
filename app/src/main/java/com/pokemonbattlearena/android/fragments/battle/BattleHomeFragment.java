@@ -119,12 +119,16 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                 mCallback.onBattleNowClicked();
                 break;
             case R.id.move_button_0:
+                mCallback.onMoveClicked(mPlayerMoves.get(0));
                 break;
             case R.id.move_button_1:
+                mCallback.onMoveClicked(mPlayerMoves.get(1));
                 break;
             case R.id.move_button_2:
+                mCallback.onMoveClicked(mPlayerMoves.get(2));
                 break;
             case R.id.move_button_3:
+                mCallback.onMoveClicked(mPlayerMoves.get(3));
                 break;
             default:
                 break;
