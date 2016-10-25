@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.google.android.gms.games.Games;
+import com.google.android.gms.plus.model.people.Person;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,6 +27,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by mitchcout on 10/22/2016.
@@ -40,13 +43,13 @@ public class ChatHomeFragment extends Fragment{
 
     private ImageButton sendMessage;
     private EditText editText;
-    private TextView chatList;
     private String chatRoom;
     private String tempKey;
     private String chatMsg, chatUser;
     private String mUsername;
 
     private ChildEventListener mChildListener;
+    private LayoutInflater layoutInflater;
 
     public ChatHomeFragment() {
         super();
@@ -65,6 +68,7 @@ public class ChatHomeFragment extends Fragment{
 
         chatRoom = "Global";
         mUsername = Games.Players.getCurrentPlayer(mApplication.getGoogleApiClient()).getDisplayName();
+        layoutInflater = inflater;
 
         return view;
     }
@@ -75,7 +79,6 @@ public class ChatHomeFragment extends Fragment{
 
         sendMessage = (ImageButton) activity.findViewById(R.id.chat_send_button);
         editText = (EditText) activity.findViewById(R.id.chat_message_input);
-        chatList = (TextView) activity.findViewById(R.id.chat_list);
 
         root = FirebaseDatabase.getInstance().getReference().child(chatRoom);
 
@@ -144,8 +147,25 @@ public class ChatHomeFragment extends Fragment{
             chatUser = (String) ((DataSnapshot)i.next()).getValue();
             chatMsg = (String) ((DataSnapshot)i.next()).getValue();
 
-            chatList.append(chatUser + " : " + chatMsg + " \n");
+            createNewMessage(layoutInflater, (ViewGroup)activity.findViewById(R.id.chat_list), chatUser, chatMsg);
 
         }
+    }
+
+    /**
+     * Creates a new chat_message item for the UI
+     */
+    private void createNewMessage(LayoutInflater inflater, ViewGroup container, String author, String msg){
+        View chatMessage = inflater.inflate(R.layout.chat_message, container, false);
+
+        //get views
+        TextView mAuthorView = (TextView) chatMessage.findViewById(R.id.chat_author);
+        TextView mMessageView = (TextView) chatMessage.findViewById(R.id.chat_message);
+
+        //set text
+        mAuthorView.setText(author + ":");
+        mMessageView.setText(msg);
+
+        container.addView(chatMessage);
     }
 }

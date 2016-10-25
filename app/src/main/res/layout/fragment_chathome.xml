@@ -25,12 +25,13 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/list_footer"
         android:layout_below="@+id/chat_room_title"
-        android:background="@android:color/darker_gray">
-        <TextView
+        android:background="@android:color/white">
+        <LinearLayout
             android:id="@+id/chat_list"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="5dp"/>
+            android:layout_height="match_parent">
+        </LinearLayout>
     </ScrollView>
 
     <LinearLayout
