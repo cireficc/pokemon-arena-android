@@ -94,7 +94,7 @@ public class ChatHomeFragment extends Fragment{
                 map2.put("msg",editText.getText().toString());
 
                 messageRoot.updateChildren(map2);
-
+                editText.setText("");
             }
         });
     }
@@ -145,7 +145,7 @@ public class ChatHomeFragment extends Fragment{
             chatMsg = (String) ((DataSnapshot)i.next()).getValue();
 
             chatList.append(chatUser + " : " + chatMsg + " \n");
-            editText.setText("");
+
         }
     }
 }
