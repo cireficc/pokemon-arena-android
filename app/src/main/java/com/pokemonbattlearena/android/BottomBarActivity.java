@@ -35,6 +35,7 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
@@ -88,6 +89,8 @@ public class BottomBarActivity extends BaseActivity implements
 
     private PokemonPlayer mCurrentPokemonPlayer;
 
+    private Battle mActiveBattle = null;
+
     //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
@@ -107,7 +110,8 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onMoveClicked(Move move) {
-
+        String gson = new Gson().toJson(move, Move.class);
+        sendMessage(gson);
     }
     //endregion
 
@@ -220,11 +224,6 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         });
-    }
-
-    private void setCurrentPokemonPlayer() {
-        mCurrentPokemonPlayer = new PokemonPlayer();
-        mCurrentPokemonPlayer.setPokemonTeam(getSavedTeam());
     }
 
     @Override
@@ -342,6 +341,7 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onLeftRoom(int statusCode, String s) {
         // we have left the room; return to main screen.
+        leaveRoom();
         Log.d(TAG, "onLeftRoom, code " + statusCode);
     }
 
@@ -356,7 +356,11 @@ public class BottomBarActivity extends BaseActivity implements
         updateRoom(room);
         if (shouldStartGame(room)) {
             Log.d(TAG, "We are going to start!");
-            sendMessage();
+            PokemonTeam team = getSavedTeam();
+            PokemonPlayer currentPlayer = new PokemonPlayer();
+            currentPlayer.setPokemonTeam(team);
+            String player = new Gson().toJson(currentPlayer);
+            sendMessage(player);
         }
     }
     //endregion
@@ -412,13 +416,8 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onDisconnectedFromRoom(Room room) {
-        mRoomId = null;
+        leaveRoom();
         showGameError();
-    }
-
-    // Show error message about game being cancelled and return to main screen.
-    void showGameError() {
-        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
     }
 
     @Override
@@ -448,18 +447,29 @@ public class BottomBarActivity extends BaseActivity implements
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
         byte[] buf = rtm.getMessageData();
         String bufferString = new String(buf);
-        PokemonPlayer opponentPlayer = new Gson().fromJson(bufferString, PokemonPlayer.class);
-        Log.d(TAG, "Message Received: " + bufferString);
-        setupBattleUI(mCurrentPokemonPlayer, opponentPlayer);
-        hideProgressDialog();
-    }
 
-    private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
-        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
-            mBattleHomeFragment.setPlayer(player);
-            mBattleHomeFragment.setOpponent(opponent);
-            mBattleHomeFragment.setBattleVisible(true);
+        if (mActiveBattle == null) {
+            // we don't have a battle, so we can assume a message is going to have a player
+            try {
+                PokemonPlayer opponentPlayer = new Gson().fromJson(bufferString, PokemonPlayer.class);
+                Log.d(TAG, "Incoming Battle Message Received: " + opponentPlayer.getPokemonTeam().toString());
+                mActiveBattle = new Battle(mCurrentPokemonPlayer, opponentPlayer);
+                setupBattleUI(mCurrentPokemonPlayer, opponentPlayer);
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+        } else {
+            // since we have a battle, we can assume a message will update the game
+            //TODO: don't send a move, send the battle state + move
+            try {
+                Move move = new Gson().fromJson(bufferString, Move.class);
+                Log.d(TAG, "In Game Message Received: " + move.getName());
+                Toast.makeText(this, move.getName(), Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
+        hideProgressDialog();
     }
 
     @Override
@@ -484,18 +494,25 @@ public class BottomBarActivity extends BaseActivity implements
     //endregion
 
     //region Private Helper Methods
-    private void sendMessage() {
-        Log.d(TAG, "Sending Message");
-        PokemonTeam team = getSavedTeam();
-        PokemonPlayer currentPlayer = new PokemonPlayer();
-        currentPlayer.setPokemonTeam(team);
-        String player = new Gson().toJson(currentPlayer);
-        byte[] message = player.getBytes();
+    private void setCurrentPokemonPlayer() {
+        mCurrentPokemonPlayer = new PokemonPlayer();
+        mCurrentPokemonPlayer.setPokemonTeam(getSavedTeam());
+    }
+    
+    // Show error message about game being cancelled and return to main screen.
+    private void showGameError() {
+        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
+    }
+
+    private void sendMessage(String message) {
+        Log.d(TAG, "Sending Message" + message);
+
+        byte[] byteMessage = message.getBytes();
         for (Participant p : mParticipants) {
             if (!p.getParticipantId().equals(mMyId)) {
-                Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, message,
+                Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, byteMessage,
                         mRoomId, p.getParticipantId());
-                Log.d(TAG, "Reliable message sent (sendMessage()) + " + new String(message));
+                Log.d(TAG, "Reliable message sent (sendMessage()) + " + message);
             }
         }
     }
@@ -516,6 +533,14 @@ public class BottomBarActivity extends BaseActivity implements
         }
         if (mParticipants != null) {
             // update game states
+        }
+    }
+
+    private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
+        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+            mBattleHomeFragment.setPlayer(player);
+            mBattleHomeFragment.setOpponent(opponent);
+            mBattleHomeFragment.setBattleVisible(true);
         }
     }
 
@@ -545,6 +570,7 @@ public class BottomBarActivity extends BaseActivity implements
         stopKeepingScreenOn();
         if (mRoomId != null) {
             Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
+            mActiveBattle = null;
             mRoomId = null;
             mRoomCreatorId = null;
         }

@@ -2,21 +2,21 @@
 <tabs>
     <tab
         id="@+id/tab_teams"
-        icon="@drawable/ic_teams"
+        icon="@drawable/ic_teamsicon"
         title="@string/teams"
         activeColor="@color/white"
         inActiveColor="@color/black"
         barColorWhenSelected="@color/color_charizard" />
     <tab
         id="@+id/tab_battle"
-        icon="@drawable/ic_battle"
+        icon="@drawable/ic_battleicon"
         title="@string/battle"
         activeColor="@color/white"
         inActiveColor="@color/black"
         barColorWhenSelected="@color/color_blastoise"/>
     <tab
         id="@+id/tab_chat"
-        icon="@drawable/ic_chat"
+        icon="@drawable/ic_chaticon"
         title="@string/chat"
         activeColor="@color/white"
         inActiveColor="@color/black"
