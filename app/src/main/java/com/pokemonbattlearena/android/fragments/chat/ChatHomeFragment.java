@@ -17,12 +17,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
+import com.google.android.gms.games.Games;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pokemonbattlearena.android.BottomBarActivity;
+import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 
 /**
@@ -30,6 +32,8 @@ import com.pokemonbattlearena.android.R;
  */
 
 public class ChatHomeFragment extends Fragment{
+
+    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
     private BottomBarActivity activity;
     private DatabaseReference root;
@@ -54,17 +58,13 @@ public class ChatHomeFragment extends Fragment{
         activity = (BottomBarActivity) context;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_chathome, container, false);
 
         chatRoom = "Global";
+        mUsername = Games.Players.getCurrentPlayer(mApplication.getGoogleApiClient()).getDisplayName();
 
         return view;
     }
@@ -76,8 +76,6 @@ public class ChatHomeFragment extends Fragment{
         sendMessage = (ImageButton) activity.findViewById(R.id.chat_send_button);
         editText = (EditText) activity.findViewById(R.id.chat_message_input);
         chatList = (TextView) activity.findViewById(R.id.chat_list);
-
-        setupUsername();
 
         root = FirebaseDatabase.getInstance().getReference().child(chatRoom);
 
@@ -133,14 +131,6 @@ public class ChatHomeFragment extends Fragment{
         super.onStop();
 
         root.removeEventListener(mChildListener);
-    }
-
-    private void setupUsername() {
-        if (mUsername == null) {
-            Random r = new Random();
-            // Assign a random user name if we don't have one saved.
-            mUsername = "PokeMaster" + r.nextInt(100000);
-        }
     }
 
     /**
