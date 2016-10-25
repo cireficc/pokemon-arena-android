@@ -226,11 +226,6 @@ public class BottomBarActivity extends BaseActivity implements
         });
     }
 
-    private void setCurrentPokemonPlayer() {
-        mCurrentPokemonPlayer = new PokemonPlayer();
-        mCurrentPokemonPlayer.setPokemonTeam(getSavedTeam());
-    }
-
     @Override
     protected void onStart() {
         if (mApplication.getGoogleApiClient() != null && mApplication.getGoogleApiClient().isConnected()) {
@@ -346,6 +341,7 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onLeftRoom(int statusCode, String s) {
         // we have left the room; return to main screen.
+        leaveRoom();
         Log.d(TAG, "onLeftRoom, code " + statusCode);
     }
 
@@ -420,13 +416,8 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onDisconnectedFromRoom(Room room) {
-        mRoomId = null;
+        leaveRoom();
         showGameError();
-    }
-
-    // Show error message about game being cancelled and return to main screen.
-    void showGameError() {
-        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
     }
 
     @Override
@@ -458,6 +449,7 @@ public class BottomBarActivity extends BaseActivity implements
         String bufferString = new String(buf);
 
         if (mActiveBattle == null) {
+            // we don't have a battle, so we can assume a message is going to have a player
             try {
                 PokemonPlayer opponentPlayer = new Gson().fromJson(bufferString, PokemonPlayer.class);
                 Log.d(TAG, "Incoming Battle Message Received: " + opponentPlayer.getPokemonTeam().toString());
@@ -467,6 +459,8 @@ public class BottomBarActivity extends BaseActivity implements
                 Log.e(TAG, e.getMessage());
             }
         } else {
+            // since we have a battle, we can assume a message will update the game
+            //TODO: don't send a move, send the battle state + move
             try {
                 Move move = new Gson().fromJson(bufferString, Move.class);
                 Log.d(TAG, "In Game Message Received: " + move.getName());
@@ -476,14 +470,6 @@ public class BottomBarActivity extends BaseActivity implements
             }
         }
         hideProgressDialog();
-    }
-
-    private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
-        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
-            mBattleHomeFragment.setPlayer(player);
-            mBattleHomeFragment.setOpponent(opponent);
-            mBattleHomeFragment.setBattleVisible(true);
-        }
     }
 
     @Override
@@ -508,6 +494,16 @@ public class BottomBarActivity extends BaseActivity implements
     //endregion
 
     //region Private Helper Methods
+    private void setCurrentPokemonPlayer() {
+        mCurrentPokemonPlayer = new PokemonPlayer();
+        mCurrentPokemonPlayer.setPokemonTeam(getSavedTeam());
+    }
+    
+    // Show error message about game being cancelled and return to main screen.
+    private void showGameError() {
+        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
+    }
+
     private void sendMessage(String message) {
         Log.d(TAG, "Sending Message" + message);
 
@@ -540,6 +536,14 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
+    private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
+        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+            mBattleHomeFragment.setPlayer(player);
+            mBattleHomeFragment.setOpponent(opponent);
+            mBattleHomeFragment.setBattleVisible(true);
+        }
+    }
+
     private boolean displaySavedTeam() {
         String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
         if (!teamJSON.equals("mew")) {
@@ -566,6 +570,7 @@ public class BottomBarActivity extends BaseActivity implements
         stopKeepingScreenOn();
         if (mRoomId != null) {
             Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
+            mActiveBattle = null;
             mRoomId = null;
             mRoomCreatorId = null;
         }
