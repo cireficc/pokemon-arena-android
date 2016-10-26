@@ -25,7 +25,9 @@ public class Move {
     protected final static String MAX_HITS_FIELD_NAME = "max_hits";
     protected final static String CHARGING_TURNS_FIELD_NAME = "charging_turns";
     protected final static String RECHARGE_TURNS_FIELD_NAME = "recharge_turns";
-
+    protected final static String SELF_HEAL_FIELD_NAME = "self_heal";
+    protected final static String SELF_HEAL_TYPE_FIELD_NAME = "self_heal_type";
+    protected final static String SELF_HEAL_AMOUNT_FIELD_NAME = "self_heal_amount";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
@@ -63,6 +65,12 @@ public class Move {
     private int chargingTurns;
     @DatabaseField(columnName = RECHARGE_TURNS_FIELD_NAME)
     private int rechargeTurns;
+    @DatabaseField(columnName = SELF_HEAL_FIELD_NAME)
+    private int selfHeal;
+    @DatabaseField(columnName = SELF_HEAL_TYPE_FIELD_NAME)
+    private String selfHealType;
+    @DatabaseField(columnName = SELF_HEAL_AMOUNT_FIELD_NAME)
+    private String selfHealAmount;
 
     public Move() {
         // Constructor for ORMLite
@@ -165,6 +173,28 @@ public class Move {
 
     public boolean isRechargeMove() {
         return rechargeTurns > 0;
+    }
+
+    public int getSelfHeal() {
+        return selfHeal;
+    }
+
+    public boolean isSelfHeal() { return selfHeal > 0; }
+
+    public SelfHealType getSelfHealType() {
+        try {
+            return SelfHealType.valueOf(this.selfHealType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public SelfHealAmount getSelfHealAmount() {
+        try {
+            return SelfHealAmount.valueOf(this.selfHealAmount.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public String toString() {
