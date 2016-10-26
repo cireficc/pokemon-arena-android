@@ -3,6 +3,7 @@ package com.pokemonbattlearena.android.engine.match;
 import android.util.Log;
 
 import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
 public class Attack implements Command {
@@ -72,8 +73,19 @@ public class Attack implements Command {
         if (move.isSelfHeal()) {
             Log.i(TAG, move.getName() + " is self heal of type " + move.getSelfHealType());
 
-            int healed = healingCalculator.getHealAmount(attacker, move, damage);
-            attacker.setCurrentHp(attacker.getCurrentHp() + healed);
+            int toHeal = healingCalculator.getHealAmount(attacker, move, damage);
+            int maxHp = attacker.getOriginalPokemon().getHp();
+            int hpAfterHeal = attacker.getCurrentHp() + toHeal;
+
+            Log.i(TAG, "Max HP: " + attacker.getOriginalPokemon().getHp() + "; HP with healing: " + hpAfterHeal);
+
+            if (hpAfterHeal >= maxHp) {
+                attacker.setCurrentHp(maxHp);
+                Log.i(TAG, "Healed to max HP");
+            } else {
+                attacker.setCurrentHp(hpAfterHeal);
+                Log.i(TAG, "HP after healing: " + attacker.getCurrentHp());
+            }
         }
 
         if (target.getCurrentHp() <= 0) {
