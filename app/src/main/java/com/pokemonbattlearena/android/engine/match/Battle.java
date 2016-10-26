@@ -1,7 +1,5 @@
 package com.pokemonbattlearena.android.engine.match;
 
-import com.pokemonbattlearena.android.engine.ai.ArtificialPlayer;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,15 +17,6 @@ public class Battle {
         this.opponent = new BattlePokemonPlayer(player2);
         this.turns = new ArrayList<>();
         this.turnOwner = new BattlePokemonPlayer(player1);
-    }
-
-    public Battle(PokemonPlayer player1, ArtificialPlayer AI){
-        this.isAiMatch= true;
-        this.self = player1;
-        this.opponent = new ArtificialPlayer(self);
-        this.turns = new ArrayList<>();
-        this.turnOwner = player1;
-
     }
 
     public void takeTurn(Command command) {
