@@ -97,7 +97,7 @@ public class BottomBarActivity extends BaseActivity implements
         if (mFragmentManager != null) {
             mBottomBar.selectTabWithId(R.id.tab_battle);
             setSavedTeam(pokemonJSON);
-            displaySavedTeam();
+            displaySavedTeam(true);
             setCurrentPokemonPlayer();
         }
     }
@@ -122,10 +122,6 @@ public class BottomBarActivity extends BaseActivity implements
         setContentView(R.layout.activity_bottombar);
 
         mPreferences = getPreferences(Context.MODE_PRIVATE);
-
-        if (displaySavedTeam()) {
-            setCurrentPokemonPlayer();
-        }
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
@@ -159,6 +155,9 @@ public class BottomBarActivity extends BaseActivity implements
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
+                if (displaySavedTeam(true)) {
+                    setCurrentPokemonPlayer();
+                }
                 switch (tabId) {
                     case R.id.tab_teams:
                         if (mTeamsHomeFragment != null && !mTeamsHomeFragment.isAdded()) {
@@ -188,6 +187,7 @@ public class BottomBarActivity extends BaseActivity implements
                         break;
                     case R.id.tab_chat:
                         if (mChatHomeFragment != null && !mChatHomeFragment.isAdded()) {
+                            displaySavedTeam(false);
                             mFragmentManager.beginTransaction()
                                     .replace(R.id.container, mChatHomeFragment, "chat")
                                     .commit();
@@ -201,6 +201,7 @@ public class BottomBarActivity extends BaseActivity implements
                         break;
                     default:
                         break;
+
                 }
             }
         });
@@ -544,16 +545,17 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
-    private boolean displaySavedTeam() {
+    private boolean displaySavedTeam(boolean show) {
         String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
-        if (!teamJSON.equals("mew")) {
-            TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
-            ImageView savedImage = (ImageView) findViewById(R.id.saved_team_imageview);
-            savedText.setVisibility(View.VISIBLE);
-            savedImage.setVisibility(View.VISIBLE);
+        View savedView = (View) findViewById(R.id.saved_team_layout);
+        ImageView savedImage = (ImageView) savedView.findViewById(R.id.saved_team_imageview);
+        if (!teamJSON.equals("mew") && show) {
+            savedView.setVisibility(View.VISIBLE);
             PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
             savedImage.setImageDrawable(getDrawableForPokemon(this, pokemonTeam.getPokemons().get(0).getName()));
             return true;
+        } else {
+            savedView.setVisibility(View.GONE);
         }
         return false;
     }
