@@ -1,6 +1,7 @@
 package com.pokemonbattlearena.android.fragments.team;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,6 +76,21 @@ public class PokemonGridAdapter extends BaseAdapter {
         // Set TextView components
         holder.mId.setText("#" + pokemon.getId());
         holder.mName.setText(pokemon.getName());
+        int color = position % 3;
+        switch (color) {
+            case 0:
+                holder.card.setCardBackgroundColor(mContext.getColor(R.color.color_charizard));
+                break;
+            case 1:
+                holder.card.setCardBackgroundColor(mContext.getColor(R.color.color_blastoise));
+                break;
+            case 2:
+                holder.card.setCardBackgroundColor(mContext.getColor(R.color.color_venusaur));
+                break;
+            default:
+                break;
+        }
+
 
         // Set ImageView components
         int imageId = holder.mImage.getContext().getResources().getIdentifier("ic_pokemon_" + pokemon.getName().toLowerCase(), "drawable", holder.mImage.getContext().getPackageName());

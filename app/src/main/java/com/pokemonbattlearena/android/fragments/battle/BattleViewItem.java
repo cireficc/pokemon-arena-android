@@ -5,6 +5,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
+import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
 /**
  * Created by Spencer Amann on 10/20/16.
@@ -15,7 +17,9 @@ public class BattleViewItem {
     TextView pokemonName;
     TextView pokemonHPText;
     ImageView pokemonHPImage;
+    //TODO: Change how active pokemon is displayed once switching can happen!
     Pokemon activePokemon;
+    PokemonPlayer activePlayer;
 
     public BattleViewItem(ImageView pokemonImage, TextView pokemonName, TextView pokemonHPText, ImageView pokemonHPImage) {
         this.pokemonImage = pokemonImage;
@@ -38,6 +42,14 @@ public class BattleViewItem {
 
     public ImageView getPokemonHPImage() {
         return pokemonHPImage;
+    }
+
+    public PokemonPlayer getActivePlayer() {
+        return activePlayer;
+    }
+
+    public void setActivePlayer(PokemonPlayer player) {
+        this.activePlayer = player;
     }
 
     public Pokemon getActivePokemon() {
