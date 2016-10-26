@@ -608,8 +608,7 @@ public class BottomBarActivity extends BaseActivity implements
         int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
         return c.getDrawable(id);
     }
-
-
+    
     private TeamsHomeFragment createTeamsHomeFragment() {
         TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
         // Set the team size
