@@ -15,6 +15,7 @@ public class Attack implements Command {
 
     private static DamageCalculator damageCalculator = DamageCalculator.getInstance();
     private static StatusEffectCalculator statusEffectCalculator = StatusEffectCalculator.getInstance();
+    private static HealingCalculator healingCalculator = HealingCalculator.getInstance();
 
     public Attack(BattlePokemon attacker, Move move, BattlePokemon target) {
         this.move = move;
@@ -35,7 +36,6 @@ public class Attack implements Command {
             attacker.setRechargingForTurns(move.getRechargeTurns());
         }
 
-        // TODO: Actually use real damage/effect calculations
         int damage = 0;
         for (int i = 0; i <= damageCalculator.getTimesHit(move); i++){
             int partialDamage = damageCalculator.calculateDamage(attacker, move, target);
@@ -67,6 +67,13 @@ public class Attack implements Command {
             }
 
             Log.i(TAG, "Effect: " + effect + " applied for " + turns + " turns");
+        }
+
+        if (move.isSelfHeal()) {
+            Log.i(TAG, move.getName() + " is self heal of type " + move.getSelfHealType());
+
+            int healed = healingCalculator.getHealAmount(attacker, move, damage);
+            attacker.setCurrentHp(attacker.getCurrentHp() + healed);
         }
 
         if (target.getCurrentHp() <= 0) {
