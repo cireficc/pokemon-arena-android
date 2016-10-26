@@ -36,11 +36,11 @@ public class MiniMax {
 
         if (command instanceof Attack) {
 
-            if (curTurn.attacker.equals(me)) {
-                return ((Attack) command).move.getPower();
+            if (curTurn.getAttacker().equals(me)) {
+                return ((Attack) command).getMove().getPower();
             }
 
-            return -(((Attack) command).move.getPower());
+            return -(((Attack) command).getMove().getPower());
             }
         return 0;
     }

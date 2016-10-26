@@ -22,6 +22,18 @@ public class Attack implements Command {
         this.target = target;
     }
 
+    public Move getMove() {
+        return move;
+    }
+
+    public BattlePokemon getAttacker() {
+        return attacker;
+    }
+
+    public BattlePokemon getTarget() {
+        return target;
+    }
+
     @Override
     public void execute() {
 

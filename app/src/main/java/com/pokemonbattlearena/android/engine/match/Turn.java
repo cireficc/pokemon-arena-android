@@ -12,6 +12,18 @@ public class Turn {
         this.command = command;
     }
 
+    public BattlePokemonPlayer getAttacker() {
+        return attacker;
+    }
+
+    public BattlePokemonPlayer getDefender() {
+        return defender;
+    }
+
+    public Command getCommand() {
+        return command;
+    }
+
     public void executeCommand() {
         command.execute();
     }
