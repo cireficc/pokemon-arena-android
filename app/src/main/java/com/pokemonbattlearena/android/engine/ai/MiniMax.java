@@ -29,12 +29,7 @@ public class MiniMax {
         buildTree();
     }
 
-    public void buildTree(){
-        //for (opTeam.getCurrentPokemon().)
-
-
-
-
+    public void buildTree() {
     }
 
     public int hFunction(Command command) {

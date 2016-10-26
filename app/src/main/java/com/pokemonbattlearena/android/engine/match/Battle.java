@@ -20,7 +20,6 @@ public class Battle {
     }
 
     public void takeTurn(Command command) {
-        //TODO AI needs to construct command and return here
         Turn turn = new Turn(turnOwner, opponent, command);
         turns.add(turn);
         turn.executeCommand();
