@@ -123,7 +123,7 @@ public class DamageCalculator {
         int critMultiplier = 1;
         final int MAX = 100;
         final int MIN = 85;
-        double roll = ThreadLocalRandom.current().nextInt(((MAX - MIN) + 1) + MIN) / 100.0;
+        double roll = (ThreadLocalRandom.current().nextInt((MAX - MIN) + 1) + MIN) / 100.0;
 
         double modifier = stabBonus * typeEffectiveness * critMultiplier * roll;
 
