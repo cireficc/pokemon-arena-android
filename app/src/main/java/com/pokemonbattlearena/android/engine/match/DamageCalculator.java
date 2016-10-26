@@ -7,7 +7,6 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.MoveType;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DamageCalculator {
@@ -83,8 +82,7 @@ public class DamageCalculator {
         if (move.getAccuracy() == 0) {
             return true;
         } else {
-            Random random = new Random();
-            int rolled = random.nextInt(MAX_ACCURACY);
+            int rolled = ThreadLocalRandom.current().nextInt(MAX_ACCURACY);
             return (rolled >= (MAX_ACCURACY - move.getAccuracy()));
         }
     }
@@ -123,10 +121,9 @@ public class DamageCalculator {
         double typeEffectiveness = getOverallTypeEffectiveness(move, target);
 
         int critMultiplier = 1;
-        Random random = new Random();
         final int MAX = 100;
         final int MIN = 85;
-        double roll = (random.nextInt((MAX - MIN) + 1) + MIN) / 100.0;
+        double roll = ThreadLocalRandom.current().nextInt(((MAX - MIN) + 1) + MIN) / 100.0;
 
         double modifier = stabBonus * typeEffectiveness * critMultiplier * roll;
 
