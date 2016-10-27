@@ -99,6 +99,21 @@ public class DamageCalculator {
 
         Log.d(TAG, "\n\nCalculating damage for " + move.getName() + " against " + originalTarget.getName());
 
+        switch(move.getName()) {
+            case "Night Shade":
+            case "Seismic Toss":
+                return POKEMON_LEVEL;
+            case "Dragon Rage":
+                return 40;
+            case "Sonic Boom":
+                return 20;
+            case "Psywave":
+                //damage = Attacking Pokemon's Level * (50% to 150%)
+                return Math.round(POKEMON_LEVEL * (ThreadLocalRandom.current().nextInt(50, 150 + 1) / 100));
+            case "Super Fang":
+                return Math.round(target.getCurrentHp() / 2);
+        }
+
         // Database converts nulls to 0; null power means it does 0 damage
         if (move.getPower() == 0) {
             Log.d(TAG, "Move power was 0; does 0 damage");
