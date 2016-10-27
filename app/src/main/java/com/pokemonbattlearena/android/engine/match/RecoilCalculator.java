@@ -28,14 +28,23 @@ public class RecoilCalculator {
         RecoilAmount recoilAmount = move.getRecoilAmount();
         int recoiled = 0;
 
-        if (recoilAmount == RecoilAmount.ONEFOURTH)
+        if (recoilAmount == RecoilAmount.ONEFOURTH) {
             recoiled = Math.round(damageDone / 4);
-
-        if (recoilAmount == RecoilAmount.ONETHIRD)
+        }
+        else if (recoilAmount == RecoilAmount.ONETHIRD) {
             recoiled = Math.round(damageDone / 3);
+        }
+        else {
+            recoiled = getCrashAmount(attacker, move);
+            Log.i(TAG, move.getName() + " is a crash move. Attacker takes " + recoiled + " damage");
+            return recoiled;
+        }
 
         Log.i(TAG, move.getName() + " is a recoil move. Attacker takes " + recoiled + " damage");
-
         return recoiled;
+    }
+
+    protected int getCrashAmount(BattlePokemon attacker, Move move){
+        return Math.round(attacker.getOriginalPokemon().getHp() / 2);
     }
 }
