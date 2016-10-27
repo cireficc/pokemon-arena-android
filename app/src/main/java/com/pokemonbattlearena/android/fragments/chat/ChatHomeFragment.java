@@ -1,13 +1,16 @@
 package com.pokemonbattlearena.android.fragments.chat;
 
+import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.ActionBarOverlayLayout;
 import android.support.v7.widget.CardView;
 import android.text.method.KeyListener;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -16,6 +19,7 @@ import android.view.ViewGroup;
 
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -180,23 +184,20 @@ public class ChatHomeFragment extends Fragment{
      * Creates a new chat_message item for the UI
      */
     private void createNewMessage(LayoutInflater inflater, ViewGroup container, String author, String msg){
-        View chatMessage = inflater.inflate(R.layout.chat_message, container, false);
+        View chatMessage;
+        if(mUsername != null && mUsername.equals(author)) {
+            chatMessage = inflater.inflate(R.layout.chat_message_user, container, false);
+        } else {
+            chatMessage = inflater.inflate(R.layout.chat_message_other, container, false);
+        }
 
         //get views
         TextView mAuthorView = (TextView) chatMessage.findViewById(R.id.chat_author);
         TextView mMessageView = (TextView) chatMessage.findViewById(R.id.chat_message);
 
         //set text
-        mAuthorView.setText(author + ":");
+        mAuthorView.setText(author);
         mMessageView.setText(msg);
-
-        //checks if message belongs to this user
-        if(mUsername != null && mUsername.equals(author)){
-            CardView mCard = (CardView) chatMessage.findViewById(R.id.chat_item_layout);
-            mCard.setCardBackgroundColor(ContextCompat.getColor(getContext(), R.color.color_blastoise));
-            mAuthorView.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
-            mMessageView.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
-        }
 
         container.addView(chatMessage);
         scroller.post(new Runnable() {
@@ -205,8 +206,5 @@ public class ChatHomeFragment extends Fragment{
                 scroller.fullScroll(View.FOCUS_DOWN);
             }
         });
-//        int count = container.getChildCount();
-//        System.out.println("COUNTCHILDREN "+count);
-//        container.getChildAt(count-1).setForegroundGravity(Gravity.RIGHT | Gravity.END);
     }
 }
