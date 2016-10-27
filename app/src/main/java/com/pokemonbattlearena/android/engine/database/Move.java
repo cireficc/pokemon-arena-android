@@ -207,7 +207,7 @@ public class Move {
         return recoil;
     }
 
-    public RecoilAmount getRecoilAmountt() {
+    public RecoilAmount getRecoilAmount() {
         try {
             return RecoilAmount.valueOf(this.recoilAmount.toUpperCase());
         } catch (IllegalArgumentException e) {
