@@ -1,10 +1,11 @@
-package com.pokemonbattlearena.android.engine.match;
+package com.pokemonbattlearena.android.engine.match.calculators;
 
 import android.util.Log;
 
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.SelfHealAmount;
 import com.pokemonbattlearena.android.engine.database.SelfHealType;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
 public class HealingCalculator {
 
@@ -23,7 +24,7 @@ public class HealingCalculator {
         return instance;
     }
 
-    protected int getHealAmount(BattlePokemon attacker, Move move, int damageDone) {
+    public int getHealAmount(BattlePokemon attacker, Move move, int damageDone) {
 
         SelfHealType healType = move.getSelfHealType();
         int healed = 0;

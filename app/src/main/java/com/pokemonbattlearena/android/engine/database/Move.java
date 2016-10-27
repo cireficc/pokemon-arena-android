@@ -28,6 +28,9 @@ public class Move {
     protected final static String SELF_HEAL_FIELD_NAME = "self_heal";
     protected final static String SELF_HEAL_TYPE_FIELD_NAME = "self_heal_type";
     protected final static String SELF_HEAL_AMOUNT_FIELD_NAME = "self_heal_amount";
+    protected final static String RECOIL_FIELD_NAME = "recoil";
+    protected final static String RECOIL_AMOUNT_FIELD_NAME = "recoil_amount";
+    protected final static String CRASH_FIELD_NAME = "crash";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
@@ -71,6 +74,12 @@ public class Move {
     private String selfHealType;
     @DatabaseField(columnName = SELF_HEAL_AMOUNT_FIELD_NAME)
     private String selfHealAmount;
+    @DatabaseField(columnName = RECOIL_FIELD_NAME)
+    private int recoil;
+    @DatabaseField(columnName = RECOIL_AMOUNT_FIELD_NAME)
+    private String recoilAmount;
+    @DatabaseField(columnName = CRASH_FIELD_NAME)
+    private int crash;
 
     public Move() {
         // Constructor for ORMLite
@@ -197,6 +206,22 @@ public class Move {
         }
     }
 
+    public boolean isRecoil() {
+        return recoil > 0;
+    }
+
+    public RecoilAmount getRecoilAmount() {
+        try {
+            return RecoilAmount.valueOf(this.recoilAmount.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public boolean isCrash() {
+        return crash > 0;
+    }
+
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
@@ -215,6 +240,13 @@ public class Move {
         sb.append(" - CanFlinch: " + canFlinch + "\n");
         sb.append(" - MaxHits: " + maxHits + "\n");
         sb.append(" - MinHits: " + minHits + "\n");
+        sb.append(" - ChargingTurns: " + chargingTurns + "\n");
+        sb.append(" - RechargingTurns: " + rechargeTurns + "\n");
+        sb.append(" - SelfHealType: " + selfHealType + "\n");
+        sb.append(" - SelfHealAmount: " + selfHealAmount + "\n");
+        sb.append(" - Recoil?: " + recoil + "\n");
+        sb.append(" - RecoilAmount: " + recoilAmount + "\n");
+        sb.append(" - Crash?: " + crash + "\n");
 
 
         return sb.toString();
