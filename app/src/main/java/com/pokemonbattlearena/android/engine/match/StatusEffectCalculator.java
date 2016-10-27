@@ -3,7 +3,6 @@ package com.pokemonbattlearena.android.engine.match;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class StatusEffectCalculator {
@@ -33,8 +32,7 @@ public class StatusEffectCalculator {
         } else {
             // Always 15% chance to flinch
             final int FLINCH_CHANCE = 15;
-            Random random = new Random();
-            int rolled = random.nextInt(MAX_CHANCE);
+            int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
             return (rolled >= (MAX_CHANCE - FLINCH_CHANCE));
         }
     }
@@ -50,8 +48,7 @@ public class StatusEffectCalculator {
         if (alreadyConfused || target.hasStatusEffect() || move.getStatusEffect() == null) {
             return false;
         } else {
-            Random random = new Random();
-            int rolled = random.nextInt(MAX_CHANCE);
+            int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
             return (rolled >= (MAX_CHANCE - move.getStatusEffectChance()));
         }
     }
