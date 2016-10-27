@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android;
 
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -104,8 +105,17 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onBattleNowClicked() {
-        showProgressDialog();
+        // showing the progress dialog also creates it if its null
+        //
         startMatchMaking();
+        showProgressDialog();
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
+                leaveRoom();
+            }
+        });
     }
 
     @Override
@@ -146,7 +156,6 @@ public class BottomBarActivity extends BaseActivity implements
         mTeamsHomeFragment = createTeamsHomeFragment();
         mBattleHomeFragment = new BattleHomeFragment();
         mChatHomeFragment = new ChatHomeFragment();
-
         mFragmentManager.beginTransaction()
                 .add(R.id.container, mBattleHomeFragment, "battle")
                 .commit();
@@ -568,9 +577,9 @@ public class BottomBarActivity extends BaseActivity implements
 
     // Leave the room.
     private void leaveRoom() {
-        Log.d(TAG, "Leaving room.");
         stopKeepingScreenOn();
         if (mRoomId != null) {
+            Log.d(TAG, "Leaving room.");
             Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
             mActiveBattle = null;
             mRoomId = null;
