@@ -1,9 +1,10 @@
-package com.pokemonbattlearena.android.engine.match;
+package com.pokemonbattlearena.android.engine.match.calculators;
 
 import android.util.Log;
 
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.RecoilAmount;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
 
 public class RecoilCalculator {
@@ -23,7 +24,7 @@ public class RecoilCalculator {
         return instance;
     }
 
-    protected int getRecoilAmount(BattlePokemon attacker, Move move, int damageDone) {
+    public int getRecoilAmount(BattlePokemon attacker, Move move, int damageDone) {
 
         RecoilAmount recoilAmount = move.getRecoilAmount();
         int recoiled = 0;
@@ -35,7 +36,7 @@ public class RecoilCalculator {
             recoiled = Math.round(damageDone / 3);
         }
         else {
-            recoiled = getCrashAmount(attacker, move);
+            recoiled = getCrashAmount(attacker);
             Log.i(TAG, move.getName() + " is a crash move. Attacker takes " + recoiled + " damage");
             return recoiled;
         }
@@ -44,7 +45,7 @@ public class RecoilCalculator {
         return recoiled;
     }
 
-    protected int getCrashAmount(BattlePokemon attacker, Move move){
+    private int getCrashAmount(BattlePokemon attacker){
         return Math.round(attacker.getOriginalPokemon().getHp() / 2);
     }
 }

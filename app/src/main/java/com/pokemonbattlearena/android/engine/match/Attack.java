@@ -3,8 +3,10 @@ package com.pokemonbattlearena.android.engine.match;
 import android.util.Log;
 
 import com.pokemonbattlearena.android.engine.database.Move;
-import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
+import com.pokemonbattlearena.android.engine.match.calculators.DamageCalculator;
+import com.pokemonbattlearena.android.engine.match.calculators.HealingCalculator;
+import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
 public class Attack implements Command {
 

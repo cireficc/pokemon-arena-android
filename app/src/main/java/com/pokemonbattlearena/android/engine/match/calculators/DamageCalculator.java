@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.engine.match;
+package com.pokemonbattlearena.android.engine.match.calculators;
 
 import android.util.Log;
 
@@ -6,6 +6,7 @@ import com.pokemonbattlearena.android.engine.database.ElementalType;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.MoveType;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -49,7 +50,7 @@ public class DamageCalculator {
         return instance;
     }
 
-    protected double getType1Effectiveness(Move move, BattlePokemon target) {
+    public double getType1Effectiveness(Move move, BattlePokemon target) {
 
         int moveIndex = move.getElementalType1().ordinal();
         int targetIndex = target.getOriginalPokemon().getElementalType1().ordinal();
@@ -57,7 +58,7 @@ public class DamageCalculator {
         return TYPE_MULTIPLIERS[moveIndex][targetIndex];
     }
 
-    protected double getType2Effectiveness(Move move, BattlePokemon target) {
+    public double getType2Effectiveness(Move move, BattlePokemon target) {
 
         int moveIndex = move.getElementalType1().ordinal();
         ElementalType type2 = target.getOriginalPokemon().getElementalType2();
@@ -70,11 +71,11 @@ public class DamageCalculator {
         }
     }
 
-    protected double getOverallTypeEffectiveness(Move move, BattlePokemon target) {
+    public double getOverallTypeEffectiveness(Move move, BattlePokemon target) {
         return getType1Effectiveness(move, target) * getType2Effectiveness(move, target);
     }
 
-    protected boolean moveHit(Move move, BattlePokemon target) {
+    public boolean moveHit(Move move, BattlePokemon target) {
 
         // TODO: Add support for accuracy stages
 
@@ -87,11 +88,11 @@ public class DamageCalculator {
         }
     }
 
-    protected int getTimesHit(Move move){
+    public int getTimesHit(Move move){
         return ThreadLocalRandom.current().nextInt(move.getMinHits(), move.getMaxHits() + 1);
     }
 
-    protected int calculateDamage(BattlePokemon attacker, Move move, BattlePokemon target) {
+    public int calculateDamage(BattlePokemon attacker, Move move, BattlePokemon target) {
 
         Pokemon originalAttacker = attacker.getOriginalPokemon();
         Pokemon originalTarget = target.getOriginalPokemon();
