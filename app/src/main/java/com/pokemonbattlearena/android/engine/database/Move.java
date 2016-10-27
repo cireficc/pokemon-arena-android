@@ -28,6 +28,8 @@ public class Move {
     protected final static String SELF_HEAL_FIELD_NAME = "self_heal";
     protected final static String SELF_HEAL_TYPE_FIELD_NAME = "self_heal_type";
     protected final static String SELF_HEAL_AMOUNT_FIELD_NAME = "self_heal_amount";
+    protected final static String RECOIL_FIELD_NAME = "recoil";
+    protected final static String RECOIL_AMOUNT_FIELD_NAME = "recoil_amount";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
@@ -71,6 +73,10 @@ public class Move {
     private String selfHealType;
     @DatabaseField(columnName = SELF_HEAL_AMOUNT_FIELD_NAME)
     private String selfHealAmount;
+    @DatabaseField(columnName = RECOIL_FIELD_NAME)
+    private String recoil;
+    @DatabaseField(columnName = RECOIL_AMOUNT_FIELD_NAME)
+    private String recoilAmount;
 
     public Move() {
         // Constructor for ORMLite
@@ -197,6 +203,18 @@ public class Move {
         }
     }
 
+    public String getRecoil() {
+        return recoil;
+    }
+
+    public RecoilAmount getRecoilAmountt() {
+        try {
+            return RecoilAmount.valueOf(this.recoilAmount.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
@@ -215,6 +233,11 @@ public class Move {
         sb.append(" - CanFlinch: " + canFlinch + "\n");
         sb.append(" - MaxHits: " + maxHits + "\n");
         sb.append(" - MinHits: " + minHits + "\n");
+        sb.append(" - ChargingTurns: " + chargingTurns + "\n");
+        sb.append(" - RechargingTurns: " + rechargeTurns + "\n");
+        sb.append(" - SelfHealType: " + selfHealType + "\n");
+        sb.append(" - SelfHealAmount: " + selfHealAmount + "\n");
+        sb.append(" - RecoilAmount: " + recoilAmount + "\n");
 
 
         return sb.toString();
