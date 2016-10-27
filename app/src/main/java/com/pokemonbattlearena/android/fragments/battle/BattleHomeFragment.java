@@ -13,17 +13,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
-import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 
 import java.util.List;
 
@@ -35,12 +30,9 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
     private Button mBattleButton;
-    private boolean battleBegun = false;
     private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
     private TypeModel mTypeModel;
-
-    private BattlePokemonTeam mPlayerBattleTeam;
 
     private List<Move> mPlayerMoves;
 
@@ -51,7 +43,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     private BattleViewItem mOpponentBattleView;
 
     private OnBattleFragmentTouchListener mCallback;
-    private Pokemon activePokemon;
 
     public BattleHomeFragment() {
         super();
