@@ -6,8 +6,6 @@ import android.widget.TextView;
 
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 
-import org.w3c.dom.Text;
-
 /**
  * Created by Spencer Amann on 10/20/16.
  */
@@ -17,7 +15,7 @@ public class BattleViewItem {
     TextView pokemonName;
     TextView pokemonHPText;
     ImageView pokemonHPImage;
-    Pokemon pokemon;
+    Pokemon activePokemon;
 
     public BattleViewItem(ImageView pokemonImage, TextView pokemonName, TextView pokemonHPText, ImageView pokemonHPImage) {
         this.pokemonImage = pokemonImage;
@@ -42,12 +40,12 @@ public class BattleViewItem {
         return pokemonHPImage;
     }
 
-    public Pokemon getPokemon() {
-        return pokemon;
+    public Pokemon getActivePokemon() {
+        return activePokemon;
     }
 
-    public void setPokemon(Pokemon pokemon) {
-        this.pokemon = pokemon;
+    public void setActivePokemon(Pokemon activePokemon) {
+        this.activePokemon = activePokemon;
     }
 
     public void setVisibility(boolean visibility) {
