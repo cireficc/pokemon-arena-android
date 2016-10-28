@@ -101,6 +101,11 @@ public class ChatHomeFragment extends Fragment{
         sendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String message = editText.getText().toString();
+                if(message.equals("")){
+                    return;
+                }
+
                 //creates a unique message key for the database
                 Map<String, Object> map = new HashMap<String, Object>();
                 tempKey = "Message"+root.push().getKey();
@@ -110,7 +115,7 @@ public class ChatHomeFragment extends Fragment{
                 DatabaseReference messageRoot = root.child(tempKey);
                 Map<String, Object> map2 = new HashMap<String, Object>();
                 map2.put("author",mUsername);
-                map2.put("msg",editText.getText().toString());
+                map2.put("msg",message);
 
                 messageRoot.updateChildren(map2);
                 editText.setText("");
