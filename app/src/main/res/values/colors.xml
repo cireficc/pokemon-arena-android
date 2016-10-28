@@ -30,5 +30,6 @@
 
     <color name="light_type_text">#FFFFF8</color>
     <color name="dark_type_text">#151515</color>
+    <color name="color_venusaur_light">#6abd40</color>
 
 </resources>
