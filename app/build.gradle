@@ -21,10 +21,6 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
-//    compileOptions {
-//        sourceCompatibility JavaVersion.VERSION_1_7
-//        targetCompatibility JavaVersion.VERSION_1_7
-//    }
 }
 
 dependencies {
@@ -47,18 +43,12 @@ dependencies {
     compile 'com.firebase:firebase-client-android:2.5.2'
     // GOOGLE
     compile 'com.google.android.gms:play-services-auth:9.6.1'
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
 
->>>>>>> match-api-integration
-=======
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
 
->>>>>>> master-dev
     // DATABASE (SQLITE)
     compile 'org.xerial:sqlite-jdbc:3.8.11.2'
     compile 'com.j256.ormlite:ormlite-core:5.0'
