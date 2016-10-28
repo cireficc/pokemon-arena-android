@@ -16,6 +16,7 @@ public class Pokemon {
     protected final static String SPECIAL_ATTACK_FIELD_NAME = "special_attack";
     protected final static String SPECIAL_DEFENSE_FIELD_NAME = "special_defense";
     protected final static String SPEED_FIELD_NAME = "speed";
+    protected final static String LEGENDARY_FIELD_NAME = "legendary";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
@@ -37,6 +38,8 @@ public class Pokemon {
     private int specialDefense;
     @DatabaseField(columnName = SPEED_FIELD_NAME)
     private int speed;
+    @DatabaseField(columnName = LEGENDARY_FIELD_NAME)
+    private int legendary;
 
     public Pokemon() {
         // Constructor for ORMLite
@@ -94,6 +97,10 @@ public class Pokemon {
         return speed;
     }
 
+    public boolean isLegendary() {
+        return legendary > 0;
+    }
+
     @Override
     public String toString() {
 
@@ -111,6 +118,7 @@ public class Pokemon {
         sb.append(" - SpecialAttack: " + specialAttack + "\n");
         sb.append(" - SpecialDefense: " + specialDefense + "\n");
         sb.append(" - Speed: " + speed + "\n");
+        sb.append(" - Legendary: " + isLegendary() + "\n");
 
         return sb.toString();
     }
