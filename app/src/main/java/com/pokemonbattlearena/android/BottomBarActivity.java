@@ -92,6 +92,8 @@ public class BottomBarActivity extends BaseActivity implements
 
     private Battle mActiveBattle = null;
 
+    private int mBattleMatchFlag = 0;
+
     //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
@@ -123,6 +125,12 @@ public class BottomBarActivity extends BaseActivity implements
         String gson = new Gson().toJson(move, Move.class);
         sendMessage(gson);
     }
+
+    @Override
+    public void onTypeBanClicked(String type) {
+        Toast.makeText(mApplication, "Banned: " + type, Toast.LENGTH_SHORT).show();
+    }
+
     //endregion
 
     //region Activity hooks
@@ -590,7 +598,7 @@ public class BottomBarActivity extends BaseActivity implements
     private void startMatchMaking() {
         // auto-match criteria to invite one random automatch opponent.
         // You can also specify more opponents (up to 3).
-        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
+        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, mBattleMatchFlag);
 
         // build the room config:
         RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();

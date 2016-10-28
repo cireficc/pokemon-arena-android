@@ -23,15 +23,11 @@ import java.util.ArrayList;
 
 public class PokemonGridAdapter extends BaseAdapter {
     private ArrayList<Pokemon> mItemList;
-    private ArrayList<Integer> mSelectedTeamArrayList;
-    private int[] mSelectedTeam;
     private Context mContext;
 
     public PokemonGridAdapter(Context c, ArrayList<Pokemon> pokemon, int teamSize) {
         mContext = c;
         mItemList = pokemon;
-        mSelectedTeamArrayList = new ArrayList<>();
-        mSelectedTeam = new int[teamSize];
     }
     @Override
     public int getCount() {
@@ -101,9 +97,5 @@ public class PokemonGridAdapter extends BaseAdapter {
         holder.mType2.setImageResource(Type2Id);
 
         return convertView;
-    }
-
-    public int[] getSelectedTeam() {
-        return mSelectedTeam;
     }
 }

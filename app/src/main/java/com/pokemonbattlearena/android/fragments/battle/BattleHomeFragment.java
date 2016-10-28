@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android.fragments.battle;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,21 +10,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.GridLayout;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.TypeBanAdapter;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
-import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 
 import java.util.List;
 
@@ -35,12 +36,9 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
     private Button mBattleButton;
-    private boolean battleBegun = false;
     private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
     private TypeModel mTypeModel;
-
-    private BattlePokemonTeam mPlayerBattleTeam;
 
     private List<Move> mPlayerMoves;
 
@@ -51,7 +49,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     private BattleViewItem mOpponentBattleView;
 
     private OnBattleFragmentTouchListener mCallback;
-    private Pokemon activePokemon;
 
     public BattleHomeFragment() {
         super();
@@ -61,6 +58,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     public interface OnBattleFragmentTouchListener {
         void onBattleNowClicked();
         void onMoveClicked(Move move);
+        void onTypeBanClicked(String type);
     }
 
     @Nullable
@@ -69,6 +67,23 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
         mBattleButton.setOnClickListener(this);
+        GridView gridView = (GridView) view.findViewById(R.id.type_ban_layout);
+        gridView.setAdapter(new TypeBanAdapter(getActivity()));
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mCallback.onTypeBanClicked(TypeModel.typeNames[position]);
+                view.setBackgroundColor(getActivity().getColor(R.color.color_charizard));
+            }
+        });
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                view.setBackgroundColor(getActivity().getColor(R.color.light_grey));
+                Toast.makeText(getActivity(), "Unbanned: " + TypeModel.typeNames[position], Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
         View playerView = view.findViewById(R.id.player_1_ui);
         View opponentView = view.findViewById(R.id.player_2_ui);
 
