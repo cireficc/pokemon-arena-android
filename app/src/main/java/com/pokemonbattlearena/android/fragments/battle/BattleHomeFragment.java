@@ -2,7 +2,6 @@ package com.pokemonbattlearena.android.fragments.battle;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,9 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.GridLayout;
+import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +48,12 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private BattleViewItem mOpponentBattleView;
 
+    private Switch mTypeBanSwitch;
+
+    private GridView mTypeBanGrid;
+
+    private TextView mTypeBanTitle;
+
     private OnBattleFragmentTouchListener mCallback;
 
     public BattleHomeFragment() {
@@ -67,21 +73,29 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
         mBattleButton.setOnClickListener(this);
-        GridView gridView = (GridView) view.findViewById(R.id.type_ban_layout);
-        gridView.setAdapter(new TypeBanAdapter(getActivity()));
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mTypeBanGrid = (GridView) view.findViewById(R.id.type_ban_layout);
+        mTypeBanTitle = (TextView) view.findViewById(R.id.type_ban_title_text);
+        mTypeBanSwitch = (Switch) view.findViewById(R.id.type_ban_switch);
+        mTypeBanSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setTypeBanVisible(isChecked);
+            }
+        });
+        mTypeBanGrid.setAdapter(new TypeBanAdapter(getActivity()));
+        mTypeBanGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mCallback.onTypeBanClicked(TypeModel.typeNames[position]);
                 view.setBackgroundColor(getActivity().getColor(R.color.color_charizard));
             }
         });
-        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mTypeBanGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 view.setBackgroundColor(getActivity().getColor(R.color.light_grey));
                 Toast.makeText(getActivity(), "Unbanned: " + TypeModel.typeNames[position], Toast.LENGTH_SHORT).show();
-                return false;
+                return true;
             }
         });
         View playerView = view.findViewById(R.id.player_1_ui);
@@ -107,6 +121,12 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
         setupMoveButtons(view);
         return view;
+    }
+
+    private void setTypeBanVisible(boolean isChecked) {
+        int visibility = isChecked ? View.VISIBLE : View.GONE;
+        mTypeBanGrid.setVisibility(visibility);
+        mTypeBanTitle.setVisibility(visibility);
     }
 
     @Override
@@ -205,6 +225,8 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         if (mPlayerBattleView != null && mOpponentBattleView != null) {
             mPlayerBattleView.setVisibility(visible);
             mOpponentBattleView.setVisibility(visible);
+            // don't need to show the switch if we are battling
+            mTypeBanSwitch.setVisibility(View.GONE);
         }
     }
 }

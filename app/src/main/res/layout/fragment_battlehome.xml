@@ -7,12 +7,22 @@
     tools:context=".BottomBarActivity"
     android:background="@color/color_venusaur">
 
+    <Switch
+        android:id="@+id/type_ban_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Type Bans?"
+        android:textStyle="bold"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/light_grey">
         <TextView
+            android:id="@+id/type_ban_title_text"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Select Types To Ban"
@@ -21,6 +31,7 @@
             android:gravity="center"/>
         <GridView
             android:id="@+id/type_ban_layout"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:numColumns="4"
             android:layout_height="140dp"
