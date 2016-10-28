@@ -61,7 +61,8 @@ public class BottomBarActivity extends BaseActivity implements
         RoomStatusUpdateListener,
         RealTimeMultiplayer.ReliableMessageSentCallback,
         TeamsHomeFragment.OnPokemonTeamSelectedListener,
-        BattleHomeFragment.OnBattleFragmentTouchListener {
+        BattleHomeFragment.OnBattleFragmentTouchListener,
+        ChatHomeFragment.OnChatLoadedListener {
 
     private static final int TEAM_SIZE_INT = 1;
     private static final int MIN_PLAYERS = 2;
@@ -129,6 +130,11 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onTypeBanClicked(String type) {
         Toast.makeText(mApplication, "Banned: " + type, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onChatLoaded() {
+        hideProgressDialog();
     }
 
     //endregion
@@ -208,6 +214,7 @@ public class BottomBarActivity extends BaseActivity implements
                             mFragmentManager.beginTransaction()
                                     .replace(R.id.container, mChatHomeFragment, "chat")
                                     .commit();
+                            showProgressDialog();
                         }
                         if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                             mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();

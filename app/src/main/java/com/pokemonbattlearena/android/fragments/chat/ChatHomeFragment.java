@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.ActionBarOverlayLayout;
 import android.support.v7.widget.CardView;
 import android.text.method.KeyListener;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -39,6 +40,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 
 import org.w3c.dom.Text;
 
@@ -48,6 +50,7 @@ import org.w3c.dom.Text;
 
 public class ChatHomeFragment extends Fragment{
 
+    private static final String TAG = ChatHomeFragment.class.getSimpleName();
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
     private BottomBarActivity activity;
@@ -65,14 +68,26 @@ public class ChatHomeFragment extends Fragment{
     private ChildEventListener mChildListener;
     private LayoutInflater layoutInflater;
 
+    private OnChatLoadedListener mCallback;
+
     public ChatHomeFragment() {
         super();
+    }
+
+    public interface OnChatLoadedListener {
+        void onChatLoaded();
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (BottomBarActivity) context;
+        try {
+            mCallback = (ChatHomeFragment.OnChatLoadedListener) context;
+        } catch (ClassCastException e) {
+            Log.e(TAG, e.getMessage());
+            throw new ClassCastException(context.toString() + "must implement listener");
+        }
     }
 
     @Nullable
@@ -144,6 +159,7 @@ public class ChatHomeFragment extends Fragment{
         mChildListener = root.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                mCallback.onChatLoaded();
                 appendChat(dataSnapshot);
             }
 
