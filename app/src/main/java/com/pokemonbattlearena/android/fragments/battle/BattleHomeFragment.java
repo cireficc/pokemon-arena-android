@@ -36,6 +36,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
     private Button mBattleButton;
+    private boolean mIsActiveBattle = false;
     private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
     private TypeModel mTypeModel;
@@ -62,7 +63,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     public interface OnBattleFragmentTouchListener {
-        void onBattleNowClicked();
+        void onBattleNowClicked(boolean isActiveBattle);
         void onMoveClicked(Move move);
         void onTypeBanClicked(String type);
     }
@@ -151,7 +152,10 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         int id = v.getId();
         switch (id) {
             case R.id.battle_now_button:
-                mCallback.onBattleNowClicked();
+                String text = mIsActiveBattle ? getString(R.string.battle) : getString(R.string.cancel_battle);
+                mBattleButton.setText(text);
+                mCallback.onBattleNowClicked(mIsActiveBattle);
+                mIsActiveBattle = !mIsActiveBattle;
                 break;
             case R.id.move_button_0:
                 mCallback.onMoveClicked(mPlayerMoves.get(0));

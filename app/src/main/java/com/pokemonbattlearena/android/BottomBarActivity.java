@@ -106,23 +106,30 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
-    public void onBattleNowClicked() {
+    public void onBattleNowClicked(boolean isActiveBattle) {
         // showing the progress dialog also creates it if its null
-        //
-        startMatchMaking();
-        showProgressDialog();
-        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
-                leaveRoom();
-            }
-        });
+        if (!isActiveBattle) {
+            startMatchMaking();
+            showProgressDialog();
+            mBattleHomeFragment.hideBans(false);
+            mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
+                    leaveRoom();
+                }
+            });
+        } else {
+            leaveRoom();
+        }
     }
 
     @Override
     public void onMoveClicked(Move move) {
         String gson = new Gson().toJson(move, Move.class);
+        if (mBattleHomeFragment != null) {
+            mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+        }
         sendMessage(gson);
     }
 
@@ -608,6 +615,15 @@ public class BottomBarActivity extends BaseActivity implements
             mActiveBattle = null;
             mRoomId = null;
             mRoomCreatorId = null;
+        }
+        refreshBattleFragment();
+    }
+
+    private void refreshBattleFragment() {
+        if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
+            mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+            mBattleHomeFragment = new BattleHomeFragment();
+            mFragmentManager.beginTransaction().add(R.id.container, mBattleHomeFragment, "battle").commit();
         }
     }
 
