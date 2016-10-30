@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickListener, View.OnClickListener {
 
-    private static final String TAG = "Teams Fragment";
+    private static final String TAG = TeamsHomeFragment.class.getSimpleName();
 
     private ArrayList<Pokemon> mItemArray;
     private PokemonBattleApplication mApplication;

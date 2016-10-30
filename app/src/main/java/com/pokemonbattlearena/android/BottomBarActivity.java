@@ -61,7 +61,8 @@ public class BottomBarActivity extends BaseActivity implements
         RoomStatusUpdateListener,
         RealTimeMultiplayer.ReliableMessageSentCallback,
         TeamsHomeFragment.OnPokemonTeamSelectedListener,
-        BattleHomeFragment.OnBattleFragmentTouchListener {
+        BattleHomeFragment.OnBattleFragmentTouchListener,
+        ChatHomeFragment.OnChatLoadedListener {
 
     private static final int TEAM_SIZE_INT = 1;
     private static final int MIN_PLAYERS = 2;
@@ -91,6 +92,8 @@ public class BottomBarActivity extends BaseActivity implements
     private PokemonPlayer mCurrentPokemonPlayer;
 
     private Battle mActiveBattle = null;
+
+    private int mBattleMatchFlag = 0;
 
     //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
@@ -123,6 +126,17 @@ public class BottomBarActivity extends BaseActivity implements
         String gson = new Gson().toJson(move, Move.class);
         sendMessage(gson);
     }
+
+    @Override
+    public void onTypeBanClicked(String type) {
+        Toast.makeText(mApplication, "Banned: " + type, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onChatLoaded() {
+        hideProgressDialog();
+    }
+
     //endregion
 
     //region Activity hooks
@@ -198,12 +212,9 @@ public class BottomBarActivity extends BaseActivity implements
                         if (mChatHomeFragment != null && !mChatHomeFragment.isAdded()) {
                             displaySavedTeam(false);
                             mFragmentManager.beginTransaction()
-                                    .add(R.id.container, mChatHomeFragment, "chat")
-                                    .commit();
-                        } else {
-                            mFragmentManager.beginTransaction()
                                     .replace(R.id.container, mChatHomeFragment, "chat")
                                     .commit();
+                            showProgressDialog();
                         }
                         if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                             mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
@@ -594,7 +605,7 @@ public class BottomBarActivity extends BaseActivity implements
     private void startMatchMaking() {
         // auto-match criteria to invite one random automatch opponent.
         // You can also specify more opponents (up to 3).
-        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
+        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, mBattleMatchFlag);
 
         // build the room config:
         RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
@@ -621,8 +632,7 @@ public class BottomBarActivity extends BaseActivity implements
         int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
         return c.getDrawable(id);
     }
-
-
+    
     private TeamsHomeFragment createTeamsHomeFragment() {
         TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
         // Set the team size
