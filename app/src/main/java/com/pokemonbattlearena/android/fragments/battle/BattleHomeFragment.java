@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Layout;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +28,12 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
+import org.w3c.dom.Text;
+
+import java.sql.Time;
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,11 +63,20 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private TextView mTypeBanTitle;
 
+    private TextView mMoveHistoryText;
+
     private OnBattleFragmentTouchListener mCallback;
 
     public BattleHomeFragment() {
         super();
         mTypeModel = new TypeModel();
+    }
+
+    public void hideBans(boolean show) {
+        int visible = show ? View.VISIBLE : View.GONE;
+        mTypeBanTitle.setVisibility(visible);
+        mTypeBanGrid.setVisibility(visible);
+        mTypeBanSwitch.setVisibility(visible);
     }
 
     public interface OnBattleFragmentTouchListener {
@@ -74,6 +91,8 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
         mBattleButton.setOnClickListener(this);
+        mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
+        mMoveHistoryText.setMovementMethod(new ScrollingMovementMethod());
         mTypeBanGrid = (GridView) view.findViewById(R.id.type_ban_layout);
         mTypeBanTitle = (TextView) view.findViewById(R.id.type_ban_title_text);
         mTypeBanSwitch = (Switch) view.findViewById(R.id.type_ban_switch);
@@ -88,14 +107,13 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mCallback.onTypeBanClicked(TypeModel.typeNames[position]);
-                view.setBackgroundColor(getActivity().getColor(R.color.color_charizard));
+                view.setBackgroundColor(getActivity().getColor(R.color.type_ban_banned_color));
             }
         });
         mTypeBanGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                view.setBackgroundColor(getActivity().getColor(R.color.light_grey));
-                Toast.makeText(getActivity(), "Unbanned: " + TypeModel.typeNames[position], Toast.LENGTH_SHORT).show();
+                view.setBackgroundColor(getActivity().getColor(R.color.type_ban_background_color));
                 return true;
             }
         });
@@ -124,7 +142,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         return view;
     }
 
-    private void setTypeBanVisible(boolean isChecked) {
+    public void setTypeBanVisible(boolean isChecked) {
         int visibility = isChecked ? View.VISIBLE : View.GONE;
         mTypeBanGrid.setVisibility(visibility);
         mTypeBanTitle.setVisibility(visibility);
@@ -229,8 +247,25 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         if (mPlayerBattleView != null && mOpponentBattleView != null) {
             mPlayerBattleView.setVisibility(visible);
             mOpponentBattleView.setVisibility(visible);
+            mMoveHistoryText.setText(String.format("Match Started: %s", DateFormat.getDateTimeInstance().format(new Date())));
+            mMoveHistoryText.setVisibility(View.VISIBLE);
             // don't need to show the switch if we are battling
             mTypeBanSwitch.setVisibility(View.GONE);
+        }
+    }
+
+    public void appendMoveHistory(String player, Move move) {
+        Calendar c = Calendar.getInstance();
+        String text = "\n" + " - " + player + " - " + move.getName() + " - " + move.getPower() + " damage";
+        if (mMoveHistoryText != null) {
+            mMoveHistoryText.append(text);
+            final Layout layout = mMoveHistoryText.getLayout();
+            if(layout != null){
+                int scrollDelta = layout.getLineBottom(mMoveHistoryText.getLineCount() - 1)
+                        - mMoveHistoryText.getScrollY() - mMoveHistoryText.getHeight();
+                if(scrollDelta > 0)
+                    mMoveHistoryText.scrollBy(0, scrollDelta);
+            }
         }
     }
 }

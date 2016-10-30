@@ -90,6 +90,8 @@ public class BottomBarActivity extends BaseActivity implements
 
     private PokemonPlayer mCurrentPokemonPlayer;
 
+    private PokemonPlayer mOpponentPokemonPlayer;
+
     private Battle mActiveBattle = null;
 
     private int mBattleMatchFlag = 0;
@@ -482,10 +484,10 @@ public class BottomBarActivity extends BaseActivity implements
         if (mActiveBattle == null) {
             // we don't have a battle, so we can assume a message is going to have a player
             try {
-                PokemonPlayer opponentPlayer = new Gson().fromJson(bufferString, PokemonPlayer.class);
-                Log.d(TAG, "Incoming Battle Message Received: " + opponentPlayer.getPokemonTeam().toString());
-                mActiveBattle = new Battle(mCurrentPokemonPlayer, opponentPlayer);
-                setupBattleUI(mCurrentPokemonPlayer, opponentPlayer);
+                mOpponentPokemonPlayer = new Gson().fromJson(bufferString, PokemonPlayer.class);
+                Log.d(TAG, "Incoming Battle Message Received: " + mOpponentPokemonPlayer.getPokemonTeam().toString());
+                mActiveBattle = new Battle(mCurrentPokemonPlayer, mOpponentPokemonPlayer);
+                setupBattleUI(mCurrentPokemonPlayer, mOpponentPokemonPlayer);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -495,7 +497,9 @@ public class BottomBarActivity extends BaseActivity implements
             try {
                 Move move = new Gson().fromJson(bufferString, Move.class);
                 Log.d(TAG, "In Game Message Received: " + move.getName());
-                Toast.makeText(this, move.getName(), Toast.LENGTH_SHORT).show();
+                if (mBattleHomeFragment != null) {
+                    mBattleHomeFragment.appendMoveHistory(mOpponentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+                }
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             }
