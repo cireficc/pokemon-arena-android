@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -64,7 +63,7 @@ public class BottomBarActivity extends BaseActivity implements
         BattleHomeFragment.OnBattleFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener {
 
-    private static final int TEAM_SIZE_INT = 1;
+    private static final int TEAM_SIZE_INT = 6;
     private static final int MIN_PLAYERS = 2;
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BottomBarActivity.class.getSimpleName();
@@ -572,16 +571,26 @@ public class BottomBarActivity extends BaseActivity implements
     private boolean displaySavedTeam(boolean show) {
         String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
         View savedView = (View) findViewById(R.id.saved_team_layout);
-        ImageView savedImage = (ImageView) savedView.findViewById(R.id.saved_team_imageview);
+
         if (!teamJSON.equals("mew") && show) {
             savedView.setVisibility(View.VISIBLE);
             PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
-            savedImage.setImageDrawable(getDrawableForPokemon(this, pokemonTeam.getPokemons().get(0).getName()));
+            setDrawablesForSavedTeam(savedView, pokemonTeam);
             return true;
         } else {
             savedView.setVisibility(View.GONE);
         }
         return false;
+    }
+
+    private void setDrawablesForSavedTeam(View savedView, PokemonTeam pokemonTeam) {
+        int index = 0;
+        for (Pokemon pokemon : pokemonTeam.getPokemons()) {
+            String key = "saved_team_" + index++;
+            int id = getResources().getIdentifier(key, "id", getPackageName());
+            ImageView savedImage = (ImageView) savedView.findViewById(id);
+            savedImage.setImageDrawable(getDrawableForPokemon(this, pokemon.getName()));
+        }
     }
 
     private void setSavedTeam(String pokemonJSON) {
