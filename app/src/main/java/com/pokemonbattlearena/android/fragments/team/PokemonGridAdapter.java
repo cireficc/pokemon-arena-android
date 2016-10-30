@@ -72,6 +72,7 @@ public class PokemonGridAdapter extends BaseAdapter {
         // Set TextView components
         holder.mId.setText("#" + pokemon.getId());
         holder.mName.setText(pokemon.getName());
+        holder.mCheckbox.setChecked(false);
         int color = position % 3;
         switch (color) {
             case 0:
