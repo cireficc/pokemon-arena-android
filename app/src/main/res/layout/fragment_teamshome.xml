@@ -5,11 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".BottomBarActivity">
-
     <Button
-        android:text="@string/teams"
+        android:text="@string/save_team"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:id="@+id/quick_battle_button" />
+        android:id="@+id/save_team_button" />
+
+    <include layout="@layout/fragment_team_setup"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
 </LinearLayout>

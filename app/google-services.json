@@ -1,7 +1,9 @@
 {
   "project_info": {
     "project_number": "95527716179",
-    "project_id": "pokemon-battle-arena-48093380"
+    "firebase_url": "https://pokemon-battle-arena-48093380.firebaseio.com",
+    "project_id": "pokemon-battle-arena-48093380",
+    "storage_bucket": "pokemon-battle-arena-48093380.appspot.com"
   },
   "client": [
     {
@@ -21,6 +23,10 @@
           }
         },
         {
+          "client_id": "95527716179-mnvrq87539oclgnjfnr1f050n9jt4aoq.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
           "client_id": "95527716179-pudp78tkrtkqm2f5gm4c0ejos29nbvqq.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -35,11 +41,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "95527716179-mnvrq87539oclgnjfnr1f050n9jt4aoq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }
