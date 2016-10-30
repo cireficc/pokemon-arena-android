@@ -87,14 +87,13 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mCallback.onTypeBanClicked(TypeModel.typeNames[position]);
-                view.setBackgroundColor(getActivity().getColor(R.color.color_charizard));
+                view.setBackgroundColor(getActivity().getColor(R.color.type_ban_banned_color));
             }
         });
         mTypeBanGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                view.setBackgroundColor(getActivity().getColor(R.color.light_grey));
-                Toast.makeText(getActivity(), "Unbanned: " + TypeModel.typeNames[position], Toast.LENGTH_SHORT).show();
+                view.setBackgroundColor(getActivity().getColor(R.color.type_ban_background_color));
                 return true;
             }
         });
