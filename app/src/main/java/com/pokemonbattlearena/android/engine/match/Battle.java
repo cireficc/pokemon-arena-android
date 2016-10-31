@@ -105,13 +105,13 @@ public class Battle {
 
         String defendingPlayerId = targetInfo.getDefendingPlayer().getId();
         BattlePokemonPlayer defendingPlayer = getPlayerFromId(defendingPlayerId);
-        BattlePokemon defendingPlayerPokemon = defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+        BattlePokemon defendingPokemon = defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
 
         Log.i(TAG, "Attacking player: " + attackingPlayerId);
         Log.i(TAG, "Attacking player pkmn: " + attackingPokemon.getOriginalPokemon().getName());
         Log.i(TAG, "Defending player: " + defendingPlayerId);
-        Log.i(TAG, "Defending player pkmn: " + defendingPlayerPokemon.getOriginalPokemon().getName());
-        
+        Log.i(TAG, "Defending player pkmn: " + defendingPokemon.getOriginalPokemon().getName());
+
         // TODO: Finish implementing this method
 
     }
