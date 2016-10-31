@@ -1,6 +1,6 @@
 package com.pokemonbattlearena.android.engine.match;
 
-public interface Command {
+interface Command {
 
-    void execute();
+    CommandResult execute();
 }
