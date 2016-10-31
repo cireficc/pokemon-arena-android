@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Battle {
 
+    // NOTE: self is always the host of the battle
     BattlePokemonPlayer self;
     BattlePokemonPlayer opponent;
     List<BattlePhase> finishedBattlePhases;
@@ -19,6 +20,22 @@ public class Battle {
         this.finishedBattlePhases = new ArrayList<>();
         this.currentBattlePhase = new BattlePhase(self, opponent);
         this.isFinished = false;
+    }
+
+    public BattlePokemonPlayer getSelf() {
+        return self;
+    }
+
+    public BattlePokemonPlayer getOpponent() {
+        return opponent;
+    }
+
+    public List<BattlePhase> getFinishedBattlePhases() {
+        return finishedBattlePhases;
+    }
+
+    public BattlePhase getCurrentBattlePhase() {
+        return currentBattlePhase;
     }
 
     public boolean isFinished() {
