@@ -50,6 +50,18 @@ class Attack implements Command {
         return defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
     }
 
+    public Move getMove() {
+        return move;
+    }
+
+    public BattlePokemon getAttacker() {
+        return attacker;
+    }
+
+    public BattlePokemon getTarget() {
+        return target;
+    }
+
     @Override
     public AttackResult execute() {
 

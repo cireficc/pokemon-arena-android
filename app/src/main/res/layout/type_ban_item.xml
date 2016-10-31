@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="3dp">
+    <ImageView
+        android:id="@+id/type_ban_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_type_dragon"
+        android:padding="2dp"/>
+    <TextView
+        android:id="@+id/type_ban_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/type_ban_image"
+        android:layout_marginStart="4dp"
+        android:layout_centerVertical="true"
+        android:text="dragon"
+        android:textStyle="bold"
+        android:padding="2dp"
+        />
+</RelativeLayout>
