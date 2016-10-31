@@ -1,4 +1,10 @@
 /*
+ * Source code copied from:
+ *     https://github.com/google/gson/blob/master/extras/src/main/java/com/google/gson/typeadapters/RuntimeTypeAdapterFactory.java
+ * This class is not included in GSON v2.7, thus it must be copied manually from the Github repository.
+ */
+
+/*
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
