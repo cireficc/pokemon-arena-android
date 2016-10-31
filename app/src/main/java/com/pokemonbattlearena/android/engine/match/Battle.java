@@ -2,6 +2,8 @@ package com.pokemonbattlearena.android.engine.match;
 
 import android.util.Log;
 
+import com.pokemonbattlearena.android.engine.database.StatusEffect;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -95,9 +97,9 @@ public class Battle {
         }
     }
 
-    private void applyAttackResult(AttackResult attackResult) {
+    private void applyAttackResult(AttackResult res) {
 
-        TargetInfo targetInfo = attackResult.getTargetInfo();
+        TargetInfo targetInfo = res.getTargetInfo();
 
         String attackingPlayerId = targetInfo.getAttackingPlayer().getId();
         BattlePokemonPlayer attackingPlayer = getPlayerFromId(attackingPlayerId);
@@ -112,8 +114,69 @@ public class Battle {
         Log.i(TAG, "Defending player: " + defendingPlayerId);
         Log.i(TAG, "Defending player pkmn: " + defendingPokemon.getOriginalPokemon().getName());
 
-        // TODO: Finish implementing this method
+        int damageDone = res.getDamageDone();
+        StatusEffect statusEffectApplied = res.getStatusEffectApplied();
+        int statusEffectTurns = res.getStatusEffectTurns();
+        boolean confused = res.isConfused();
+        int confusedTurns = res.getConfusedTurns();
+        boolean flinched = res.isFlinched();
+        int chargingTurns = res.getChargingTurns();
+        int rechargingTurns = res.getRechargingTurns();
+        int healingDone = res.getHealingDone();
+        int recoilTaken = res.getRecoilTaken();
 
+        Log.i(TAG, "Applying damage done: " + damageDone);
+        defendingPokemon.setCurrentHp(attackingPokemon.getCurrentHp() - damageDone);
+
+        Log.i(TAG, "Applying StatusEffect (maybe): " + statusEffectApplied);
+        // If the Pokemon doesn't already have a StatusEffect, we can apply one
+        if (defendingPokemon.getStatusEffect() == null && statusEffectApplied != null) {
+            Log.i(TAG, "Pokemon doesn't already have a StatusEffect. Applying for " + statusEffectTurns + " turn(s)!");
+            defendingPokemon.setStatusEffect(statusEffectApplied);
+            defendingPokemon.setStatusEffectTurns(res.getStatusEffectTurns());
+        }
+
+        Log.i(TAG, "Applying Confusion (maybe): " + confused);
+        if (!defendingPokemon.isConfused() && confused) {
+            Log.i(TAG, "Pokemon is not already confused. Applying for " + confusedTurns + " turn(s)!");
+        }
+
+        Log.i(TAG, "Applying flinch: " + flinched);
+        defendingPokemon.setFlinched(flinched);
+
+        Log.i(TAG, "Applying charging (maybe): " + chargingTurns);
+        if (!defendingPokemon.isCharging()) {
+            Log.i(TAG, "Pokemon is not already charging. Applying for " + chargingTurns + " turn(s)!");
+        }
+
+        Log.i(TAG, "Applying recharging (maybe): " + rechargingTurns);
+        if (!defendingPokemon.isRecharging()) {
+            Log.i(TAG, "Pokemon is not already recharging. Applying for " + rechargingTurns + " turn(s)!");
+        }
+
+        int maxHp = attackingPokemon.getOriginalPokemon().getHp();
+        int currentHp = attackingPokemon.getCurrentHp();
+        int healedTo = currentHp + healingDone;
+
+        Log.i(TAG, "Applying healing done: " + healingDone);
+
+        if (healedTo >= maxHp) {
+            Log.i(TAG, "Healing was over max HP; healing to max HP: " + maxHp);
+            attackingPokemon.setCurrentHp(maxHp);
+        } else {
+            Log.i(TAG, "Healing was not over max HP; healing to " + healedTo);
+            attackingPokemon.setCurrentHp(healedTo);
+        }
+
+        Log.i(TAG, "Applying recoil taken: " + recoilTaken);
+        attackingPokemon.setCurrentHp(currentHp - recoilTaken);
+
+        boolean attackerFainted = attackingPokemon.getCurrentHp() <= 0;
+        boolean defenderFainted = defendingPokemon.getCurrentHp() <= 0;
+
+        Log.i(TAG, "Applying fainted status. Attacker fainted? " + attackerFainted + " || defender fainted? " + defenderFainted);
+        attackingPokemon.setFainted(attackerFainted);
+        defendingPokemon.setFainted(defenderFainted);
     }
 
     private BattlePokemonPlayer getPlayerFromId(String id) {
