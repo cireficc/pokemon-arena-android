@@ -49,4 +49,13 @@ public class Battle {
     private void setFinished() {
         isFinished = self.getBattlePokemonTeam().allFainted() || opponent.getBattlePokemonTeam().allFainted();
     }
+
+    public void startNewBattlePhase() {
+
+        Log.i(TAG, "Starting new battle phase");
+        finishedBattlePhases.add(currentBattlePhase);
+        Log.i(TAG, "Added current battle phase to finished phases");
+        Log.i(TAG, "Created new battle phase");
+        currentBattlePhase = new BattlePhase(self, opponent);
+    }
 }
