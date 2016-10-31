@@ -34,9 +34,12 @@ import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListene
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
+import com.pokemonbattlearena.android.engine.ai.AiBattle;
+import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.Battle;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
@@ -122,6 +125,12 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
+    public void onAiBattleClicked() {
+        startAiBattle();
+
+    }
+
+    @Override
     public void onMoveClicked(Move move) {
         String gson = new Gson().toJson(move, Move.class);
         sendMessage(gson);
@@ -142,6 +151,7 @@ public class BottomBarActivity extends BaseActivity implements
     //region Activity hooks
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
 
@@ -515,6 +525,16 @@ public class BottomBarActivity extends BaseActivity implements
             default:
                 break;
         }
+    }
+    //endregion
+
+    //region AI Battle
+    private void startAiBattle() {
+
+        setCurrentPokemonPlayer();
+        AiPlayer ai = new AiPlayer(mApplication.getBattleDatabase(), mCurrentPokemonPlayer);
+        mActiveBattle = new AiBattle(mCurrentPokemonPlayer, ai);
+        setupBattleUI(mCurrentPokemonPlayer, ai);
     }
     //endregion
 
