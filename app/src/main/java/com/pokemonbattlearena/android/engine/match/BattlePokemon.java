@@ -6,17 +6,17 @@ import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
 public class BattlePokemon {
 
-    private Pokemon originalPokemon;
-    private int currentHp;
-    private StatusEffect statusEffect;
-    private int statusEffectTurns;
-    private boolean confused;
-    private int confusedTurns;
-    private boolean flinched;
-    private int chargingForTurns;
-    private int rechargingForTurns;
-    private boolean fainted;
-    private Move[] moveSet = new Move[4];
+    private transient Pokemon originalPokemon;
+    private transient int currentHp;
+    private transient StatusEffect statusEffect;
+    private transient int statusEffectTurns;
+    private transient boolean confused;
+    private transient int confusedTurns;
+    private transient boolean flinched;
+    private transient int chargingForTurns;
+    private transient int rechargingForTurns;
+    private transient boolean fainted;
+    private transient Move[] moveSet = new Move[4];
 
     public BattlePokemon(Pokemon pokemon) {
 
