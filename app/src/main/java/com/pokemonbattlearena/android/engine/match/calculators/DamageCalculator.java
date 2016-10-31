@@ -89,7 +89,11 @@ public class DamageCalculator {
     }
 
     public int getTimesHit(Move move){
-        return ThreadLocalRandom.current().nextInt(move.getMinHits(), move.getMaxHits() + 1);
+
+        int hits = ThreadLocalRandom.current().nextInt(move.getMinHits(), move.getMaxHits() + 1);
+        Log.i(TAG, "Move hits " + hits + " times (min: " + move.getMinHits() + "; max: " + move.getMaxHits() + ")");
+
+        return hits;
     }
 
     public int calculateDamage(BattlePokemon attacker, Move move, BattlePokemon target) {
