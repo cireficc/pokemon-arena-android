@@ -87,6 +87,30 @@ public class Battle {
         return battlePhaseResult;
     }
 
+    public void applyCommandResult(CommandResult commandResult) {
+
+        TargetInfo targetInfo = commandResult.getTargetInfo();
+
+        if (commandResult instanceof AttackResult) {
+            Log.i(TAG, "Applying command result of type AttackResult");
+
+            String attackingPlayerId = targetInfo.getAttackingPlayer().getId();
+            BattlePokemonPlayer attackingPlayer = getPlayerFromId(attackingPlayerId);
+            BattlePokemon attackingPlayerPokemon = attackingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+
+            String defendingPlayerId = targetInfo.getDefendingPlayer().getId();
+            BattlePokemonPlayer defendingPlayer = getPlayerFromId(defendingPlayerId);
+            BattlePokemon defendingPlayerPokemon = defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+
+            Log.i(TAG, "Attacking player: " + attackingPlayerId);
+            Log.i(TAG, "Attacking player pkmn: " + attackingPlayerPokemon.getOriginalPokemon().getName());
+            Log.i(TAG, "Defending player: " + defendingPlayerId);
+            Log.i(TAG, "Defending player pkmn: " + defendingPlayerPokemon.getOriginalPokemon().getName());
+
+            // TODO: Finish implementing this method
+        }
+    }
+
     private BattlePokemonPlayer getPlayerFromId(String id) {
         if (self.getId().equals(id)) {
             return self;
