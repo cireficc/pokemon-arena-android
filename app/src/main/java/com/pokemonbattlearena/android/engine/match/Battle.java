@@ -3,6 +3,7 @@ package com.pokemonbattlearena.android.engine.match;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Battle {
@@ -57,6 +58,33 @@ public class Battle {
         Log.i(TAG, "Added current battle phase to finished phases");
         Log.i(TAG, "Created new battle phase");
         currentBattlePhase = new BattlePhase(self, opponent);
+    }
+
+    public BattlePhaseResult executeCurrentBattlePhase() {
+
+        Log.i(TAG, "Executing current battle phase from Battle");
+
+        Log.i(TAG, "Sorting commands by priority");
+        Collections.sort(currentBattlePhase.getCommands(), BattlePhase.getCommandComparator());
+        BattlePhaseResult battlePhaseResult = new BattlePhaseResult();
+
+        for (Command command : currentBattlePhase.getCommands()) {
+            Log.i(TAG, "Executing command of type: " + command.getClass());
+
+            CommandResult commandResult = command.execute();
+
+            Log.i(TAG, "Adding command result to battle phase result");
+            battlePhaseResult.addCommandResult(commandResult);
+        }
+
+        Log.i(TAG, "Setting battle phase result on current battle phase");
+        currentBattlePhase.setBattlePhaseResult(battlePhaseResult);
+
+        Log.i(TAG, "Setting finished");
+        setFinished();
+        Log.i(TAG, "Battle finished? " + isFinished);
+
+        return battlePhaseResult;
     }
 
     private BattlePokemonPlayer getPlayerFromId(String id) {
