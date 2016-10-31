@@ -9,6 +9,7 @@ public class Battle {
     BattlePokemonPlayer opponent;
     List<BattlePhase> finishedBattlePhases;
     transient BattlePhase currentBattlePhase;
+    transient boolean isFinished;
 
     public Battle() { }
 
@@ -17,9 +18,14 @@ public class Battle {
         this.opponent = new BattlePokemonPlayer(player2);
         this.finishedBattlePhases = new ArrayList<>();
         this.currentBattlePhase = new BattlePhase(self, opponent);
+        this.isFinished = false;
     }
 
+    public boolean isFinished() {
+        return isFinished;
     }
 
+    private void setFinished() {
+        isFinished = self.getBattlePokemonTeam().allFainted() || opponent.getBattlePokemonTeam().allFainted();
     }
 }
