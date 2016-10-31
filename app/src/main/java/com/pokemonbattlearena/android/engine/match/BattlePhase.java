@@ -61,6 +61,10 @@ public class BattlePhase {
         return battlePhaseResult;
     }
 
+    public void setBattlePhaseResult(BattlePhaseResult battlePhaseResult) {
+        this.battlePhaseResult = battlePhaseResult;
+    }
+
     public static Comparator<Command> getCommandComparator() {
         return commandComparator;
     }
@@ -97,24 +101,5 @@ public class BattlePhase {
         Log.i(TAG, "Is phase ready (both players ready): " + ready);
 
         return ready;
-    }
-
-    protected BattlePhaseResult execute() {
-
-        Log.i(TAG, "Executing current battle phase from BattlePhase");
-        Log.i(TAG, "Sorting commands by priority");
-        Collections.sort(commands, commandComparator);
-        battlePhaseResult = new BattlePhaseResult();
-
-        for (Command command : commands) {
-            Log.i(TAG, "Executing command of type: " + command.getClass());
-
-            CommandResult commandResult = command.execute();
-
-            Log.i(TAG, "Adding command result to battle phase result");
-            battlePhaseResult.addCommandResult(commandResult);
-        }
-
-        return battlePhaseResult;
     }
 }
