@@ -58,4 +58,12 @@ public class Battle {
         Log.i(TAG, "Created new battle phase");
         currentBattlePhase = new BattlePhase(self, opponent);
     }
+
+    private BattlePokemonPlayer getPlayerFromId(String id) {
+        if (self.getId().equals(id)) {
+            return self;
+        } else {
+            return opponent;
+        }
+    }
 }
