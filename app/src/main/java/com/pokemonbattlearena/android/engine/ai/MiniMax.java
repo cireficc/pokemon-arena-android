@@ -7,6 +7,9 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
+
+import java.util.Random;
+
 import static android.content.ContentValues.TAG;
 import static java.lang.Double.MIN_VALUE;
 import static java.lang.Integer.MAX_VALUE;
@@ -47,7 +50,7 @@ public class MiniMax {
       //  for (int i = 0; i < 4; i++) {
       //      Log.d(TAG, gamePossibilities.getRoot().getChild(i).toString());
       //  }
-        Log.d(TAG, "" + chooseBestMove(gamePossibilities.getRoot(), depth, isAi));
+     //   Log.d(TAG, "" + chooseBestMove(gamePossibilities.getRoot(), depth, isAi));
     }
 
 
@@ -70,9 +73,14 @@ public class MiniMax {
     }
 
     public double hFunction(Node n) {
-        return n.getValue().movePower;
+        return new Random().nextInt(1000);
+       // return n.getValue().movePower;
     }
 
+
+    public Node choose() {
+        return chooseBestMove(gamePossibilities.getRoot(), depth, true);
+    }
 
     public Node chooseBestMove(Node n, int depth, boolean isAi) {
         if (depth == 0 || n.isLeaf()) {

@@ -167,6 +167,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                 mCallback.onBattleNowClicked();
                 break;
             case R.id.ai_battle_button:
+                mAiBattleButton.setVisibility(View.GONE);
                 mCallback.onAiBattleClicked();
                 break;
             case R.id.move_button_0:
@@ -205,12 +206,12 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         //mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(mPlayerBattleTeam.getCurrentPokemon().getOriginalPokemon());
 
         if (mPlayerMoves != null) {
-            for (int i = 7; i < buttonIds.length + 7; i++) {
+            for (int i = 0; i < buttonIds.length; i++) {
                 Move m = mPlayerMoves.get(i);
                 if (m != null) {
-                    mMoveButtons[i - 7].setText(m.getName());
-                    mMoveButtons[i - 7].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(m.getType1())));
-                    mMoveButtons[i - 7].setVisibility(View.VISIBLE);
+                    mMoveButtons[i].setText(m.getName());
+                    mMoveButtons[i].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(m.getType1())));
+                    mMoveButtons[i].setVisibility(View.VISIBLE);
                 }
             }
         }

@@ -98,6 +98,8 @@ public class BottomBarActivity extends BaseActivity implements
 
     private int mBattleMatchFlag = 0;
 
+    private boolean isAiBattle = false;
+
     //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
@@ -126,14 +128,23 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onAiBattleClicked() {
+        isAiBattle = true;
         startAiBattle();
 
     }
 
     @Override
     public void onMoveClicked(Move move) {
-        String gson = new Gson().toJson(move, Move.class);
-        sendMessage(gson);
+        if (!isAiBattle) {
+            String gson = new Gson().toJson(move, Move.class);
+            sendMessage(gson);
+        } else {
+            Toast.makeText(mApplication, move.getName(), Toast.LENGTH_SHORT).show();
+            if (mActiveBattle instanceof AiBattle) {
+                Toast.makeText(mApplication, mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon().getName() + " used: " + ((AiBattle) mActiveBattle).showIntelligence(), Toast.LENGTH_SHORT).show();
+            }
+
+        }
     }
 
     @Override
@@ -530,7 +541,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     //region AI Battle
     private void startAiBattle() {
-
         setCurrentPokemonPlayer();
         AiPlayer ai = new AiPlayer(mApplication.getBattleDatabase(), mCurrentPokemonPlayer);
         mActiveBattle = new AiBattle(mCurrentPokemonPlayer, ai);

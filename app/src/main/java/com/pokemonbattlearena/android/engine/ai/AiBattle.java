@@ -16,21 +16,16 @@ public class AiBattle extends Battle {
         super(humanPlayer, aiPlayer);
       //  BattlePokemonTeam aiPokemon = this.getOpponent().getBattlePokemonTeam();
       //  BattlePokemonTeam playerPokemon = this.getSelf().getBattlePokemonTeam();
-
         this.intelligence = new MiniMax(this.getOpponent(), this.getSelf());
-
-
     }
 
     public Command getNextCommand() {
-
         // TODO: Actually calculate shit using heuristics instead of hard-coding moves
-
-//        BattlePokemonTeam humanTeam = this.getOpponent().getBattlePokemonTeam();
-//        Move[] humanCurrentPokemonMoves = playerPokemon.getMoveSet();
-//        int humanCurrentPokemonHp = playerPokemon.getCurrentHp();
-
-//        return new Attack(aiPokemon, moveToUse, playerPokemon);
         return null;
+    }
+
+    public String showIntelligence() {
+
+        return intelligence.choose().getValue().toString();
     }
 }
