@@ -1,9 +1,13 @@
 package com.pokemonbattlearena.android.engine.match;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Battle {
+
+    private transient static final String TAG = Battle.class.getName();
 
     // NOTE: self is always the host of the battle
     BattlePokemonPlayer self;
