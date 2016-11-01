@@ -1,9 +1,19 @@
 package com.pokemonbattlearena.android.fragments.battle;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.view.Display;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
@@ -66,5 +76,22 @@ public class BattleViewItem {
         pokemonName.setVisibility(visible);
         pokemonHPImage.setVisibility(visible);
         pokemonHPText.setVisibility(visible);
+    }
+
+    public void updateHealthBar(Activity a, int amount) {
+        Display display = a.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        int width = pokemonHPImage.getWidth() - amount;
+        int height = pokemonHPImage.getHeight();
+
+//        Bitmap bMap = BitmapFactory.decodeResource(a.getResources(), R.drawable.healthbar);
+//        Bitmap bMapScaled = Bitmap.createScaledBitmap(bMap, width, height, true);
+//        pokemonHPImage.setImageBitmap(bMapScaled);
+//        Drawable dr = a.getResources().getDrawable(R.drawable.healthbar);
+//        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+//        Drawable d = new BitmapDrawable(a.getResources(), Bitmap.createScaledBitmap(bitmap, width, height, true));
+//        pokemonHPImage.setImageDrawable(d);
     }
 }

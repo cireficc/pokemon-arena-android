@@ -33,9 +33,14 @@ import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListene
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.AttackResult;
 import com.pokemonbattlearena.android.engine.match.Battle;
+import com.pokemonbattlearena.android.engine.match.BattlePhaseResult;
+import com.pokemonbattlearena.android.engine.match.CommandResult;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
@@ -96,6 +101,12 @@ public class BottomBarActivity extends BaseActivity implements
 
     private int mBattleMatchFlag = 0;
 
+    private final RuntimeTypeAdapterFactory<CommandResult> mRuntimeTypeAdapterFactory = RuntimeTypeAdapterFactory
+            .of(CommandResult.class, "type")
+            .registerSubtype(AttackResult.class);
+
+    private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mRuntimeTypeAdapterFactory).create();
+
     //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
@@ -103,7 +114,7 @@ public class BottomBarActivity extends BaseActivity implements
             mBottomBar.selectTabWithId(R.id.tab_battle);
             setSavedTeam(pokemonJSON);
             displaySavedTeam(true);
-            setCurrentPokemonPlayer();
+            setCurrentPokemonPlayer(new Gson().fromJson(pokemonJSON, PokemonTeam.class));
         }
     }
 
@@ -117,8 +128,10 @@ public class BottomBarActivity extends BaseActivity implements
             mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
-                    Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
-                    leaveRoom();
+                    if (mBattleHomeFragment.isVisible() ) {
+                        Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
+                        leaveRoom();
+                    }
                 }
             });
         } else {
@@ -131,13 +144,20 @@ public class BottomBarActivity extends BaseActivity implements
         String gson = new Gson().toJson(move, Move.class);
         if (mBattleHomeFragment != null) {
             mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+            boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+//            mBattleHomeFragment.showMoveUI(movesReady);
         }
         sendMessage(gson);
     }
 
     @Override
     public void onTypeBanClicked(String type) {
-        Toast.makeText(mApplication, "Banned: " + type, Toast.LENGTH_SHORT).show();
+        mBattleMatchFlag |= CustomTypeMatch.valueOf(type.toUpperCase()).getFlag();
+    }
+
+    @Override
+    public void onTypeBanLongClicked(String type) {
+        mBattleMatchFlag ^= CustomTypeMatch.valueOf(type.toUpperCase()).getFlag();
     }
 
     @Override
@@ -187,7 +207,7 @@ public class BottomBarActivity extends BaseActivity implements
             @Override
             public void onTabSelected(@IdRes int tabId) {
                 if (displaySavedTeam(true)) {
-                    setCurrentPokemonPlayer();
+                    setCurrentPokemonPlayer(getSavedTeam());
                 }
                 switch (tabId) {
                     case R.id.tab_teams:
@@ -234,26 +254,6 @@ public class BottomBarActivity extends BaseActivity implements
                     default:
                         break;
 
-                }
-            }
-        });
-
-        // Listens for a tab touch (Only when 'reselected')
-        mBottomBar.setOnTabReselectListener(new OnTabReselectListener() {
-            @Override
-            public void onTabReSelected(@IdRes int tabId) {
-                switch (tabId) {
-                    case R.id.tab_teams:
-                        Toast.makeText(BottomBarActivity.this, "Teams Again", Toast.LENGTH_SHORT).show();
-                        break;
-                    case R.id.tab_battle:
-                        Toast.makeText(BottomBarActivity.this, "Battle Again", Toast.LENGTH_SHORT).show();
-                        break;
-                    case R.id.tab_chat:
-                        Toast.makeText(BottomBarActivity.this, "Chat Again", Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        break;
                 }
             }
         });
@@ -480,7 +480,9 @@ public class BottomBarActivity extends BaseActivity implements
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
         byte[] buf = rtm.getMessageData();
         String bufferString = new String(buf);
-
+        Log.d(TAG, "Incoming");
+        // a host is the player who created the room. (They don't get special treatment)
+        boolean isHost = mRoomCreatorId.equalsIgnoreCase(mMyId);
         if (mActiveBattle == null) {
             // we don't have a battle, so we can assume a message is going to have a player
             try {
@@ -493,17 +495,40 @@ public class BottomBarActivity extends BaseActivity implements
             }
         } else {
             // since we have a battle, we can assume a message will update the game
-            //TODO: don't send a move, send the battle state + move
-            try {
+            if (isHost) {
+                // the host will receive moves from an opponent
                 Move move = new Gson().fromJson(bufferString, Move.class);
                 Log.d(TAG, "In Game Message Received: " + move.getName());
                 if (mBattleHomeFragment != null) {
                     mBattleHomeFragment.appendMoveHistory(mOpponentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), move);
+
+//                    mBattleHomeFragment.showMoveUI(movesReady);
+                    //TODO: This will break. Something is broken in DamageCalculator.
+//                    BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
+//                    for (CommandResult commandResult : result.getCommandResults()) {
+//                        mActiveBattle.applyCommandResult(commandResult);
+//                    }
+//                    updateUI();
+//                    String json = mCommandGson.toJson(result);
+//                    sendMessage(json);
+                    // Send JSON bytes to opponent
                 }
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
+
+            } else {
+                // we need to receive a BattleResult since we are the client
+                BattlePhaseResult resultFromJson = mCommandGson.fromJson(bufferString, BattlePhaseResult.class);
+                for (CommandResult commandResult : resultFromJson.getCommandResults()) {
+                    // Update the internal state of the battle (only host really needs to do this, but opponent can too)
+                    // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
+
+                    // Update UI here using data in the CommandResult (AttackResult) object or using the Battle object
+                    // E.g. damageDone, healingDone, etc.
+                }
+                mActiveBattle.startNewBattlePhase();
             }
         }
+
         hideProgressDialog();
     }
 
@@ -529,9 +554,9 @@ public class BottomBarActivity extends BaseActivity implements
     //endregion
 
     //region Private Helper Methods
-    private void setCurrentPokemonPlayer() {
+    private void setCurrentPokemonPlayer(PokemonTeam team) {
         mCurrentPokemonPlayer = new PokemonPlayer();
-        mCurrentPokemonPlayer.setPokemonTeam(getSavedTeam());
+        mCurrentPokemonPlayer.setPokemonTeam(team);
     }
     
     // Show error message about game being cancelled and return to main screen.
@@ -579,6 +604,14 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
+    private void updateUI() {
+        if (mBattleHomeFragment != null) {
+            int health1 = mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
+            int health2 = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
+            mBattleHomeFragment.updateHealthBars(health1, health2);
+        }
+    }
+
     private boolean displaySavedTeam(boolean show) {
         String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
         View savedView = (View) findViewById(R.id.saved_team_layout);
@@ -606,6 +639,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     private void setSavedTeam(String pokemonJSON) {
         SharedPreferences.Editor editor = mPreferences.edit();
+        Log.e(TAG, "Setting team: " + pokemonJSON);
         editor.putString("pokemonTeamJSON", pokemonJSON).apply();
         editor.commit();
     }
@@ -642,7 +676,12 @@ public class BottomBarActivity extends BaseActivity implements
         RoomConfig roomConfig = roomConfigBuilder.build();
 
         // create room:
-        Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), roomConfig);
+        if (mApplication.getGoogleApiClient().isConnected()) {
+            Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), roomConfig);
+        } else {
+            showGameError();
+            Log.e(TAG, "Not connected to Google Play Games");
+        }
 
         // prevent screen from sleeping during handshake
         keepScreenOn();
@@ -651,6 +690,7 @@ public class BottomBarActivity extends BaseActivity implements
     private PokemonTeam getSavedTeam() {
         String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
         if (!teamJSON.equals("mew")) {
+            Log.e(TAG, "Got saved team: " + teamJSON);
             return new Gson().fromJson(teamJSON, PokemonTeam.class);
         }
         return null;

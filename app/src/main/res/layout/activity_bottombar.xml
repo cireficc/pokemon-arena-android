@@ -44,7 +44,7 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:layout_margin="2dp"
-            android:text="Saved Team"
+            android:text="@string/active_team"
             android:id="@+id/saved_team_textview"/>
                 <ImageView
                     android:id="@+id/saved_team_0"

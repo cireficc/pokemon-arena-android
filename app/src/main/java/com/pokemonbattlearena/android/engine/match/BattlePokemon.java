@@ -4,6 +4,9 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BattlePokemon {
 
     private transient Pokemon originalPokemon;
@@ -16,15 +19,15 @@ public class BattlePokemon {
     private transient int chargingForTurns;
     private transient int rechargingForTurns;
     private transient boolean fainted;
-    private transient Move[] moveSet = new Move[4];
+    private transient List<Move> moveSet;
 
     public BattlePokemon(Pokemon pokemon) {
-
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
         this.confused = false;
         this.flinched = false;
         this.fainted = false;
+        this.moveSet = pokemon.getActiveMoveList();
     }
 
     public Pokemon getOriginalPokemon() {
@@ -111,7 +114,5 @@ public class BattlePokemon {
 
     public void setFainted(boolean fainted) { this.fainted = fainted; }
 
-    public Move[] getMoveSet() { return moveSet; }
-
-    public void setMoveSet(Move[] chosenMoves) { this.moveSet = chosenMoves; }
+    public List<Move> getMoveSet() { return moveSet; }
 }
