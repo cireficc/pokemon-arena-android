@@ -32,6 +32,14 @@ class Attack implements Command {
         return move;
     }
 
+    public BattlePokemonPlayer getAttackingPlayer() {
+        return attackingPlayer;
+    }
+
+    public BattlePokemonPlayer getDefendingPlayer() {
+        return defendingPlayer;
+    }
+
     protected BattlePokemon getAttackingPokemon() {
 
         return attackingPlayer.getBattlePokemonTeam().getCurrentPokemon();

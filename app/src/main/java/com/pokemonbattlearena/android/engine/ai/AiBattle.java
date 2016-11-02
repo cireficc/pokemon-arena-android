@@ -1,7 +1,6 @@
 package com.pokemonbattlearena.android.engine.ai;
 
 import com.pokemonbattlearena.android.engine.match.Battle;
-import com.pokemonbattlearena.android.engine.match.Command;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
 public class AiBattle extends Battle {
@@ -13,11 +12,6 @@ public class AiBattle extends Battle {
       //  BattlePokemonTeam aiPokemon = this.getOpponent().getBattlePokemonTeam();
       //  BattlePokemonTeam playerPokemon = this.getSelf().getBattlePokemonTeam();
         this.intelligence = new MiniMax(this.getOpponent(), this.getSelf());
-    }
-
-    public Command getNextCommand() {
-        // TODO: Actually calculate shit using heuristics instead of hard-coding moves
-        return null;
     }
 
     public String showIntelligence() {
