@@ -4,25 +4,29 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
+import java.util.List;
+
 public class BattlePokemon {
 
-    private Pokemon originalPokemon;
-    private int currentHp;
-    private StatusEffect statusEffect;
-    private int statusEffectTurns;
-    private boolean confused;
-    private int confusedTurns;
-    private boolean flinched;
-    private boolean fainted;
-    private Move[] moveSet = new Move[4];
+    private transient Pokemon originalPokemon;
+    private transient int currentHp;
+    private transient StatusEffect statusEffect;
+    private transient int statusEffectTurns;
+    private transient boolean confused;
+    private transient int confusedTurns;
+    private transient boolean flinched;
+    private transient int chargingForTurns;
+    private transient int rechargingForTurns;
+    private transient boolean fainted;
+    private transient List<Move> moveSet;
 
     public BattlePokemon(Pokemon pokemon) {
-
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
         this.confused = false;
         this.flinched = false;
         this.fainted = false;
+        this.moveSet = pokemon.getActiveMoveList();
     }
 
     public Pokemon getOriginalPokemon() {
@@ -81,11 +85,37 @@ public class BattlePokemon {
         this.flinched = flinched;
     }
 
+    public int getChargingForTurns() {
+        return chargingForTurns;
+    }
+
+    public void setChargingForTurns(int chargingForTurns) {
+        this.chargingForTurns = chargingForTurns;
+    }
+
+    public boolean isCharging() {
+        return this.chargingForTurns > 0;
+    }
+
+    public int getRechargingForTurns() {
+        return rechargingForTurns;
+    }
+
+    public void setRechargingForTurns(int rechargingForTurns) {
+        this.rechargingForTurns = rechargingForTurns;
+    }
+
+    public boolean isRecharging() {
+        return this.rechargingForTurns > 0;
+    }
+
     public boolean isFainted() { return this.fainted; }
 
     public void setFainted(boolean fainted) { this.fainted = fainted; }
 
-    public Move[] getMoveSet() { return moveSet; }
+    public void setMoveSet(List<Move> moves) {
+        this.moveSet = moves;
+    }
 
-    public void setMoveSet(Move[] chosenMoves) { this.moveSet = chosenMoves; }
+    public List<Move> getMoveSet() { return moveSet; }
 }

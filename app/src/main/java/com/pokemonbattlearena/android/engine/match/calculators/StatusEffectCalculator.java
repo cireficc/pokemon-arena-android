@@ -1,9 +1,9 @@
-package com.pokemonbattlearena.android.engine.match;
+package com.pokemonbattlearena.android.engine.match.calculators;
 
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class StatusEffectCalculator {
@@ -26,15 +26,14 @@ public class StatusEffectCalculator {
         return instance;
     }
 
-    protected boolean doesApplyFlinch(Move move) {
+    public boolean doesApplyFlinch(Move move) {
 
         if (!move.canFlinch()) {
             return false;
         } else {
             // Always 15% chance to flinch
             final int FLINCH_CHANCE = 15;
-            Random random = new Random();
-            int rolled = random.nextInt(MAX_CHANCE);
+            int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
             return (rolled >= (MAX_CHANCE - FLINCH_CHANCE));
         }
     }
@@ -43,15 +42,14 @@ public class StatusEffectCalculator {
      * Calculate any status effect produced by using a move against a target Pokemon
      * http://bulbapedia.bulbagarden.net/wiki/Status_move
      */
-    protected boolean doesApplyStatusEffect(Move move, BattlePokemon target) {
+    public boolean doesApplyStatusEffect(Move move, BattlePokemon target) {
 
         boolean alreadyConfused = (target.isConfused() && move.getStatusEffect() == StatusEffect.CONFUSION);
 
         if (alreadyConfused || target.hasStatusEffect() || move.getStatusEffect() == null) {
             return false;
         } else {
-            Random random = new Random();
-            int rolled = random.nextInt(MAX_CHANCE);
+            int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
             return (rolled >= (MAX_CHANCE - move.getStatusEffectChance()));
         }
     }
@@ -59,7 +57,7 @@ public class StatusEffectCalculator {
     /*
      * Calculate the number of turns that a status effect will last
      */
-    protected int getStatusEffectTurns(StatusEffect effect) {
+    public int getStatusEffectTurns(StatusEffect effect) {
 
         final int MIN_TURNS = 1;
         final int MAX_TURNS_SLEEP = 3;

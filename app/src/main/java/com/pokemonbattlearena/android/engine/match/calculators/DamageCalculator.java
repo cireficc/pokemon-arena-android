@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.engine.match;
+package com.pokemonbattlearena.android.engine.match.calculators;
 
 import android.util.Log;
 
@@ -6,8 +6,8 @@ import com.pokemonbattlearena.android.engine.database.ElementalType;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.MoveType;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DamageCalculator {
@@ -50,7 +50,7 @@ public class DamageCalculator {
         return instance;
     }
 
-    protected double getType1Effectiveness(Move move, BattlePokemon target) {
+    public double getType1Effectiveness(Move move, BattlePokemon target) {
 
         int moveIndex = move.getElementalType1().ordinal();
         int targetIndex = target.getOriginalPokemon().getElementalType1().ordinal();
@@ -58,7 +58,7 @@ public class DamageCalculator {
         return TYPE_MULTIPLIERS[moveIndex][targetIndex];
     }
 
-    protected double getType2Effectiveness(Move move, BattlePokemon target) {
+    public double getType2Effectiveness(Move move, BattlePokemon target) {
 
         int moveIndex = move.getElementalType1().ordinal();
         ElementalType type2 = target.getOriginalPokemon().getElementalType2();
@@ -71,11 +71,11 @@ public class DamageCalculator {
         }
     }
 
-    protected double getOverallTypeEffectiveness(Move move, BattlePokemon target) {
+    public double getOverallTypeEffectiveness(Move move, BattlePokemon target) {
         return getType1Effectiveness(move, target) * getType2Effectiveness(move, target);
     }
 
-    protected boolean moveHit(Move move, BattlePokemon target) {
+    public boolean moveHit(Move move, BattlePokemon target) {
 
         // TODO: Add support for accuracy stages
 
@@ -83,23 +83,41 @@ public class DamageCalculator {
         if (move.getAccuracy() == 0) {
             return true;
         } else {
-            Random random = new Random();
-            int rolled = random.nextInt(MAX_ACCURACY);
+            int rolled = ThreadLocalRandom.current().nextInt(MAX_ACCURACY);
             return (rolled >= (MAX_ACCURACY - move.getAccuracy()));
         }
     }
 
-    protected int getTimesHit(Move move){
-        return ThreadLocalRandom.current().nextInt(move.getMinHits(), move.getMaxHits() + 1);
+    public int getTimesHit(Move move){
+
+        int hits = ThreadLocalRandom.current().nextInt(move.getMinHits(), move.getMaxHits() + 1);
+        Log.i(TAG, "Move hits " + hits + " times (min: " + move.getMinHits() + "; max: " + move.getMaxHits() + ")");
+
+        return hits;
     }
 
-    protected int calculateDamage(BattlePokemon attacker, Move move, BattlePokemon target) {
+    public int calculateDamage(BattlePokemon attacker, Move move, BattlePokemon target) {
 
         Pokemon originalAttacker = attacker.getOriginalPokemon();
         Pokemon originalTarget = target.getOriginalPokemon();
         final int POKEMON_LEVEL = 100;
 
         Log.d(TAG, "\n\nCalculating damage for " + move.getName() + " against " + originalTarget.getName());
+
+        switch(move.getName()) {
+            case "Night Shade":
+            case "Seismic Toss":
+                return POKEMON_LEVEL;
+            case "Dragon Rage":
+                return 40;
+            case "Sonic Boom":
+                return 20;
+            case "Psywave":
+                //damage = Attacking Pokemon's Level * (50% to 150%)
+                return Math.round(POKEMON_LEVEL * (ThreadLocalRandom.current().nextInt(50, 150 + 1) / 100));
+            case "Super Fang":
+                return Math.round(target.getCurrentHp() / 2);
+        }
 
         // Database converts nulls to 0; null power means it does 0 damage
         if (move.getPower() == 0) {
@@ -123,10 +141,9 @@ public class DamageCalculator {
         double typeEffectiveness = getOverallTypeEffectiveness(move, target);
 
         int critMultiplier = 1;
-        Random random = new Random();
         final int MAX = 100;
         final int MIN = 85;
-        double roll = (random.nextInt((MAX - MIN) + 1) + MIN) / 100.0;
+        double roll = (ThreadLocalRandom.current().nextInt((MAX - MIN) + 1) + MIN) / 100.0;
 
         double modifier = stabBonus * typeEffectiveness * critMultiplier * roll;
 

@@ -23,6 +23,14 @@ public class Move {
     protected final static String CAN_FLINCH_FIELD_NAME = "can_flinch";
     protected final static String MIN_HITS_FIELD_NAME = "min_hits";
     protected final static String MAX_HITS_FIELD_NAME = "max_hits";
+    protected final static String CHARGING_TURNS_FIELD_NAME = "charging_turns";
+    protected final static String RECHARGE_TURNS_FIELD_NAME = "recharge_turns";
+    protected final static String SELF_HEAL_FIELD_NAME = "self_heal";
+    protected final static String SELF_HEAL_TYPE_FIELD_NAME = "self_heal_type";
+    protected final static String SELF_HEAL_AMOUNT_FIELD_NAME = "self_heal_amount";
+    protected final static String RECOIL_FIELD_NAME = "recoil";
+    protected final static String RECOIL_AMOUNT_FIELD_NAME = "recoil_amount";
+    protected final static String CRASH_FIELD_NAME = "crash";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
@@ -56,6 +64,22 @@ public class Move {
     private int minHits;
     @DatabaseField(columnName = MAX_HITS_FIELD_NAME)
     private int maxHits;
+    @DatabaseField(columnName = CHARGING_TURNS_FIELD_NAME)
+    private int chargingTurns;
+    @DatabaseField(columnName = RECHARGE_TURNS_FIELD_NAME)
+    private int rechargeTurns;
+    @DatabaseField(columnName = SELF_HEAL_FIELD_NAME)
+    private int selfHeal;
+    @DatabaseField(columnName = SELF_HEAL_TYPE_FIELD_NAME)
+    private String selfHealType;
+    @DatabaseField(columnName = SELF_HEAL_AMOUNT_FIELD_NAME)
+    private String selfHealAmount;
+    @DatabaseField(columnName = RECOIL_FIELD_NAME)
+    private int recoil;
+    @DatabaseField(columnName = RECOIL_AMOUNT_FIELD_NAME)
+    private String recoilAmount;
+    @DatabaseField(columnName = CRASH_FIELD_NAME)
+    private int crash;
 
     public Move() {
         // Constructor for ORMLite
@@ -144,6 +168,60 @@ public class Move {
         return maxHits;
     }
 
+    public int getChargingTurns() {
+        return chargingTurns;
+    }
+
+    public boolean isChargingMove() {
+        return chargingTurns > 0;
+    }
+
+    public int getRechargeTurns() {
+        return rechargeTurns;
+    }
+
+    public boolean isRechargeMove() {
+        return rechargeTurns > 0;
+    }
+
+    public int getSelfHeal() {
+        return selfHeal;
+    }
+
+    public boolean isSelfHeal() { return selfHeal > 0; }
+
+    public SelfHealType getSelfHealType() {
+        try {
+            return SelfHealType.valueOf(this.selfHealType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public SelfHealAmount getSelfHealAmount() {
+        try {
+            return SelfHealAmount.valueOf(this.selfHealAmount.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public boolean isRecoil() {
+        return recoil > 0;
+    }
+
+    public RecoilAmount getRecoilAmount() {
+        try {
+            return RecoilAmount.valueOf(this.recoilAmount.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public boolean isCrash() {
+        return crash > 0;
+    }
+
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
@@ -162,6 +240,13 @@ public class Move {
         sb.append(" - CanFlinch: " + canFlinch + "\n");
         sb.append(" - MaxHits: " + maxHits + "\n");
         sb.append(" - MinHits: " + minHits + "\n");
+        sb.append(" - ChargingTurns: " + chargingTurns + "\n");
+        sb.append(" - RechargingTurns: " + rechargeTurns + "\n");
+        sb.append(" - SelfHealType: " + selfHealType + "\n");
+        sb.append(" - SelfHealAmount: " + selfHealAmount + "\n");
+        sb.append(" - Recoil?: " + recoil + "\n");
+        sb.append(" - RecoilAmount: " + recoilAmount + "\n");
+        sb.append(" - Crash?: " + crash + "\n");
 
 
         return sb.toString();
