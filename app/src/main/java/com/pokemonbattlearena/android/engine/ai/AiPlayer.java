@@ -3,13 +3,13 @@ package com.pokemonbattlearena.android.engine.ai;
 import com.pokemonbattlearena.android.engine.database.Database;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.RandomAccess;
 
 public class AiPlayer extends PokemonPlayer {
 
@@ -41,11 +41,11 @@ public class AiPlayer extends PokemonPlayer {
 
     public void setMoves() {
         Pokemon org = aiBattler.getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon();
-        Move[] moves = new Move[4];
+        List<Move> moves = new ArrayList<>(4);
 
         for (int i = 0; i < 4; i++) {
             int rnd = new Random().nextInt(db.getMovesForPokemon(org).size());
-            moves[i] = db.getMovesForPokemon(org).get(rnd);
+            moves.add(i, db.getMovesForPokemon(org).get(rnd));
         }
 
         aiBattler.getBattlePokemonTeam().getCurrentPokemon().setMoveSet(moves);

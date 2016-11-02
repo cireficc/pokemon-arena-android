@@ -61,10 +61,10 @@ public class MiniMax {
             int i = 0;
             while( i < 4) {
                 if (isAi) {
-                    Node ne = new Node(new DummyCommandResult(aiCurrent.getMoveSet()[i]));
+                    Node ne = new Node(new DummyCommandResult(aiCurrent.getMoveSet().get(i)));
                     n.setChildAt(i, (buildTree(d - 1, ne, !isAi)));
                 } else {
-                    Node ne = new Node(new DummyCommandResult(huCurrent.getMoveSet()[i]));
+                    Node ne = new Node(new DummyCommandResult(huCurrent.getMoveSet().get(i)));
                     n.setChildAt(i, (buildTree(d - 1, ne, !isAi)));
                 }
                 i++;

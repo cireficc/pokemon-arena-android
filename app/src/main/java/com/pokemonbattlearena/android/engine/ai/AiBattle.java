@@ -1,10 +1,6 @@
 package com.pokemonbattlearena.android.engine.ai;
 
-import com.pokemonbattlearena.android.engine.database.Move;
-import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.Battle;
-import com.pokemonbattlearena.android.engine.match.BattlePokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Command;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 

@@ -1,9 +1,12 @@
 package com.pokemonbattlearena.android.engine.match;
 
+import android.util.Log;
+
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Database;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,20 +34,14 @@ public class Battle {
         } else {
             this.opponent = new BattlePokemonPlayer(player2);
         }
-        this.turns = new ArrayList<>();
-        this.turnOwner = new BattlePokemonPlayer(player1);
-    }
-
-    public BattlePokemonPlayer getSelf() {
-        return self;
     }
 
     //TODO kill this method at all costs.
     private void setPlayerMoves(Database db) {
         Pokemon org = self.getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon();
-        Move[] moves = new Move[4];
+        List<Move> moves = new ArrayList<Move>();
         for (int i = 0; i < 4; i++) {
-            moves[i] = db.getMovesForPokemon(org).get(i);
+            moves.add(i, db.getMovesForPokemon(org).get(i));
         }
         self.getBattlePokemonTeam().getCurrentPokemon().setMoveSet(moves);
     }
@@ -55,14 +52,6 @@ public class Battle {
 
     public BattlePokemonPlayer getOpponent() {
         return opponent;
-    }
-
-    public BattlePokemonPlayer getTurnOwner() {
-        return turnOwner;
-    }
-
-    protected void changeTurn() {
-        this.turnOwner = (turnOwner == self) ? opponent : self;
     }
 
     public List<BattlePhase> getFinishedBattlePhases() {

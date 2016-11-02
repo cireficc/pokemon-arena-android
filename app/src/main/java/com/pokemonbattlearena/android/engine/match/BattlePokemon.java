@@ -4,7 +4,6 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BattlePokemon {
@@ -113,6 +112,10 @@ public class BattlePokemon {
     public boolean isFainted() { return this.fainted; }
 
     public void setFainted(boolean fainted) { this.fainted = fainted; }
+
+    public void setMoveSet(List<Move> moves) {
+        this.moveSet = moves;
+    }
 
     public List<Move> getMoveSet() { return moveSet; }
 }

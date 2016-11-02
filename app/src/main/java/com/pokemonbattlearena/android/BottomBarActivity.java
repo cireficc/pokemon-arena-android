@@ -153,12 +153,13 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onMoveClicked(Move move) {
-        if (mBattleHomeFragment != null) {
-            mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
-            boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
-//            mBattleHomeFragment.showMoveUI(movesReady);
-        }
+
         if (!isAiBattle) {
+            if (mBattleHomeFragment != null) {
+                mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+                boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+//            mBattleHomeFragment.showMoveUI(movesReady);
+            }
             String gson = new Gson().toJson(move, Move.class);
             sendMessage(gson);
         } else {
