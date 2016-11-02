@@ -1,8 +1,10 @@
 package com.pokemonbattlearena.android.fragments.team;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
@@ -15,17 +17,21 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.PokemonMove;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -99,14 +105,61 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Pokemon selectedPokemon = (Pokemon) mAdapter.getItem(position);
-        PokemonGridViewItem item = (PokemonGridViewItem) view.getTag();
+        final Pokemon selectedPokemon = (Pokemon) mAdapter.getItem(position);
+        final PokemonGridViewItem item = (PokemonGridViewItem) view.getTag();
+        final List<Move> moveList = mApplication.getBattleDatabase().getMovesForPokemon(selectedPokemon);
+        final List<Move> selectedMoves = new ArrayList<>();
         if (!selectedTeamArrayList.contains(selectedPokemon)) {
             if (selectedTeamArrayList.size() >= mTeamSize) {
-                Toast.makeText(mApplication, "You can only select: " + mTeamSize + " pokemon for your team", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mApplication, "You can only select " + mTeamSize + " pokemon for your team", Toast.LENGTH_SHORT).show();
             } else {
-                selectedTeamArrayList.add(selectedPokemon);
-                item.mCheckbox.setChecked(true);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = LayoutInflater.from(getActivity());
+                View moveSelectionView = inflater.inflate(R.layout.move_selection_dialog,parent,false);
+                final ListView moveListView = (ListView) moveSelectionView.findViewById(R.id.move_list_view);
+                final MoveAdapter adapter = new MoveAdapter(getActivity(), moveList);
+                moveListView.setAdapter(adapter);
+                moveListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Move selectedMove = (Move) adapter.getItem(position);
+                        MoveAdapter.MoveViewHolder holder = (MoveAdapter.MoveViewHolder) view.getTag();
+                        if (!selectedMoves.contains(selectedMove) && selectedMoves.size() < 4) {
+                            selectedMoves.add(selectedMove);
+                            holder.moveCheckbox.setChecked(true);
+                        } else {
+                            selectedMoves.remove(selectedMove);
+                            holder.moveCheckbox.setChecked(false);
+                        }
+                    }
+                });
+                builder.setTitle("Pick 4 Moves");
+                builder.setView(moveSelectionView);
+                builder.setCancelable(false);
+                builder.setPositiveButton("Save Moves", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedTeamArrayList.add(selectedPokemon);
+                        item.mCheckbox.setChecked(true);
+                    }
+                });
+                builder.setNeutralButton("Default Moves", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        List<Move> moves = mApplication.getBattleDatabase().getMovesForPokemon(selectedPokemon);
+                        Collections.shuffle(moves);
+                        selectedPokemon.setActiveMoveList(moves.subList(0,4));
+                        selectedTeamArrayList.add(selectedPokemon);
+                        item.mCheckbox.setChecked(true);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedTeamArrayList.remove(selectedPokemon);
+                    }
+                });
+                builder.show();
             }
         } else {
             item.mCheckbox.setChecked(false);

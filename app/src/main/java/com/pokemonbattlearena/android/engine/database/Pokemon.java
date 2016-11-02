@@ -3,6 +3,8 @@ package com.pokemonbattlearena.android.engine.database;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.List;
+
 @DatabaseTable(tableName = "pokemons")
 public class Pokemon {
 
@@ -40,6 +42,8 @@ public class Pokemon {
     private int speed;
     @DatabaseField(columnName = LEGENDARY_FIELD_NAME)
     private int legendary;
+
+    protected List<Move> activeMoveList;
 
     public Pokemon() {
         // Constructor for ORMLite
@@ -101,6 +105,14 @@ public class Pokemon {
         return legendary > 0;
     }
 
+    public void setActiveMoveList(List<Move> moves) {
+        this.activeMoveList = moves;
+    }
+
+    public List<Move> getActiveMoveList() {
+        return activeMoveList;
+    }
+
     @Override
     public String toString() {
 
@@ -119,7 +131,7 @@ public class Pokemon {
         sb.append(" - SpecialDefense: " + specialDefense + "\n");
         sb.append(" - Speed: " + speed + "\n");
         sb.append(" - Legendary: " + isLegendary() + "\n");
-
+        sb.append(" - Moves: " + getActiveMoveList());
         return sb.toString();
     }
 }

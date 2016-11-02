@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.pokemonbattlearena.android.engine.BattleEngine;
+import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.database.Database;
 
 /**

@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/light_grey">
+        android:background="@color/type_ban_background_color">
         <TextView
             android:id="@+id/type_ban_title_text"
             android:visibility="gone"
@@ -44,6 +44,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/battle_now_button" />
+
+    <Button
+        android:id="@+id/ai_battle_button"
+        android:text="AI Battle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         />
 
     <include layout="@layout/fragment_battleui"/>
 

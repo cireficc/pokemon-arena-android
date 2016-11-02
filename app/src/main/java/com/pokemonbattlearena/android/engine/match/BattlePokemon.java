@@ -4,27 +4,29 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
+import java.util.List;
+
 public class BattlePokemon {
 
-    private Pokemon originalPokemon;
-    private int currentHp;
-    private StatusEffect statusEffect;
-    private int statusEffectTurns;
-    private boolean confused;
-    private int confusedTurns;
-    private boolean flinched;
-    private int chargingForTurns;
-    private int rechargingForTurns;
-    private boolean fainted;
-    private Move[] moveSet = new Move[4];
+    private transient Pokemon originalPokemon;
+    private transient int currentHp;
+    private transient StatusEffect statusEffect;
+    private transient int statusEffectTurns;
+    private transient boolean confused;
+    private transient int confusedTurns;
+    private transient boolean flinched;
+    private transient int chargingForTurns;
+    private transient int rechargingForTurns;
+    private transient boolean fainted;
+    private transient List<Move> moveSet;
 
     public BattlePokemon(Pokemon pokemon) {
-
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
         this.confused = false;
         this.flinched = false;
         this.fainted = false;
+        this.moveSet = pokemon.getActiveMoveList();
     }
 
     public Pokemon getOriginalPokemon() {
@@ -111,7 +113,9 @@ public class BattlePokemon {
 
     public void setFainted(boolean fainted) { this.fainted = fainted; }
 
-    public Move[] getMoveSet() { return moveSet; }
+    public void setMoveSet(List<Move> moves) {
+        this.moveSet = moves;
+    }
 
-    public void setMoveSet(Move[] chosenMoves) { this.moveSet = chosenMoves; }
+    public List<Move> getMoveSet() { return moveSet; }
 }

@@ -6,67 +6,95 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.calculators.DamageCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.HealingCalculator;
+import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
-public class Attack implements Command {
+class Attack implements Command {
 
-    private static final String TAG = Attack.class.getName();
+    private transient static final String TAG = Attack.class.getName();
 
     private Move move;
-    private BattlePokemon attacker;
-    private BattlePokemon target;
+    private BattlePokemonPlayer attackingPlayer;
+    private BattlePokemonPlayer defendingPlayer;
 
-    private static DamageCalculator damageCalculator = DamageCalculator.getInstance();
-    private static StatusEffectCalculator statusEffectCalculator = StatusEffectCalculator.getInstance();
-    private static HealingCalculator healingCalculator = HealingCalculator.getInstance();
+    private transient static DamageCalculator damageCalculator = DamageCalculator.getInstance();
+    private transient static StatusEffectCalculator statusEffectCalculator = StatusEffectCalculator.getInstance();
+    private transient static HealingCalculator healingCalculator = HealingCalculator.getInstance();
+    private transient static RecoilCalculator recoilCalculator = RecoilCalculator.getInstance();
 
-    public Attack(BattlePokemon attacker, Move move, BattlePokemon target) {
+    Attack(BattlePokemonPlayer attacker, BattlePokemonPlayer defender, Move move) {
+        this.attackingPlayer = attacker;
+        this.defendingPlayer = defender;
         this.move = move;
-        this.attacker = attacker;
-        this.target = target;
     }
 
-    public Move getMove() {
+    protected Move getMove() {
         return move;
     }
 
-    public BattlePokemon getAttacker() {
-        return attacker;
+    public BattlePokemonPlayer getAttackingPlayer() {
+        return attackingPlayer;
     }
 
-    public BattlePokemon getTarget() {
-        return target;
+    public BattlePokemonPlayer getDefendingPlayer() {
+        return defendingPlayer;
     }
+
+    protected BattlePokemon getAttackingPokemon() {
+
+        return attackingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+    }
+
+    protected BattlePokemon getDefendingPokemon() {
+
+        return defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+    }
+
 
     @Override
-    public void execute() {
+    public AttackResult execute() {
+
+        BattlePokemon attackingPokemon = getAttackingPokemon();
+        BattlePokemon defendingPokemon = getDefendingPokemon();
+        TargetInfo targetInfo =
+                new TargetInfo(attackingPlayer, defendingPlayer, attackingPokemon, defendingPokemon);
+        AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move.getId());
 
         if (move.isChargingMove()) {
             Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
-            attacker.setChargingForTurns(move.getChargingTurns());
+            builder.setChargingTurns(move.getChargingTurns());
         }
 
         if (move.isRechargeMove()) {
             Log.i(TAG, move.getName() + " is recharge move (for " + move.getRechargeTurns() + " turns)");
-            attacker.setRechargingForTurns(move.getRechargeTurns());
+            builder.setRechargingTurns(move.getRechargeTurns());
         }
 
-        int damage = 0;
+        int damageDone = 0;
         for (int i = 0; i <= damageCalculator.getTimesHit(move); i++){
-            int partialDamage = damageCalculator.calculateDamage(attacker, move, target);
+            int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
             Log.i(TAG, "Partial damage: " + partialDamage);
-            damage += partialDamage;
+            damageDone += partialDamage;
         }
 
-        int remainingHp = target.getCurrentHp() - damage;
-        target.setCurrentHp(remainingHp);
+        Log.i(TAG, "Total damage: " + damageDone);
+        builder.setDamageDone(damageDone);
+
+        int remainingHp = defendingPokemon.getCurrentHp() - damageDone;
+
+        // If the defender faints, we can return early and skip other calculations
+        if (remainingHp <= 0) {
+            Log.d(TAG, defendingPokemon.getOriginalPokemon().getName() + " fainted!");
+            builder.setFainted(true);
+            return builder.build();
+        }
+
         boolean flinched = statusEffectCalculator.doesApplyFlinch(move);
-        boolean applyStatusEffect = statusEffectCalculator.doesApplyStatusEffect(move, target);
-
         Log.i(TAG, move.getName() + " caused flinch? " + flinched);
-        Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
+        builder.setFlinched(flinched);
 
-        target.setFlinched(true);
+        boolean applyStatusEffect = statusEffectCalculator.doesApplyStatusEffect(move, defendingPokemon);
+        Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
 
         if (applyStatusEffect) {
             StatusEffect effect = move.getStatusEffect();
@@ -74,11 +102,11 @@ public class Attack implements Command {
 
             // Confusion can be applied separately from other status effects
             if (effect == StatusEffect.CONFUSION) {
-                target.setConfused(true);
-                target.setConfusedTurns(turns);
+                builder.setConfused(true);
+                builder.setConfusedTurns(turns);
             } else {
-                target.setStatusEffect(effect);
-                target.setStatusEffectTurns(turns);
+                builder.setStatusEffectApplied(effect);
+                builder.setStatusEffectTurns(turns);
             }
 
             Log.i(TAG, "Effect: " + effect + " applied for " + turns + " turns");
@@ -87,24 +115,19 @@ public class Attack implements Command {
         if (move.isSelfHeal()) {
             Log.i(TAG, move.getName() + " is self heal of type " + move.getSelfHealType());
 
-            int toHeal = healingCalculator.getHealAmount(attacker, move, damage);
-            int maxHp = attacker.getOriginalPokemon().getHp();
-            int hpAfterHeal = attacker.getCurrentHp() + toHeal;
+            int toHeal = healingCalculator.getHealAmount(attackingPokemon, move, damageDone);
+            builder.setHealingDone(toHeal);
 
-            Log.i(TAG, "Max HP: " + attacker.getOriginalPokemon().getHp() + "; HP with healing: " + hpAfterHeal);
-
-            if (hpAfterHeal >= maxHp) {
-                attacker.setCurrentHp(maxHp);
-                Log.i(TAG, "Healed to max HP");
-            } else {
-                attacker.setCurrentHp(hpAfterHeal);
-                Log.i(TAG, "HP after healing: " + attacker.getCurrentHp());
-            }
+            Log.i(TAG, "Max HP: " + attackingPokemon.getOriginalPokemon().getHp() + "; HP to heal: " + toHeal);
         }
 
-        if (target.getCurrentHp() <= 0) {
-            Log.d(TAG, target.getOriginalPokemon().getName() + " fainted! (" + target.getCurrentHp() + " hp)");
-            target.setFainted(true);
+        if (move.isRecoil()) {
+            Log.i(TAG, move.getName() + " is recoil type");
+            int recoilTaken = recoilCalculator.getRecoilAmount(attackingPokemon, move, damageDone);
+            Log.i(TAG, attackingPokemon.getOriginalPokemon().getName() + " takes " + recoilTaken + " recoil damage");
+            builder.setRecoilTaken(recoilTaken);
         }
+
+        return builder.build();
     }
 }

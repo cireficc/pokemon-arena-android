@@ -2,10 +2,15 @@ package com.pokemonbattlearena.android.fragments.battle;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Layout;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +27,22 @@ import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeBanAdapter;
 import com.pokemonbattlearena.android.TypeModel;
+import com.pokemonbattlearena.android.engine.ai.AiBattle;
+import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
+import org.w3c.dom.Text;
+
+import java.sql.Time;
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by droidowl on 9/25/16.
@@ -36,6 +52,10 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
     private Button mBattleButton;
+    private Button mAiBattleButton;
+
+    private boolean mIsActiveBattle = false;
+    private boolean battleBegun = false;
     private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
     private TypeModel mTypeModel;
@@ -54,6 +74,8 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private TextView mTypeBanTitle;
 
+    private TextView mMoveHistoryText;
+
     private OnBattleFragmentTouchListener mCallback;
 
     public BattleHomeFragment() {
@@ -61,10 +83,27 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mTypeModel = new TypeModel();
     }
 
+    public void hideBans(boolean show) {
+        int visible = show ? View.VISIBLE : View.GONE;
+        mTypeBanTitle.setVisibility(visible);
+        mTypeBanGrid.setVisibility(visible);
+        mTypeBanSwitch.setVisibility(visible);
+    }
+
+    public void showMoveUI(boolean show) {
+        for (Button button : mMoveButtons) {
+            button.setClickable(show);
+            PorterDuff.Mode m = show ? PorterDuff.Mode.CLEAR : PorterDuff.Mode.DARKEN;
+            button.setBackgroundTintMode(m);
+        }
+    }
+
     public interface OnBattleFragmentTouchListener {
-        void onBattleNowClicked();
+        void onBattleNowClicked(boolean isActiveBattle);
+        void onAiBattleClicked();
         void onMoveClicked(Move move);
         void onTypeBanClicked(String type);
+        void onTypeBanLongClicked(String type);
     }
 
     @Nullable
@@ -72,7 +111,11 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
+        mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
+        mMoveHistoryText.setMovementMethod( new ScrollingMovementMethod());
+        mAiBattleButton = (Button) view.findViewById(R.id.ai_battle_button);
         mBattleButton.setOnClickListener(this);
+        mAiBattleButton.setOnClickListener(this);
         mTypeBanGrid = (GridView) view.findViewById(R.id.type_ban_layout);
         mTypeBanTitle = (TextView) view.findViewById(R.id.type_ban_title_text);
         mTypeBanSwitch = (Switch) view.findViewById(R.id.type_ban_switch);
@@ -87,14 +130,14 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mCallback.onTypeBanClicked(TypeModel.typeNames[position]);
-                view.setBackgroundColor(getActivity().getColor(R.color.color_charizard));
+                view.setBackgroundColor(getActivity().getColor(R.color.type_ban_banned_color));
             }
         });
         mTypeBanGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                view.setBackgroundColor(getActivity().getColor(R.color.light_grey));
-                Toast.makeText(getActivity(), "Unbanned: " + TypeModel.typeNames[position], Toast.LENGTH_SHORT).show();
+                mCallback.onTypeBanLongClicked(TypeModel.typeNames[position]);
+                view.setBackgroundColor(getActivity().getColor(R.color.type_ban_background_color));
                 return true;
             }
         });
@@ -119,11 +162,13 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
         mOpponentBattleView.setVisibility(false);
 
+
+
         setupMoveButtons(view);
         return view;
     }
 
-    private void setTypeBanVisible(boolean isChecked) {
+    public void setTypeBanVisible(boolean isChecked) {
         int visibility = isChecked ? View.VISIBLE : View.GONE;
         mTypeBanGrid.setVisibility(visibility);
         mTypeBanTitle.setVisibility(visibility);
@@ -151,7 +196,14 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         int id = v.getId();
         switch (id) {
             case R.id.battle_now_button:
-                mCallback.onBattleNowClicked();
+                String text = mIsActiveBattle ? getString(R.string.battle) : getString(R.string.cancel_battle);
+                mBattleButton.setText(text);
+                mCallback.onBattleNowClicked(mIsActiveBattle);
+                mIsActiveBattle = !mIsActiveBattle;
+                break;
+            case R.id.ai_battle_button:
+                mAiBattleButton.setVisibility(View.GONE);
+                mCallback.onAiBattleClicked();
                 break;
             case R.id.move_button_0:
                 mCallback.onMoveClicked(mPlayerMoves.get(0));
@@ -179,12 +231,15 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                 b.setVisibility(View.INVISIBLE);
                 b.setOnClickListener(this);
                 mMoveButtons[i] = b;
-            }   
+            }
         }
     }
 
     // set the buttons to the current activePokemon
     private void configureMoveButtons() {
+
+        //mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(mPlayerBattleTeam.getCurrentPokemon().getOriginalPokemon());
+
         if (mPlayerMoves != null) {
             for (int i = 0; i < buttonIds.length; i++) {
                 Move m = mPlayerMoves.get(i);
@@ -194,6 +249,8 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                     mMoveButtons[i].setVisibility(View.VISIBLE);
                 }
             }
+        } else {
+            Log.e(TAG, "No moves");
         }
     }
 
@@ -209,7 +266,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mPlayerBattleView.setActivePokemon(activePokemon);
         mPlayerBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), activePokemon.getName()));
         mPlayerBattleView.getPokemonName().setText(activePokemon.getName());
-        mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(activePokemon);
+        mPlayerMoves = activePokemon.getActiveMoveList();
         configureMoveButtons();
     }
 
@@ -225,8 +282,30 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         if (mPlayerBattleView != null && mOpponentBattleView != null) {
             mPlayerBattleView.setVisibility(visible);
             mOpponentBattleView.setVisibility(visible);
+            mMoveHistoryText.setText(String.format("Match Started: %s", DateFormat.getDateTimeInstance().format(new Date())));
+            mMoveHistoryText.setVisibility(View.VISIBLE);
             // don't need to show the switch if we are battling
             mTypeBanSwitch.setVisibility(View.GONE);
         }
+    }
+
+    public void appendMoveHistory(String player, Move move) {
+        Calendar c = Calendar.getInstance();
+        String text = "\n" + " - " + player + " - " + move.getName() + " - " + move.getPower() + " damage";
+        if (mMoveHistoryText != null) {
+            mMoveHistoryText.append(text);
+            final Layout layout = mMoveHistoryText.getLayout();
+            if(layout != null){
+                int scrollDelta = layout.getLineBottom(mMoveHistoryText.getLineCount() - 1)
+                        - mMoveHistoryText.getScrollY() - mMoveHistoryText.getHeight();
+                if(scrollDelta > 0)
+                    mMoveHistoryText.scrollBy(0, scrollDelta);
+            }
+        }
+    }
+
+    public void updateHealthBars(int health1, int health2) {
+        mPlayerBattleView.updateHealthBar(getActivity(), health1);
+        mOpponentBattleView.updateHealthBar(getActivity(), health2);
     }
 }

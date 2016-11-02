@@ -24,4 +24,15 @@ public class BattlePokemonTeam {
     public BattlePokemon getCurrentPokemon() {
         return battlePokemons.get(0);
     }
+
+    public boolean allFainted() {
+
+        for (BattlePokemon pokemon : battlePokemons) {
+            if (!pokemon.isFainted()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
