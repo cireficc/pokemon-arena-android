@@ -27,8 +27,12 @@ import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeBanAdapter;
 import com.pokemonbattlearena.android.TypeModel;
+import com.pokemonbattlearena.android.engine.ai.AiBattle;
+import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
 import org.w3c.dom.Text;
@@ -38,6 +42,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by droidowl on 9/25/16.
@@ -47,7 +52,10 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
     private Button mBattleButton;
+    private Button mAiBattleButton;
+
     private boolean mIsActiveBattle = false;
+    private boolean battleBegun = false;
     private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
     private TypeModel mTypeModel;
@@ -91,7 +99,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     public interface OnBattleFragmentTouchListener {
-        void onBattleNowClicked(boolean isActiveBattle);
+        void onAiBattleClicked();
         void onMoveClicked(Move move);
         void onTypeBanClicked(String type);
         void onTypeBanLongClicked(String type);
@@ -102,9 +110,9 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
+        mAiBattleButton = (Button) view.findViewById(R.id.ai_battle_button);
         mBattleButton.setOnClickListener(this);
-        mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
-        mMoveHistoryText.setMovementMethod(new ScrollingMovementMethod());
+        mAiBattleButton.setOnClickListener(this);
         mTypeBanGrid = (GridView) view.findViewById(R.id.type_ban_layout);
         mTypeBanTitle = (TextView) view.findViewById(R.id.type_ban_title_text);
         mTypeBanSwitch = (Switch) view.findViewById(R.id.type_ban_switch);
@@ -151,6 +159,8 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
         mOpponentBattleView.setVisibility(false);
 
+
+
         setupMoveButtons(view);
         return view;
     }
@@ -188,6 +198,10 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                 mCallback.onBattleNowClicked(mIsActiveBattle);
                 mIsActiveBattle = !mIsActiveBattle;
                 break;
+            case R.id.ai_battle_button:
+                mAiBattleButton.setVisibility(View.GONE);
+                mCallback.onAiBattleClicked();
+                break;
             case R.id.move_button_0:
                 mCallback.onMoveClicked(mPlayerMoves.get(0));
                 break;
@@ -214,12 +228,15 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                 b.setVisibility(View.INVISIBLE);
                 b.setOnClickListener(this);
                 mMoveButtons[i] = b;
-            }   
+            }
         }
     }
 
     // set the buttons to the current activePokemon
     private void configureMoveButtons() {
+
+        //mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(mPlayerBattleTeam.getCurrentPokemon().getOriginalPokemon());
+
         if (mPlayerMoves != null) {
             for (int i = 0; i < buttonIds.length; i++) {
                 Move m = mPlayerMoves.get(i);

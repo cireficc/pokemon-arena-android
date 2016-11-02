@@ -1,8 +1,9 @@
 package com.pokemonbattlearena.android.engine.match;
 
-import android.util.Log;
-
-import com.pokemonbattlearena.android.engine.database.StatusEffect;
+import com.pokemonbattlearena.android.engine.ai.AiPlayer;
+import com.pokemonbattlearena.android.engine.database.Database;
+import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,10 +24,29 @@ public class Battle {
 
     public Battle(PokemonPlayer player1, PokemonPlayer player2) {
         this.self = new BattlePokemonPlayer(player1);
-        this.opponent = new BattlePokemonPlayer(player2);
-        this.finishedBattlePhases = new ArrayList<>();
-        this.currentBattlePhase = new BattlePhase(self, opponent);
-        this.isFinished = false;
+        if (player2 instanceof AiPlayer) {
+            this.opponent = ((AiPlayer) player2).getAiBattler();
+            //TODO actually get player moves into the Pokemon Player
+            setPlayerMoves(((AiPlayer) player2).db);
+        } else {
+            this.opponent = new BattlePokemonPlayer(player2);
+        }
+        this.turns = new ArrayList<>();
+        this.turnOwner = new BattlePokemonPlayer(player1);
+    }
+
+    public BattlePokemonPlayer getSelf() {
+        return self;
+    }
+
+    //TODO kill this method at all costs.
+    private void setPlayerMoves(Database db) {
+        Pokemon org = self.getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon();
+        Move[] moves = new Move[4];
+        for (int i = 0; i < 4; i++) {
+            moves[i] = db.getMovesForPokemon(org).get(i);
+        }
+        self.getBattlePokemonTeam().getCurrentPokemon().setMoveSet(moves);
     }
 
     public BattlePokemonPlayer getSelf() {
@@ -35,6 +55,14 @@ public class Battle {
 
     public BattlePokemonPlayer getOpponent() {
         return opponent;
+    }
+
+    public BattlePokemonPlayer getTurnOwner() {
+        return turnOwner;
+    }
+
+    protected void changeTurn() {
+        this.turnOwner = (turnOwner == self) ? opponent : self;
     }
 
     public List<BattlePhase> getFinishedBattlePhases() {

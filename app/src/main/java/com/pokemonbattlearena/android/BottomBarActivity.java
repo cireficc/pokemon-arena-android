@@ -35,17 +35,21 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
+import com.pokemonbattlearena.android.engine.ai.AiBattle;
+import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.AttackResult;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePhaseResult;
 import com.pokemonbattlearena.android.engine.match.CommandResult;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
+import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabReselectListener;
 import com.roughike.bottombar.OnTabSelectListener;
@@ -64,7 +68,7 @@ public class BottomBarActivity extends BaseActivity implements
         RoomUpdateListener,
         RoomStatusUpdateListener,
         RealTimeMultiplayer.ReliableMessageSentCallback,
-        TeamsHomeFragment.OnPokemonTeamSelectedListener,
+        OnPokemonTeamSelectedListener,
         BattleHomeFragment.OnBattleFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener {
 
@@ -106,6 +110,7 @@ public class BottomBarActivity extends BaseActivity implements
             .registerSubtype(AttackResult.class);
 
     private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mRuntimeTypeAdapterFactory).create();
+    private boolean isAiBattle = false;
 
     //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
@@ -140,14 +145,29 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
+    public void onAiBattleClicked() {
+        isAiBattle = true;
+        startAiBattle();
+
+    }
+
+    @Override
     public void onMoveClicked(Move move) {
-        String gson = new Gson().toJson(move, Move.class);
         if (mBattleHomeFragment != null) {
             mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
             boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
 //            mBattleHomeFragment.showMoveUI(movesReady);
         }
-        sendMessage(gson);
+        if (!isAiBattle) {
+            String gson = new Gson().toJson(move, Move.class);
+            sendMessage(gson);
+        } else {
+            Toast.makeText(mApplication, move.getName(), Toast.LENGTH_SHORT).show();
+            if (mActiveBattle instanceof AiBattle) {
+                Toast.makeText(mApplication, mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon().getName() + " used: " + ((AiBattle) mActiveBattle).showIntelligence(), Toast.LENGTH_SHORT).show();
+            }
+
+        }
     }
 
     @Override
@@ -170,6 +190,7 @@ public class BottomBarActivity extends BaseActivity implements
     //region Activity hooks
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
 
@@ -550,6 +571,15 @@ public class BottomBarActivity extends BaseActivity implements
             default:
                 break;
         }
+    }
+    //endregion
+
+    //region AI Battle
+    private void startAiBattle() {
+        setCurrentPokemonPlayer(getSavedTeam());
+        AiPlayer ai = new AiPlayer(mApplication.getBattleDatabase(), mCurrentPokemonPlayer);
+        mActiveBattle = new AiBattle(mCurrentPokemonPlayer, ai);
+        setupBattleUI(mCurrentPokemonPlayer, ai);
     }
     //endregion
 
