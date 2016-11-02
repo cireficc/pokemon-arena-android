@@ -157,6 +157,9 @@ public class BottomBarActivity extends BaseActivity implements
         if (!isAiBattle) {
             if (mBattleHomeFragment != null) {
                 mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+                if (mActiveBattle.getCurrentBattlePhase() == null) {
+                    mActiveBattle.startNewBattlePhase();
+                }
                 boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
 //            mBattleHomeFragment.showMoveUI(movesReady);
             }
@@ -517,7 +520,7 @@ public class BottomBarActivity extends BaseActivity implements
             }
         } else {
             // since we have a battle, we can assume a message will update the game
-            if (isHost) {
+            if (!isHost) {
                 // the host will receive moves from an opponent
                 Move move = new Gson().fromJson(bufferString, Move.class);
                 Log.d(TAG, "In Game Message Received: " + move.getName());
@@ -527,13 +530,13 @@ public class BottomBarActivity extends BaseActivity implements
 
 //                    mBattleHomeFragment.showMoveUI(movesReady);
                     //TODO: This will break. Something is broken in DamageCalculator.
-//                    BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
-//                    for (CommandResult commandResult : result.getCommandResults()) {
-//                        mActiveBattle.applyCommandResult(commandResult);
-//                    }
+                    BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
+                    for (CommandResult commandResult : result.getCommandResults()) {
+                        mActiveBattle.applyCommandResult(commandResult);
+                    }
 //                    updateUI();
-//                    String json = mCommandGson.toJson(result);
-//                    sendMessage(json);
+                    String json = mCommandGson.toJson(result);
+                    sendMessage(json);
                     // Send JSON bytes to opponent
                 }
 
@@ -547,7 +550,7 @@ public class BottomBarActivity extends BaseActivity implements
                     // Update UI here using data in the CommandResult (AttackResult) object or using the Battle object
                     // E.g. damageDone, healingDone, etc.
                 }
-                mActiveBattle.startNewBattlePhase();
+                    mActiveBattle.startNewBattlePhase();
             }
         }
 

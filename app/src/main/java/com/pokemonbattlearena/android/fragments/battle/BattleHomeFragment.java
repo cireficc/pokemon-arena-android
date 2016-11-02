@@ -112,6 +112,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
         mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
+        mMoveHistoryText.setMovementMethod( new ScrollingMovementMethod());
         mAiBattleButton = (Button) view.findViewById(R.id.ai_battle_button);
         mBattleButton.setOnClickListener(this);
         mAiBattleButton.setOnClickListener(this);
