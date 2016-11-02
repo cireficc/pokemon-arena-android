@@ -34,6 +34,9 @@ public class Battle {
         } else {
             this.opponent = new BattlePokemonPlayer(player2);
         }
+
+        this.finishedBattlePhases = new ArrayList<>();
+        this.currentBattlePhase = new BattlePhase(self, opponent);
     }
 
     //TODO kill this method at all costs.
