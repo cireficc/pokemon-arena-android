@@ -39,18 +39,24 @@
         </GridView>
     </LinearLayout>
 
-    <Button
-        android:text="@string/battle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/battle_now_button" />
+        android:orientation="horizontal">
+        <Button
+            android:text="@string/battle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/battle_now_button" />
 
-    <Button
-        android:id="@+id/ai_battle_button"
-        android:text="AI Battle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-         />
+        <Button
+            android:id="@+id/ai_battle_button"
+            android:text="AI Battle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+    </LinearLayout>
 
     <include layout="@layout/fragment_battleui"/>
 

@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -92,9 +94,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     public void showMoveUI(boolean show) {
         for (Button button : mMoveButtons) {
-            button.setClickable(show);
-            PorterDuff.Mode m = show ? PorterDuff.Mode.CLEAR : PorterDuff.Mode.DARKEN;
-            button.setBackgroundTintMode(m);
+            button.setEnabled(show);
         }
     }
 
@@ -146,20 +146,20 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
         TextView pokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
         ImageView pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
-        ImageView pokemonHPImage = (ImageView) playerView.findViewById(R.id.hp_imageview);
+        SeekBar pokemonHpProgress = (SeekBar) playerView.findViewById(R.id.hp_imageview);
         TextView pokemonHPText = (TextView) playerView.findViewById(R.id.hp_textview);
 
-        mPlayerBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
+        mPlayerBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHpProgress);
         mPlayerBattleView.setVisibility(false);
 
         pokemonName = (TextView) opponentView.findViewById(R.id.active_name_textview);
         pokemonImage = (ImageView) opponentView.findViewById(R.id.active_imageview);
-        pokemonHPImage = (ImageView)  opponentView.findViewById(R.id.hp_imageview);
+        pokemonHpProgress = (SeekBar)  opponentView.findViewById(R.id.hp_imageview);
         pokemonHPText = (TextView)  opponentView.findViewById(R.id.hp_textview);
 
         //TODO: don't create opponent until match starts
 
-        mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHPImage);
+        mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHpProgress);
         mOpponentBattleView.setVisibility(false);
 
 
@@ -266,6 +266,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mPlayerBattleView.setActivePokemon(activePokemon);
         mPlayerBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), activePokemon.getName()));
         mPlayerBattleView.getPokemonName().setText(activePokemon.getName());
+        mPlayerBattleView.setHPBar(activePokemon.getHp());
         mPlayerMoves = activePokemon.getActiveMoveList();
         configureMoveButtons();
     }
@@ -276,6 +277,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mOpponentBattleView.setActivePokemon(activePokemon);
         mOpponentBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), activePokemon.getName()));
         mOpponentBattleView.getPokemonName().setText(activePokemon.getName());
+        mOpponentBattleView.setHPBar(activePokemon.getHp());
     }
 
     public void setBattleVisible(boolean visible) {
@@ -305,7 +307,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     public void updateHealthBars(int health1, int health2) {
-        mPlayerBattleView.updateHealthBar(getActivity(), health1);
-        mOpponentBattleView.updateHealthBar(getActivity(), health2);
+        mPlayerBattleView.updateHealthBar(health1);
+        mOpponentBattleView.updateHealthBar(health2);
     }
 }
