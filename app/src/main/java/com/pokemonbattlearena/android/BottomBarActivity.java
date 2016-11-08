@@ -47,6 +47,7 @@ import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
+import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
@@ -90,6 +91,7 @@ public class BottomBarActivity extends BaseActivity implements
     private boolean mSignInClicked = false;
 
     private FragmentManager mFragmentManager;
+    private MainMenuFragment mMainMenuFragment;
     private BattleHomeFragment mBattleHomeFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
@@ -220,6 +222,7 @@ public class BottomBarActivity extends BaseActivity implements
 
         mApplication.setGoogleApiClient(googleApiClient);
 
+        mMainMenuFragment = new MainMenuFragment();
         mTeamsHomeFragment = createTeamsHomeFragment();
         mBattleHomeFragment = new BattleHomeFragment();
         mChatHomeFragment = new ChatHomeFragment();

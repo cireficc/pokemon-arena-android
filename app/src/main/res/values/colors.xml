@@ -6,7 +6,7 @@
     <color name="color_venusaur">#5a9c39</color>
     <color name="color_pikachu">#f6bd20</color>
 
-    <color name="white">#FFFFFF</color>
+    <color name="white">#ffffff</color>
     <color name="black">#000000</color>
     <color name="grey">#222222</color>
     <color name="type_ban_background_color">@color/color_blastoise</color>
@@ -33,5 +33,7 @@
     <color name="light_type_text">#FFFFF8</color>
     <color name="dark_type_text">#151515</color>
     <color name="color_venusaur_light">#6abd40</color>
+    <color name="color_charizard_light">#ea704c</color>
+    <color name="match_history_background">#bdbdbd</color>
 
 </resources>
