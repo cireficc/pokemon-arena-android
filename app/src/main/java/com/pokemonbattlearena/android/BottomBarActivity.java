@@ -90,6 +90,7 @@ public class BottomBarActivity extends BaseActivity implements
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
 
+    // FRAGMENTS
     private FragmentManager mFragmentManager;
     private MainMenuFragment mMainMenuFragment;
     private BattleHomeFragment mBattleHomeFragment;
@@ -100,10 +101,10 @@ public class BottomBarActivity extends BaseActivity implements
     private SharedPreferences mPreferences;
 
     private PokemonPlayer mCurrentPokemonPlayer;
-
     private PokemonPlayer mOpponentPokemonPlayer;
 
     private Battle mActiveBattle = null;
+    private BattlePhase mBattlePhase;
 
     private int mBattleMatchFlag = 0;
 
@@ -207,7 +208,7 @@ public class BottomBarActivity extends BaseActivity implements
         setSupportActionBar(toolbar);
 
         mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
-
+        mBattlePhase = BattlePhase.INACTIVE;
         mBottomBar.setDefaultTab(R.id.tab_battle);
 
         mFragmentManager = getFragmentManager();
@@ -227,7 +228,7 @@ public class BottomBarActivity extends BaseActivity implements
         mBattleHomeFragment = new BattleHomeFragment();
         mChatHomeFragment = new ChatHomeFragment();
         mFragmentManager.beginTransaction()
-                .add(R.id.container, mBattleHomeFragment, "battle")
+                .add(R.id.container, mMainMenuFragment, "battle")
                 .commit();
 
         // Listens for a tab touch (Only first touch of new tab)
@@ -247,14 +248,14 @@ public class BottomBarActivity extends BaseActivity implements
                         if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
                             mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
                         }
-                        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
-                            mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+                        if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
+                            mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
                         }
                         break;
                     case R.id.tab_battle:
-                        if (mBattleHomeFragment != null && !mBattleHomeFragment.isAdded()) {
+                        if (mMainMenuFragment != null && !mMainMenuFragment.isAdded()) {
                             mFragmentManager.beginTransaction()
-                                    .replace(R.id.container, mBattleHomeFragment, "battle")
+                                    .replace(R.id.container, mMainMenuFragment, "battle")
                                     .commit();
                         }
                         if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
@@ -275,8 +276,8 @@ public class BottomBarActivity extends BaseActivity implements
                         if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                             mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
                         }
-                        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
-                            mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+                        if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
+                            mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
                         }
                         break;
                     default:

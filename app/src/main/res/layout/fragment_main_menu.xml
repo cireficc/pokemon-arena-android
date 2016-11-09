@@ -9,7 +9,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/color_charizard_light">
+        android:background="@color/color_blastoise_light">
 
         <ImageView
             android:layout_width="160dp"
@@ -24,7 +24,6 @@
         <Button
             android:layout_width="160dp"
             android:layout_height="75dp"
-            android:scaleY="2.15"
             android:layout_marginStart="16dp"
             android:id="@+id/battle_now_button"
             android:layout_alignParentStart="true"
@@ -34,7 +33,6 @@
         <Button
             android:layout_width="160dp"
             android:layout_height="75dp"
-            android:scaleY="2.15"
             android:id="@+id/battle_friend_button"
             android:layout_below="@+id/battle_now_button"
             android:layout_alignStart="@+id/battle_now_button"
@@ -44,7 +42,6 @@
         <Button
             android:layout_width="160dp"
             android:layout_height="75dp"
-            android:scaleY="2.15"
             android:id="@+id/battle_ai_button"
             android:layout_below="@+id/battle_friend_button"
             android:layout_alignStart="@+id/battle_now_button"

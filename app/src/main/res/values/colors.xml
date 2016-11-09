@@ -35,5 +35,6 @@
     <color name="color_venusaur_light">#6abd40</color>
     <color name="color_charizard_light">#ea704c</color>
     <color name="match_history_background">#bdbdbd</color>
+    <color name="color_blastoise_light">#2488f7</color>
 
 </resources>

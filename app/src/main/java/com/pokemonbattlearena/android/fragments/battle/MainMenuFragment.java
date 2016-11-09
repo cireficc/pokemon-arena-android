@@ -5,8 +5,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.pokemonbattlearena.android.R;
 
@@ -19,14 +21,10 @@ import com.pokemonbattlearena.android.R;
  * create an instance of this fragment.
  */
 public class MainMenuFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Button mBattleNowButton;
+    private Button mBattleFriendButton;
+    private Button mBattleAIButton;
 
     private OnFragmentInteractionListener mListener;
 
@@ -46,8 +44,7 @@ public class MainMenuFragment extends Fragment {
     public static MainMenuFragment newInstance(String param1, String param2) {
         MainMenuFragment fragment = new MainMenuFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,17 +52,57 @@ public class MainMenuFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main_menu, container, false);
+        View view = inflater.inflate(R.layout.fragment_main_menu, container, false);
+
+        mBattleNowButton = (Button) view.findViewById(R.id.battle_now_button);
+        mBattleFriendButton = (Button) view.findViewById(R.id.battle_friend_button);
+        mBattleAIButton = (Button) view.findViewById(R.id.battle_ai_button);
+
+        mBattleNowButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button_clicked);
+                    return true;
+                } else {
+                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button);
+                    return false;
+                }
+            }
+        });
+        mBattleFriendButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mBattleFriendButton.setBackgroundResource(R.drawable.ic_battle_friend_button_clicked);
+                    return true;
+                } else {
+                    mBattleFriendButton.setBackgroundResource(R.drawable.ic_battle_friend_button);
+                    return false;
+                }
+            }
+        });
+        mBattleAIButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mBattleAIButton.setBackgroundResource(R.drawable.ic_battle_ai_button_clicked);
+                    return true;
+                } else {
+                    mBattleAIButton.setBackgroundResource(R.drawable.ic_battle_ai_button);
+                    return false;
+                }
+            }
+        });
+
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -78,12 +115,12 @@ public class MainMenuFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+//        if (context instanceof OnFragmentInteractionListener) {
+//            mListener = (OnFragmentInteractionListener) context;
+//        } else {
+//            throw new RuntimeException(context.toString()
+//                    + " must implement OnFragmentInteractionListener");
+//        }
     }
 
     @Override

@@ -5,7 +5,8 @@
     <string name="chat">Chat</string>
     <string name="teams">Team</string>
     <string name="select_team">Select Pokemon</string>
-    <string name="loading">Connecting to Battle…</string>
+    <string name="loading">Loading…</string>
+    <string name="connecting">Connecting...</string>
     <string name="signin_other_error">There was an issue with sign in, please try again later.</string>
     <string name="default_pokemon">default activePokemon</string>
     <string name="battle_now">Quick Battle</string>
