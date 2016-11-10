@@ -4,49 +4,39 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.pokemonbattlearena.android.ApplicationPhase;
+import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MainMenuFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MainMenuFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Created by Mitch Couturier
  */
 public class MainMenuFragment extends Fragment {
+
+    PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
+    private final static String TAG = MainMenuFragment.class.getSimpleName();
 
     private Button mBattleNowButton;
     private Button mBattleFriendButton;
     private Button mBattleAIButton;
 
+    private OnMenuFragmentTouchListener mCallback;
     private OnFragmentInteractionListener mListener;
 
     public MainMenuFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MainMenuFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MainMenuFragment newInstance(String param1, String param2) {
-        MainMenuFragment fragment = new MainMenuFragment();
-        Bundle args = new Bundle();
-
-        fragment.setArguments(args);
-        return fragment;
+    public interface OnMenuFragmentTouchListener {
+        void onBattleNowClicked();
+        void onAiBattleClicked();
     }
 
     @Override
@@ -67,10 +57,14 @@ public class MainMenuFragment extends Fragment {
         mBattleNowButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                //on button pressed
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
                     mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button_clicked);
                     return true;
-                } else {
+                }
+                //on button release
+                else {
+                    mCallback.onBattleNowClicked();
                     mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button);
                     return false;
                 }
@@ -79,10 +73,13 @@ public class MainMenuFragment extends Fragment {
         mBattleFriendButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                //on button pressed
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
                     mBattleFriendButton.setBackgroundResource(R.drawable.ic_battle_friend_button_clicked);
                     return true;
-                } else {
+                }
+                //on button release
+                else {
                     mBattleFriendButton.setBackgroundResource(R.drawable.ic_battle_friend_button);
                     return false;
                 }
@@ -91,36 +88,32 @@ public class MainMenuFragment extends Fragment {
         mBattleAIButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                //on button pressed
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
                     mBattleAIButton.setBackgroundResource(R.drawable.ic_battle_ai_button_clicked);
                     return true;
-                } else {
+                }
+                //on button release
+                else {
+                    mCallback.onAiBattleClicked();
                     mBattleAIButton.setBackgroundResource(R.drawable.ic_battle_ai_button);
                     return false;
                 }
             }
         });
 
-
         return view;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
+        try {
+            mCallback = (MainMenuFragment.OnMenuFragmentTouchListener) context;
+        } catch (ClassCastException e) {
+            Log.e(TAG, e.getMessage());
+            throw new ClassCastException(context.toString() + "must implement listener");
+        }
     }
 
     @Override

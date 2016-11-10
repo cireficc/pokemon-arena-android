@@ -40,17 +40,10 @@
     </LinearLayout>
 
     <Button
-        android:text="@string/battle"
+        android:text="@string/cancel_battle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/battle_now_button" />
-
-    <Button
-        android:id="@+id/ai_battle_button"
-        android:text="AI Battle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-         />
+        android:id="@+id/cancel_battle_button" />
 
     <include layout="@layout/fragment_battleui"/>
 

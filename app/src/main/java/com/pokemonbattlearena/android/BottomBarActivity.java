@@ -71,6 +71,7 @@ public class BottomBarActivity extends BaseActivity implements
         RealTimeMultiplayer.ReliableMessageSentCallback,
         OnPokemonTeamSelectedListener,
         BattleHomeFragment.OnBattleFragmentTouchListener,
+        MainMenuFragment.OnMenuFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener {
 
     private static final int TEAM_SIZE_INT = 6;
@@ -104,7 +105,6 @@ public class BottomBarActivity extends BaseActivity implements
     private PokemonPlayer mOpponentPokemonPlayer;
 
     private Battle mActiveBattle = null;
-    private BattlePhase mBattlePhase;
 
     private int mBattleMatchFlag = 0;
 
@@ -127,31 +127,32 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
-    public void onBattleNowClicked(boolean isActiveBattle) {
+    public void onCancelBattle(boolean isActiveBattle) {
+        leaveRoom();
+    }
+
+    @Override
+    public void onBattleNowClicked() {
         // showing the progress dialog also creates it if its null
-        if (!isActiveBattle) {
-            startMatchMaking();
-            showProgressDialog();
-            mBattleHomeFragment.hideBans(false);
-            mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    if (mBattleHomeFragment.isVisible() ) {
-                        Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
-                        leaveRoom();
-                    }
+        mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
+        refreshBattleFragment();
+        startMatchMaking();
+        showProgressDialog();
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (mBattleHomeFragment.isVisible() ) {
+                    Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
+                    leaveRoom();
                 }
-            });
-        } else {
-            leaveRoom();
-        }
+            }
+        });
     }
 
     @Override
     public void onAiBattleClicked() {
         isAiBattle = true;
         startAiBattle();
-
     }
 
     @Override
@@ -208,7 +209,6 @@ public class BottomBarActivity extends BaseActivity implements
         setSupportActionBar(toolbar);
 
         mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
-        mBattlePhase = BattlePhase.INACTIVE;
         mBottomBar.setDefaultTab(R.id.tab_battle);
 
         mFragmentManager = getFragmentManager();
@@ -240,44 +240,66 @@ public class BottomBarActivity extends BaseActivity implements
                 }
                 switch (tabId) {
                     case R.id.tab_teams:
-                        if (mTeamsHomeFragment != null && !mTeamsHomeFragment.isAdded()) {
-                            mFragmentManager.beginTransaction()
-                                    .replace(R.id.container, mTeamsHomeFragment, "team")
-                                    .commit();
-                        }
-                        if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
-                            mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
-                        }
-                        if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
-                            mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
+                        if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
+                            if (mTeamsHomeFragment != null && !mTeamsHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction()
+                                        .replace(R.id.container, mTeamsHomeFragment, "team")
+                                        .commit();
+                            }
+                            if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
+                            }
+                            if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
+                            }
+                        } else if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
+
                         }
                         break;
                     case R.id.tab_battle:
-                        if (mMainMenuFragment != null && !mMainMenuFragment.isAdded()) {
-                            mFragmentManager.beginTransaction()
-                                    .replace(R.id.container, mMainMenuFragment, "battle")
-                                    .commit();
-                        }
-                        if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
-                            mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
-                        }
-                        if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
-                            mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
+                        if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
+                            if (mMainMenuFragment != null && !mMainMenuFragment.isAdded()) {
+                                mFragmentManager.beginTransaction()
+                                        .replace(R.id.container, mMainMenuFragment, "battle")
+                                        .commit();
+                            }
+                            if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
+                            }
+                            if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
+                            }
+                        } else if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
+                            if (mBattleHomeFragment != null && !mBattleHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction()
+                                        .replace(R.id.container, mBattleHomeFragment, "battle")
+                                        .commit();
+                            }
+                            if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
+                            }
+                            if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
+                            }
                         }
                         break;
                     case R.id.tab_chat:
-                        if (mChatHomeFragment != null && !mChatHomeFragment.isAdded()) {
-                            displaySavedTeam(false);
-                            mFragmentManager.beginTransaction()
-                                    .replace(R.id.container, mChatHomeFragment, "chat")
-                                    .commit();
-                            showProgressDialog();
-                        }
-                        if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
-                            mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
-                        }
-                        if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
-                            mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
+                        if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
+                            if (mChatHomeFragment != null && !mChatHomeFragment.isAdded()) {
+                                displaySavedTeam(false);
+                                mFragmentManager.beginTransaction()
+                                        .replace(R.id.container, mChatHomeFragment, "chat")
+                                        .commit();
+                                showProgressDialog();
+                            }
+                            if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
+                            }
+                            if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
+                            }
+                        } else if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
+
                         }
                         break;
                     default:
@@ -587,6 +609,8 @@ public class BottomBarActivity extends BaseActivity implements
         setCurrentPokemonPlayer(getSavedTeam());
         AiPlayer ai = new AiPlayer(mApplication.getBattleDatabase(), mCurrentPokemonPlayer);
         mActiveBattle = new AiBattle(mCurrentPokemonPlayer, ai);
+        mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
+        refreshBattleFragment();
         setupBattleUI(mCurrentPokemonPlayer, ai);
     }
     //endregion
@@ -692,14 +716,22 @@ public class BottomBarActivity extends BaseActivity implements
             mRoomId = null;
             mRoomCreatorId = null;
         }
+        mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
         refreshBattleFragment();
     }
 
     private void refreshBattleFragment() {
-        if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
-            mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
-            mBattleHomeFragment = new BattleHomeFragment();
-            mFragmentManager.beginTransaction().add(R.id.container, mBattleHomeFragment, "battle").commit();
+        if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
+            if (mFragmentManager != null && mMainMenuFragment.isAdded()) {
+                mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
+                mBattleHomeFragment = new BattleHomeFragment();
+                mFragmentManager.beginTransaction().add(R.id.container, mBattleHomeFragment, "battle").commit();
+            }
+        } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
+            if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
+                mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+                mFragmentManager.beginTransaction().add(R.id.container, mMainMenuFragment, "battle").commit();
+            }
         }
     }
 
