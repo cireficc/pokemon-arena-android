@@ -202,8 +202,11 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                 mIsActiveBattle = !mIsActiveBattle;
                 break;
             case R.id.ai_battle_button:
+                text = mIsActiveBattle ? getString(R.string.battle) : getString(R.string.cancel_battle);
+                mBattleButton.setText(text);
                 mAiBattleButton.setVisibility(View.GONE);
                 mCallback.onAiBattleClicked();
+                mIsActiveBattle = !mIsActiveBattle;
                 break;
             case R.id.move_button_0:
                 mCallback.onMoveClicked(mPlayerMoves.get(0));

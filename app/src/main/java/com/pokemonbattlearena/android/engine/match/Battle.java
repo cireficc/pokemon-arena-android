@@ -29,8 +29,6 @@ public class Battle {
         this.self = new BattlePokemonPlayer(player1);
         if (player2 instanceof AiPlayer) {
             this.opponent = ((AiPlayer) player2).getAiBattler();
-            //TODO actually get player moves into the Pokemon Player
-            setPlayerMoves(((AiPlayer) player2).db);
         } else {
             this.opponent = new BattlePokemonPlayer(player2);
         }
@@ -39,15 +37,6 @@ public class Battle {
         this.currentBattlePhase = new BattlePhase(self, opponent);
     }
 
-    //TODO kill this method at all costs.
-    private void setPlayerMoves(Database db) {
-        Pokemon org = self.getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon();
-        List<Move> moves = new ArrayList<Move>();
-        for (int i = 0; i < 4; i++) {
-            moves.add(i, db.getMovesForPokemon(org).get(i));
-        }
-        self.getBattlePokemonTeam().getCurrentPokemon().setMoveSet(moves);
-    }
 
     public BattlePokemonPlayer getSelf() {
         return self;
