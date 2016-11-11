@@ -46,7 +46,15 @@
         android:layout_alignBottom="@+id/hp_imageview"
         android:layout_marginTop="@dimen/hpTopMargin"
         />
-    <ImageView
+    <SeekBar
+        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+        android:progressDrawable="@drawable/hp_progress"
+        android:thumb="@drawable/thumb"
+        android:progress="100"
+        android:max="100"
+        android:clickable="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:id="@+id/hp_imageview"
 
         android:layout_width="100dp"
@@ -57,6 +65,7 @@
         android:layout_alignStart="@+id/hp_textview"
         android:paddingStart="10dp"
         android:paddingEnd="15dp"
+
         android:layout_marginTop="@dimen/hpTopMargin"
         android:layout_marginStart="@dimen/marginStart" />
 </RelativeLayout>

@@ -10,8 +10,7 @@ public class BattlePokemonPlayer {
     private transient BattlePokemonTeam battlePokemonTeam;
 
     public BattlePokemonPlayer(PokemonPlayer player) {
-
-        this.id = UUID.randomUUID().toString();
+        this.id = player.getPlayerId();
         this.battlePokemonTeam = new BattlePokemonTeam(player.getPokemonTeam());
     }
 
