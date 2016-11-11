@@ -17,6 +17,7 @@ public class PokemonBattleApplication extends Application {
     private Database mBattleDatabase;
     private static GoogleApiClient mGoogleApiClient;
     private static PokemonBattleApplication singleton;
+    private static ApplicationPhase mApplicationPhase;
 
     @Override
     public void onCreate() {
@@ -24,6 +25,7 @@ public class PokemonBattleApplication extends Application {
         singleton = this;
         mBattleEngine = BattleEngine.getInstance();
         mBattleDatabase = new Database(getApplicationContext());
+        mApplicationPhase = ApplicationPhase.INACTIVE_BATTLE;
     }
 
     public BattleEngine getBattleEngine() {
@@ -44,5 +46,12 @@ public class PokemonBattleApplication extends Application {
 
     public static PokemonBattleApplication getInstance(){
         return singleton;
+    }
+
+    public static ApplicationPhase getApplicationPhase() {
+        return mApplicationPhase;}
+
+    public static void setApplicationPhase(ApplicationPhase mApplicationPhase) {
+        PokemonBattleApplication.mApplicationPhase = mApplicationPhase;
     }
 }
