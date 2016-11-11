@@ -93,6 +93,8 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     public void showMoveUI(boolean show) {
+        String locked = show ? "UNLOCKED":"LOCKED";
+        Log.d(TAG, "UI is now " + locked);
         for (Button button : mMoveButtons) {
             button.setEnabled(show);
         }

@@ -120,7 +120,7 @@ public class BottomBarActivity extends BaseActivity implements
             mBottomBar.selectTabWithId(R.id.tab_battle);
             setSavedTeam(pokemonJSON);
             displaySavedTeam(true);
-            setCurrentPokemonPlayer(new Gson().fromJson(pokemonJSON, PokemonTeam.class));
+            setCurrentPokemonPlayerTeam(new Gson().fromJson(pokemonJSON, PokemonTeam.class));
         }
     }
 
@@ -154,17 +154,16 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onMoveClicked(Move move) {
-
         if (!isAiBattle) {
             if (mBattleHomeFragment != null) {
                 mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
-                if (mActiveBattle.getCurrentBattlePhase() == null) {
-                    mActiveBattle.startNewBattlePhase();
-                }
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
                     boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                     mBattleHomeFragment.showMoveUI(movesReady);
+                    if (movesReady) {
+                        updateUIForPhase();
+                    }
                 } else {
                     Log.d(TAG, "Client: sending move: " + move.getName());
                     String gson = new Gson().toJson(move, Move.class);
@@ -239,7 +238,7 @@ public class BottomBarActivity extends BaseActivity implements
             @Override
             public void onTabSelected(@IdRes int tabId) {
                 if (displaySavedTeam(true)) {
-                    setCurrentPokemonPlayer(getSavedTeam());
+                    setCurrentPokemonPlayerTeam(getSavedTeam());
                 }
                 switch (tabId) {
                     case R.id.tab_teams:
@@ -411,7 +410,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onRoomConnected(int statusCode, Room room) {
-        Log.d(TAG, "onRoomConnected(" + statusCode + ", " + room + ")");
         if (statusCode != STATUS_OK) {
             Log.e(TAG, "*** Error: onRoomConnected, status " + statusCode);
             showGameError();
@@ -419,11 +417,10 @@ public class BottomBarActivity extends BaseActivity implements
         }
         updateRoom(room);
         if (shouldStartGame(room)) {
+            setCurrentPokemonPlayerTeam(getSavedTeam());
+            Log.d(TAG, "HOST? : " + mIsHost);
             Log.d(TAG, "We are going to start!");
-            PokemonTeam team = getSavedTeam();
-            PokemonPlayer currentPlayer = new PokemonPlayer();
-            currentPlayer.setPokemonTeam(team);
-            String player = new Gson().toJson(currentPlayer);
+            String player = new Gson().toJson(mCurrentPokemonPlayer);
             sendMessage(player);
         }
     }
@@ -468,7 +465,6 @@ public class BottomBarActivity extends BaseActivity implements
         //get participants and my ID:
         mParticipants = room.getParticipants();
         mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
-
         // save room ID if its not initialized in onRoomCreated() so we can leave cleanly before the game starts.
         if (mRoomId == null)
             mRoomId = room.getRoomId();
@@ -527,22 +523,12 @@ public class BottomBarActivity extends BaseActivity implements
 
             if (move.getName() != null && mIsHost) {
                 Log.d(TAG, "We got a move: " + move.getName());
-                mBattleHomeFragment.appendMoveHistory(mOpponentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
-                boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), move);
-
-                mBattleHomeFragment.showMoveUI(movesReady);
-                BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
-                for (CommandResult commandResult : result.getCommandResults()) {
-                    mActiveBattle.applyCommandResult(commandResult);
-                    Log.d(TAG, commandResult.getTargetInfo().toString());
+                boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), move);
+                if (phaseReady) {
+                    updateUIForPhase();
+                    mBattleHomeFragment.showMoveUI(true);
+                    mActiveBattle.startNewBattlePhase();
                 }
-
-                String json = mCommandGson.toJson(result);
-                sendMessage(json);
-                updateUI();
-
-                mActiveBattle.startNewBattlePhase();
-                mBattleHomeFragment.showMoveUI(true);
             }
             if (resultFromJson.getCommandResults() != null && !mIsHost) {
                 Log.d(TAG, "We got a command result" + resultFromJson.toString());
@@ -551,12 +537,24 @@ public class BottomBarActivity extends BaseActivity implements
                     // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
                     mActiveBattle.applyCommandResult(commandResult);
                     Log.d(TAG, commandResult.getTargetInfo().toString());
+                    updateUI();
                 }
-                updateUI();
+
                 mBattleHomeFragment.showMoveUI(true);
             }
         }
         hideProgressDialog();
+    }
+
+    private void updateUIForPhase() {
+        BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
+        for (CommandResult commandResult : result.getCommandResults()) {
+            mActiveBattle.applyCommandResult(commandResult);
+            Log.d(TAG, commandResult.getTargetInfo().toString());
+            updateUI();
+        }
+        String json = mCommandGson.toJson(result);
+        sendMessage(json);
     }
 
     @Override
@@ -582,7 +580,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     //region AI Battle
     private void startAiBattle() {
-        setCurrentPokemonPlayer(getSavedTeam());
+        setCurrentPokemonPlayerTeam(getSavedTeam());
         AiPlayer ai = new AiPlayer(mApplication.getBattleDatabase(), mCurrentPokemonPlayer);
         mActiveBattle = new AiBattle(mCurrentPokemonPlayer, ai);
         setupBattleUI(mCurrentPokemonPlayer, ai);
@@ -590,8 +588,8 @@ public class BottomBarActivity extends BaseActivity implements
     //endregion
 
     //region Private Helper Methods
-    private void setCurrentPokemonPlayer(PokemonTeam team) {
-        mCurrentPokemonPlayer = new PokemonPlayer();
+    private void setCurrentPokemonPlayerTeam(PokemonTeam team) {
+        mCurrentPokemonPlayer = new PokemonPlayer(mMyId);
         mCurrentPokemonPlayer.setPokemonTeam(team);
     }
     
@@ -649,12 +647,16 @@ public class BottomBarActivity extends BaseActivity implements
         if (mBattleHomeFragment != null) {
             int health1 = mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
             int health2 = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
+
             String name = mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon().getName();
             int currentHp = mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
             Log.d(TAG, name + ": " + currentHp);
+
             name = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon().getName();
             currentHp = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
+
             Log.d(TAG, name + ": " + currentHp);
+
             mBattleHomeFragment.updateHealthBars(health1, health2);
         }
     }

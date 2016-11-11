@@ -39,6 +39,12 @@ public class Battle {
         this.currentBattlePhase = new BattlePhase(self, opponent);
     }
 
+    public void swap() {
+        BattlePokemonPlayer temp = self;
+        self = opponent;
+        opponent = temp;
+    }
+
     //TODO kill this method at all costs.
     private void setPlayerMoves(Database db) {
         Pokemon org = self.getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon();
@@ -131,7 +137,7 @@ public class Battle {
 
         Log.i(TAG, "Attacking player: " + attackingPlayerId);
         Log.i(TAG, "Attacking player pkmn: " + attackingPokemon.getOriginalPokemon().getName());
-        Log.i(TAG, "Defending player: " + defendingPlayerId);
+        Log.i(TAG, "Defending player ID: " + defendingPlayer.getId() + "Defending ID: " + defendingPlayerId);
         Log.i(TAG, "Defending player pkmn: " + defendingPokemon.getOriginalPokemon().getName());
 
         int damageDone = res.getDamageDone();
