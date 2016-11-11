@@ -71,7 +71,7 @@ class Attack implements Command {
         }
 
         int damageDone = 0;
-        for (int i = 0; i <= damageCalculator.getTimesHit(move); i++){
+        for (int i = 0; i < damageCalculator.getTimesHit(move); i ++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
             Log.i(TAG, "Partial damage: " + partialDamage);
             damageDone += partialDamage;
