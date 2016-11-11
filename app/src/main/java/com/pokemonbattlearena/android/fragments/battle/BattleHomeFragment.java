@@ -239,9 +239,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     // set the buttons to the current activePokemon
     private void configureMoveButtons() {
-
-        //mPlayerMoves = mApplication.getBattleDatabase().getMovesForPokemon(mPlayerBattleTeam.getCurrentPokemon().getOriginalPokemon());
-
         if (mPlayerMoves != null) {
             for (int i = 0; i < buttonIds.length; i++) {
                 Move m = mPlayerMoves.get(i);
