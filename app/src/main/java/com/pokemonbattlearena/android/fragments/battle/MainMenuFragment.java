@@ -54,22 +54,28 @@ public class MainMenuFragment extends Fragment {
         mBattleFriendButton = (Button) view.findViewById(R.id.battle_friend_button);
         mBattleAIButton = (Button) view.findViewById(R.id.battle_ai_button);
 
-        mBattleNowButton.setOnTouchListener(new View.OnTouchListener() {
+        mBattleNowButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                //on button pressed
-                if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button_clicked);
-                    return true;
-                }
-                //on button release
-                else {
-                    mCallback.onBattleNowClicked();
-                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button);
-                    return false;
-                }
+            public void onClick(View v) {
+                mCallback.onBattleNowClicked();
             }
         });
+//        mBattleNowButton.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                //on button pressed
+//                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+//                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button_clicked);
+//                    return true;
+//                }
+//                //on button release
+//                else {
+//                    mCallback.onBattleNowClicked();
+//                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button);
+//                    return false;
+//                }
+//            }
+//        });
         mBattleFriendButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {

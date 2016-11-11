@@ -136,7 +136,7 @@ public class BottomBarActivity extends BaseActivity implements
     public void onBattleNowClicked() {
         // showing the progress dialog also creates it if its null
         mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
-        refreshBattleFragment();
+        mFragmentManager.beginTransaction().replace(R.id.container, mBattleHomeFragment, "battle").commit();
         startMatchMaking();
         showProgressDialog();
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -166,7 +166,7 @@ public class BottomBarActivity extends BaseActivity implements
                     boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                     mBattleHomeFragment.showMoveUI(movesReady);
                     if (movesReady) {
-                        updateUIForPhase();
+                        handleBattleResult();
                     }
                 } else {
                     Log.d(TAG, "Client: sending move: " + move.getName());
@@ -238,7 +238,7 @@ public class BottomBarActivity extends BaseActivity implements
         mBattleHomeFragment = new BattleHomeFragment();
         mChatHomeFragment = new ChatHomeFragment();
         mFragmentManager.beginTransaction()
-                .add(R.id.container, mMainMenuFragment, "battle")
+                .add(R.id.container, mMainMenuFragment, "main")
                 .commit();
 
         // Listens for a tab touch (Only first touch of new tab)
@@ -270,8 +270,11 @@ public class BottomBarActivity extends BaseActivity implements
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
                             if (mMainMenuFragment != null && !mMainMenuFragment.isAdded()) {
                                 mFragmentManager.beginTransaction()
-                                        .replace(R.id.container, mMainMenuFragment, "battle")
+                                        .replace(R.id.container, mMainMenuFragment, "main")
                                         .commit();
+                            }
+                            if (mBattleHomeFragment != null && mTeamsHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
                             }
                             if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                                 mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
@@ -284,6 +287,9 @@ public class BottomBarActivity extends BaseActivity implements
                                 mFragmentManager.beginTransaction()
                                         .replace(R.id.container, mBattleHomeFragment, "battle")
                                         .commit();
+                            }
+                            if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
                             }
                             if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                                 mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
@@ -414,10 +420,7 @@ public class BottomBarActivity extends BaseActivity implements
             showGameError();
             return;
         }
-
-        // save room ID so we can leave cleanly before the game starts.
-        mRoomId = room.getRoomId();
-        mRoomCreatorId = room.getCreatorId();
+        updateRoom(room);
     }
 
     @Override
@@ -463,7 +466,7 @@ public class BottomBarActivity extends BaseActivity implements
     // etc.
     @Override
     public void onPeerDeclined(Room room, List<String> arg1) {
-        updateRoom(room);
+        leaveRoom();
     }
 
     @Override
@@ -488,18 +491,12 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onPeerLeft(Room room, List<String> peersWhoLeft) {
         updateRoom(room);
+        leaveRoom();
     }
 
     @Override
     public void onConnectedToRoom(Room room) {
-        //get participants and my ID:
-        mParticipants = room.getParticipants();
-        mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
-        // save room ID if its not initialized in onRoomCreated() so we can leave cleanly before the game starts.
-        if (mRoomId == null)
-            mRoomId = room.getRoomId();
-        if (mRoomCreatorId == null)
-            mRoomCreatorId = room.getCreatorId();
+        updateRoom(room);
     }
 
     @Override
@@ -527,6 +524,7 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onPeersDisconnected(Room room, List<String> peers) {
         updateRoom(room);
+        leaveRoom();
     }
     //endregion
 
@@ -555,9 +553,7 @@ public class BottomBarActivity extends BaseActivity implements
                 Log.d(TAG, "We got a move: " + move.getName());
                 boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), move);
                 if (phaseReady) {
-                    updateUIForPhase();
-
-                    mActiveBattle.startNewBattlePhase();
+                    handleBattleResult();
                 }
             }
             if (resultFromJson.getCommandResults() != null && !mIsHost) {
@@ -576,23 +572,26 @@ public class BottomBarActivity extends BaseActivity implements
         hideProgressDialog();
     }
 
-    private void updateUIForPhase() {
+    private void handleBattleResult() {
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
-        boolean isOver = mActiveBattle.isFinished();
+
         for (CommandResult commandResult : result.getCommandResults()) {
             mActiveBattle.applyCommandResult(commandResult);
-            Log.d(TAG, commandResult.getTargetInfo().toString());
             updateUI();
+            Log.d(TAG, commandResult.getTargetInfo().toString());
+            boolean isOver = mActiveBattle.isFinished();
+            if (isOver) {
+                Toast.makeText(mApplication, "A player has won", Toast.LENGTH_SHORT).show();
+                leaveRoom();
+                return;
+            }
         }
         mBattleHomeFragment.showMoveUI(true);
         String json = mCommandGson.toJson(result);
         sendMessage(json);
 
-        if (isOver) {
-            Toast.makeText(mApplication, "A player has won", Toast.LENGTH_SHORT).show();
-            leaveRoom();
-        }
 
+        mActiveBattle.startNewBattlePhase();
     }
 
     @Override
@@ -661,18 +660,18 @@ public class BottomBarActivity extends BaseActivity implements
             mParticipants = room.getParticipants();
             mRoomId = room.getRoomId();
             mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
-            mRoomCreatorId = room.getCreatorId();
             ArrayList<String> sortedIds = new ArrayList<>();
-            for (Participant mParticipant : mParticipants) {
-                sortedIds.add(mParticipant.getParticipantId());
-            }
-            Collections.sort(sortedIds);
-            mHostId = sortedIds.get(0);
-            mIsHost = mHostId.equalsIgnoreCase(mMyId);
+            setHost(sortedIds);
         }
-        if (mParticipants != null) {
-            // update game states
+    }
+
+    private void setHost(ArrayList<String> sortedIds) {
+        for (Participant mParticipant : mParticipants) {
+            sortedIds.add(mParticipant.getParticipantId());
         }
+        Collections.sort(sortedIds);
+        mHostId = sortedIds.get(0);
+        mIsHost = mHostId.equalsIgnoreCase(mMyId);
     }
 
     private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
@@ -737,11 +736,17 @@ public class BottomBarActivity extends BaseActivity implements
     private void leaveRoom() {
         stopKeepingScreenOn();
         if (mRoomId != null) {
-            Log.d(TAG, "Leaving room.");
             Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
+            mRoomId = null;
+            mActiveBattle = null;
+            mMyId = null;
+            mParticipants = null;
+            mIsHost = false;
+            mHostId = null;
+            Log.d(TAG, "Left room everything is null.");
         }
+        mFragmentManager.beginTransaction().replace(R.id.container, mMainMenuFragment, "main").commit();
         mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
-        refreshBattleFragment();
     }
 
     private void refreshBattleFragment() {
@@ -754,7 +759,7 @@ public class BottomBarActivity extends BaseActivity implements
         } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
             if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
                 mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
-                mFragmentManager.beginTransaction().add(R.id.container, mMainMenuFragment, "battle").commit();
+                mFragmentManager.beginTransaction().add(R.id.container, mMainMenuFragment, "main").commit();
             }
         }
     }
