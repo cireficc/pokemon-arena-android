@@ -548,6 +548,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     private void updateUIForPhase() {
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
+        boolean isOver = mActiveBattle.isFinished();
         for (CommandResult commandResult : result.getCommandResults()) {
             mActiveBattle.applyCommandResult(commandResult);
             Log.d(TAG, commandResult.getTargetInfo().toString());
@@ -555,6 +556,10 @@ public class BottomBarActivity extends BaseActivity implements
         }
         String json = mCommandGson.toJson(result);
         sendMessage(json);
+        if (isOver) {
+            Toast.makeText(mApplication, "A player has won", Toast.LENGTH_SHORT).show();
+            leaveRoom();
+        }
     }
 
     @Override

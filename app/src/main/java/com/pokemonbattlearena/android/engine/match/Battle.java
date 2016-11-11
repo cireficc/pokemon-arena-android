@@ -77,6 +77,7 @@ public class Battle {
 
     private void setFinished() {
         isFinished = self.getBattlePokemonTeam().allFainted() || opponent.getBattlePokemonTeam().allFainted();
+        isFinished = self.getBattlePokemonTeam().getCurrentPokemon().isFainted() || opponent.getBattlePokemonTeam().getCurrentPokemon().isFainted();
     }
 
     public void startNewBattlePhase() {
