@@ -51,8 +51,7 @@ import java.util.Random;
 public class BattleHomeFragment extends Fragment implements View.OnClickListener {
     PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
-    private Button mBattleButton;
-    private Button mAiBattleButton;
+    private Button mCancelBattleButton;
 
     private boolean mIsActiveBattle = false;
     private boolean battleBegun = false;
@@ -99,8 +98,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     public interface OnBattleFragmentTouchListener {
-        void onBattleNowClicked(boolean isActiveBattle);
-        void onAiBattleClicked();
+        void onCancelBattle(boolean isActiveBattle);
         void onMoveClicked(Move move);
         void onTypeBanClicked(String type);
         void onTypeBanLongClicked(String type);
@@ -110,12 +108,10 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
-        mBattleButton = (Button) view.findViewById(R.id.battle_now_button);
+        mCancelBattleButton = (Button) view.findViewById(R.id.cancel_battle_button);
         mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
         mMoveHistoryText.setMovementMethod( new ScrollingMovementMethod());
-        mAiBattleButton = (Button) view.findViewById(R.id.ai_battle_button);
-        mBattleButton.setOnClickListener(this);
-        mAiBattleButton.setOnClickListener(this);
+        mCancelBattleButton.setOnClickListener(this);
         mTypeBanGrid = (GridView) view.findViewById(R.id.type_ban_layout);
         mTypeBanTitle = (TextView) view.findViewById(R.id.type_ban_title_text);
         mTypeBanSwitch = (Switch) view.findViewById(R.id.type_ban_switch);
@@ -195,18 +191,8 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         int id = v.getId();
         switch (id) {
-            case R.id.battle_now_button:
-                String text = mIsActiveBattle ? getString(R.string.battle) : getString(R.string.cancel_battle);
-                mBattleButton.setText(text);
-                mCallback.onBattleNowClicked(mIsActiveBattle);
-                mIsActiveBattle = !mIsActiveBattle;
-                break;
-            case R.id.ai_battle_button:
-                text = mIsActiveBattle ? getString(R.string.battle) : getString(R.string.cancel_battle);
-                mBattleButton.setText(text);
-                mAiBattleButton.setVisibility(View.GONE);
-                mCallback.onAiBattleClicked();
-                mIsActiveBattle = !mIsActiveBattle;
+            case R.id.cancel_battle_button:
+                mCallback.onCancelBattle(mIsActiveBattle);
                 break;
             case R.id.move_button_0:
                 mCallback.onMoveClicked(mPlayerMoves.get(0));
