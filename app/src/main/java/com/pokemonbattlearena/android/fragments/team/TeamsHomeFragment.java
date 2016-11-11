@@ -139,6 +139,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                 builder.setPositiveButton("Save Moves", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        selectedPokemon.setActiveMoveList(selectedMoves);
                         selectedTeamArrayList.add(selectedPokemon);
                         item.mCheckbox.setChecked(true);
                     }
