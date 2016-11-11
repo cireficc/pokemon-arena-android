@@ -125,12 +125,12 @@ public class DamageCalculator {
             return 0;
         }
 
-        int attack = (move.getMoveType() == MoveType.PHYSICAL) ? originalAttacker.getAttack() : originalAttacker.getSpecialAttack();
-        int defense = (move.getMoveType() == MoveType.PHYSICAL) ? originalTarget.getDefense() : originalTarget.getSpecialDefense();
+        double attack = (move.getMoveType() == MoveType.PHYSICAL) ? originalAttacker.getAttack() : originalAttacker.getSpecialAttack();
+        double defense = (move.getMoveType() == MoveType.PHYSICAL) ? originalTarget.getDefense() : originalTarget.getSpecialDefense();
 
         double levelCalc = ((2 * POKEMON_LEVEL) + 10) / 250.0;
         double statCalc = attack / defense;
-        int basePower = move.getPower();
+        double basePower = move.getPower();
 
         double damage = (levelCalc * statCalc * basePower) + 2;
 
@@ -140,7 +140,7 @@ public class DamageCalculator {
 
         double typeEffectiveness = getOverallTypeEffectiveness(move, target);
 
-        int critMultiplier = 1;
+        double critMultiplier = 1;
         final int MAX = 100;
         final int MIN = 85;
         double roll = (ThreadLocalRandom.current().nextInt((MAX - MIN) + 1) + MIN) / 100.0;
