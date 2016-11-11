@@ -170,11 +170,15 @@ public class BottomBarActivity extends BaseActivity implements
             String gson = new Gson().toJson(move, Move.class);
             sendMessage(gson);
         } else {
-            Toast.makeText(mApplication, move.getName(), Toast.LENGTH_SHORT).show();
-            if (mActiveBattle instanceof AiBattle) {
-                Toast.makeText(mApplication, mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon().getName() + " used: " + ((AiBattle) mActiveBattle).showIntelligence(), Toast.LENGTH_SHORT).show();
+            if (mBattleHomeFragment != null) {
+                mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+                if (mActiveBattle.getCurrentBattlePhase() == null) {
+                    mActiveBattle.startNewBattlePhase();
+                }
+                if (mActiveBattle instanceof AiBattle) {
+                    mBattleHomeFragment.appendMoveHistory("AI", ((AiBattle) mActiveBattle).showIntelligence());
+                }
             }
-
         }
     }
 
