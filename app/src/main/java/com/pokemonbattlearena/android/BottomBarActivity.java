@@ -526,7 +526,7 @@ public class BottomBarActivity extends BaseActivity implements
                 boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), move);
                 if (phaseReady) {
                     updateUIForPhase();
-                    mBattleHomeFragment.showMoveUI(true);
+
                     mActiveBattle.startNewBattlePhase();
                 }
             }
@@ -554,12 +554,15 @@ public class BottomBarActivity extends BaseActivity implements
             Log.d(TAG, commandResult.getTargetInfo().toString());
             updateUI();
         }
+        mBattleHomeFragment.showMoveUI(true);
         String json = mCommandGson.toJson(result);
         sendMessage(json);
+
         if (isOver) {
             Toast.makeText(mApplication, "A player has won", Toast.LENGTH_SHORT).show();
             leaveRoom();
         }
+
     }
 
     @Override
