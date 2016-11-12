@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android.engine.match;
 
 import android.util.Log;
 
+import com.pokemonbattlearena.android.engine.database.StatType;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
 public class AttackResult extends CommandResult {
@@ -21,6 +22,8 @@ public class AttackResult extends CommandResult {
     private int healingDone;
     private int recoilTaken;
     private boolean fainted;
+    private StatType statTypeApplied;
+    private int stageChange;
 
     private AttackResult(Builder builder) {
 
@@ -40,6 +43,8 @@ public class AttackResult extends CommandResult {
         this.healingDone = builder.healingDone;
         this.recoilTaken = builder.recoilTaken;
         this.fainted = builder.fainted;
+        this.statTypeApplied = builder.statTypeApplied;
+        this.stageChange = builder.stageChange;
     }
 
     public int getMoveUsedId() {
@@ -90,6 +95,10 @@ public class AttackResult extends CommandResult {
         return fainted;
     }
 
+    public StatType getStatType() { return statTypeApplied; }
+
+    public int getStageChange() { return stageChange; }
+
     protected static class Builder {
 
         private TargetInfo targetInfo;
@@ -106,6 +115,8 @@ public class AttackResult extends CommandResult {
         private int healingDone;
         private int recoilTaken;
         private boolean fainted;
+        private StatType statTypeApplied;
+        private int stageChange;
 
         protected Builder(TargetInfo targetInfo, int moveUsedId) {
             this.targetInfo = targetInfo;
@@ -164,6 +175,16 @@ public class AttackResult extends CommandResult {
 
         protected Builder setFainted(boolean fainted) {
             this.fainted = fainted;
+            return this;
+        }
+
+        protected Builder setStatTypeApplied(StatType statTypeApplied) {
+            this.statTypeApplied = statTypeApplied;
+            return this;
+        }
+
+        protected Builder setStageChange(int stageChange) {
+            this.stageChange = stageChange;
             return this;
         }
 
