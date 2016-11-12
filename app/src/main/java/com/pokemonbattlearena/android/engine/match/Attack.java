@@ -7,6 +7,7 @@ import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.calculators.DamageCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.HealingCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
+import com.pokemonbattlearena.android.engine.match.calculators.StageChangeCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
 class Attack implements Command {
@@ -21,6 +22,7 @@ class Attack implements Command {
     private transient static StatusEffectCalculator statusEffectCalculator = StatusEffectCalculator.getInstance();
     private transient static HealingCalculator healingCalculator = HealingCalculator.getInstance();
     private transient static RecoilCalculator recoilCalculator = RecoilCalculator.getInstance();
+    private transient static StageChangeCalculator stageChangeCalculator = StageChangeCalculator.getInstance();
 
     Attack(BattlePokemonPlayer attacker, BattlePokemonPlayer defender, Move move) {
         this.attackingPlayer = attacker;
@@ -126,6 +128,16 @@ class Attack implements Command {
             int recoilTaken = recoilCalculator.getRecoilAmount(attackingPokemon, move, damageDone);
             Log.i(TAG, attackingPokemon.getOriginalPokemon().getName() + " takes " + recoilTaken + " recoil damage");
             builder.setRecoilTaken(recoilTaken);
+        }
+
+        boolean doStageChange = stageChangeCalculator.doesApplyStageChange(move);
+        Log.i(TAG, "Apply Stage change? " + doStageChange);
+
+        if(doStageChange) {
+            Log.i(TAG, move.getStageChange() + " is the amount");
+            Log.i(TAG, move.getStageChangeStatType() + " is the stage type");
+            builder.setStageChange(move.getStageChange());
+            builder.setStatTypeApplied(move.getStageChangeStatType());
         }
 
         return builder.build();
