@@ -48,6 +48,7 @@ import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
+import com.pokemonbattlearena.android.fragments.chat.ChatInGameFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
@@ -71,7 +72,8 @@ public class BottomBarActivity extends BaseActivity implements
         OnPokemonTeamSelectedListener,
         BattleHomeFragment.OnBattleFragmentTouchListener,
         MainMenuFragment.OnMenuFragmentTouchListener,
-        ChatHomeFragment.OnChatLoadedListener {
+        ChatHomeFragment.OnChatLoadedListener,
+        ChatInGameFragment.OnGameChatLoadedListener{
 
     private static final int TEAM_SIZE_INT = 6;
     private static final int MIN_PLAYERS = 2;
@@ -98,6 +100,7 @@ public class BottomBarActivity extends BaseActivity implements
     private BattleHomeFragment mBattleHomeFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
+    private ChatInGameFragment mChatInGameFragment;
 
     private BottomBar mBottomBar;
     private SharedPreferences mPreferences;
@@ -136,7 +139,7 @@ public class BottomBarActivity extends BaseActivity implements
     public void onBattleNowClicked() {
         // showing the progress dialog also creates it if its null
         mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
-        mFragmentManager.beginTransaction().replace(R.id.container, mBattleHomeFragment, "battle").commit();
+        refreshBattleFragment();
         startMatchMaking();
         showProgressDialog();
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -237,6 +240,7 @@ public class BottomBarActivity extends BaseActivity implements
         mTeamsHomeFragment = createTeamsHomeFragment();
         mBattleHomeFragment = new BattleHomeFragment();
         mChatHomeFragment = new ChatHomeFragment();
+        mChatInGameFragment = new ChatInGameFragment();
         mFragmentManager.beginTransaction()
                 .add(R.id.container, mMainMenuFragment, "main")
                 .commit();
@@ -294,8 +298,8 @@ public class BottomBarActivity extends BaseActivity implements
                             if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                                 mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
                             }
-                            if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
-                                mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
+                            if (mChatInGameFragment != null && mChatInGameFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mChatInGameFragment).commit();
                             }
                         }
                         break;
@@ -315,7 +319,16 @@ public class BottomBarActivity extends BaseActivity implements
                                 mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
                             }
                         } else if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
-
+                            if (mChatInGameFragment != null && !mChatInGameFragment.isAdded()) {
+                                displaySavedTeam(false);
+                                mFragmentManager.beginTransaction()
+                                        .replace(R.id.container, mChatInGameFragment, "game_chat")
+                                        .commit();
+                                showProgressDialog();
+                            }
+                            if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+                            }
                         }
                         break;
                     default:
@@ -827,4 +840,9 @@ public class BottomBarActivity extends BaseActivity implements
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     //endregion
+
+    @Override
+    public String getHostId() {
+        return mHostId;
+    }
 }
