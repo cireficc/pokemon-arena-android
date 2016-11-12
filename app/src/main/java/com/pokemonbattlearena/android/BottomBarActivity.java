@@ -745,8 +745,8 @@ public class BottomBarActivity extends BaseActivity implements
             mHostId = null;
             Log.d(TAG, "Left room everything is null.");
         }
-        mFragmentManager.beginTransaction().replace(R.id.container, mMainMenuFragment, "main").commit();
         mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
+        refreshBattleFragment();
     }
 
     private void refreshBattleFragment() {

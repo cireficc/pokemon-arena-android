@@ -28,7 +28,6 @@ public class MainMenuFragment extends Fragment {
     private Button mBattleAIButton;
 
     private OnMenuFragmentTouchListener mCallback;
-    private OnFragmentInteractionListener mListener;
 
     public MainMenuFragment() {
         // Required empty public constructor
@@ -54,28 +53,28 @@ public class MainMenuFragment extends Fragment {
         mBattleFriendButton = (Button) view.findViewById(R.id.battle_friend_button);
         mBattleAIButton = (Button) view.findViewById(R.id.battle_ai_button);
 
-        mBattleNowButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallback.onBattleNowClicked();
-            }
-        });
-//        mBattleNowButton.setOnTouchListener(new View.OnTouchListener() {
+//        mBattleNowButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                //on button pressed
-//                if(event.getAction() == MotionEvent.ACTION_DOWN) {
-//                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button_clicked);
-//                    return true;
-//                }
-//                //on button release
-//                else {
-//                    mCallback.onBattleNowClicked();
-//                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button);
-//                    return false;
-//                }
+//            public void onClick(View v) {
+//                mCallback.onBattleNowClicked();
 //            }
 //        });
+        mBattleNowButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //on button pressed
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button_clicked);
+                    return true;
+                }
+                //on button release
+                else {
+                    mCallback.onBattleNowClicked();
+                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button);
+                    return false;
+                }
+            }
+        });
         mBattleFriendButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -125,21 +124,5 @@ public class MainMenuFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 }
