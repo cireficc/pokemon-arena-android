@@ -189,16 +189,6 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
-    public void onTypeBanClicked(String type) {
-        mBattleMatchFlag |= CustomTypeMatch.valueOf(type.toUpperCase()).getFlag();
-    }
-
-    @Override
-    public void onTypeBanLongClicked(String type) {
-        mBattleMatchFlag ^= CustomTypeMatch.valueOf(type.toUpperCase()).getFlag();
-    }
-
-    @Override
     public void onChatLoaded() {
         hideProgressDialog();
     }
