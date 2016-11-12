@@ -3,6 +3,7 @@ package com.pokemonbattlearena.android.engine.match;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BattlePokemonTeam {
@@ -23,6 +24,10 @@ public class BattlePokemonTeam {
 
     public BattlePokemon getCurrentPokemon() {
         return battlePokemons.get(0);
+    }
+
+    public void switchPokemonAtPosition(int position) {
+        Collections.swap(battlePokemons, 0, position);
     }
 
     public boolean allFainted() {
