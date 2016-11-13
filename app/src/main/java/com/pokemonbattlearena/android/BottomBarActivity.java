@@ -80,7 +80,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     // GOOGLE PLAY GAMES FIELDS
     private static final int RC_SIGN_IN = 9001;
-    private String mRoomCreatorId = null;
     private String mRoomId = null;
     private String mMyId = null;
     private ArrayList<Participant> mParticipants = null;
@@ -152,6 +151,9 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onSwitchPokemon(int position) {
+        mActiveBattle.getSelf().getBattlePokemonTeam().switchPokemonAtPosition(position);
+        mActiveBattle.getOpponent().getBattlePokemonTeam().switchPokemonAtPosition(position);
+        mBattleHomeFragment.refreshActivePokemon(mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon(), mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon());
     }
 
     @Override
@@ -168,7 +170,7 @@ public class BottomBarActivity extends BaseActivity implements
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
                     boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
-                    mBattleHomeFragment.showMoveUI(movesReady);
+                    mBattleHomeFragment.enableMoveUI(movesReady);
                     if (movesReady) {
                         handleBattleResult();
                     }
@@ -176,7 +178,7 @@ public class BottomBarActivity extends BaseActivity implements
                     Log.d(TAG, "Client: sending move: " + move.getName());
                     String gson = new Gson().toJson(move, Move.class);
                     sendMessage(gson);
-                    mBattleHomeFragment.showMoveUI(false);
+                    mBattleHomeFragment.enableMoveUI(false);
                 }
             }
         } else {
@@ -560,7 +562,7 @@ public class BottomBarActivity extends BaseActivity implements
                     updateUI();
                 }
 
-                mBattleHomeFragment.showMoveUI(true);
+                mBattleHomeFragment.enableMoveUI(true);
             }
         }
         hideProgressDialog();
@@ -580,7 +582,7 @@ public class BottomBarActivity extends BaseActivity implements
                 return;
             }
         }
-        mBattleHomeFragment.showMoveUI(true);
+        mBattleHomeFragment.enableMoveUI(true);
         String json = mCommandGson.toJson(result);
         sendMessage(json);
 

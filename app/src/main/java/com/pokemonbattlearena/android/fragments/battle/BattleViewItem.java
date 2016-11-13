@@ -1,6 +1,7 @@
 package com.pokemonbattlearena.android.fragments.battle;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -68,8 +69,12 @@ public class BattleViewItem {
         return activePokemon;
     }
 
-    public void setActivePokemon(Pokemon activePokemon) {
+    public void setActivePokemon(Pokemon activePokemon, Drawable d) {
         this.activePokemon = activePokemon;
+        this.pokemonHpProgress.setMax(activePokemon.getHp());
+        this.pokemonName.setText(activePokemon.getName());
+        this.pokemonImage.setImageDrawable(d);
+        setHPBar(activePokemon.getHp());
     }
 
     public void setVisibility(boolean visibility) {
