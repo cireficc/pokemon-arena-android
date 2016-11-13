@@ -170,7 +170,7 @@ public class BottomBarActivity extends BaseActivity implements
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
                     boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
-                    mBattleHomeFragment.enableMoveUI(movesReady);
+                    mBattleHomeFragment.enableButtonActions(movesReady);
                     if (movesReady) {
                         handleBattleResult();
                     }
@@ -178,7 +178,7 @@ public class BottomBarActivity extends BaseActivity implements
                     Log.d(TAG, "Client: sending move: " + move.getName());
                     String gson = new Gson().toJson(move, Move.class);
                     sendMessage(gson);
-                    mBattleHomeFragment.enableMoveUI(false);
+                    mBattleHomeFragment.enableButtonActions(false);
                 }
             }
         } else {
@@ -562,7 +562,7 @@ public class BottomBarActivity extends BaseActivity implements
                     updateUI();
                 }
 
-                mBattleHomeFragment.enableMoveUI(true);
+                mBattleHomeFragment.enableButtonActions(true);
             }
         }
         hideProgressDialog();
@@ -582,7 +582,7 @@ public class BottomBarActivity extends BaseActivity implements
                 return;
             }
         }
-        mBattleHomeFragment.enableMoveUI(true);
+        mBattleHomeFragment.enableButtonActions(true);
         String json = mCommandGson.toJson(result);
         sendMessage(json);
 

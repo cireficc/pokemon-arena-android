@@ -71,12 +71,13 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mTypeModel = new TypeModel();
     }
 
-    public void enableMoveUI(boolean enabled) {
+    public void enableButtonActions(boolean enabled) {
         String locked = enabled ? "UNLOCKED":"LOCKED";
         Log.d(TAG, "UI is now " + locked);
         for (Button button : mMoveButtons) {
             button.setEnabled(enabled);
         }
+        mSwitchButton.setEnabled(enabled);
     }
 
     private void configureButtonsWithMoves(List<Move> moves) {
