@@ -255,7 +255,7 @@ public class Battle {
             attackingPokemon.setSpeedStage(attackingPokemon.getSpeedStage() + (attackingPokemon.getSpeedStage() * (-1)));
             attackingPokemon.setCritStage(attackingPokemon.getCritStage() + (attackingPokemon.getCritStage() * (-1)));
             defendingPokemon.setAttackStage(defendingPokemon.getAttackStage() + (defendingPokemon.getAttackStage() * (-1)));
-            defendingPokemon.setDefenseStage(defendingPokemon.getDefenseStage() + (defendingPokemon.getDefenseStage() * (-1));
+            defendingPokemon.setDefenseStage(defendingPokemon.getDefenseStage() + (defendingPokemon.getDefenseStage() * (-1)));
             defendingPokemon.setSpAttackStage(defendingPokemon.getSpAttackStage() + (defendingPokemon.getSpAttackStage() * (-1)));
             defendingPokemon.setSpDefenseStage(defendingPokemon.getSpDefenseStage() + (defendingPokemon.getSpDefenseStage() * (-1)));
             defendingPokemon.setSpeedStage(defendingPokemon.getSpeedStage() + (defendingPokemon.getSpeedStage() * (-1)));
