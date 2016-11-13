@@ -71,7 +71,8 @@ public class BottomBarActivity extends BaseActivity implements
         OnPokemonTeamSelectedListener,
         BattleHomeFragment.OnBattleFragmentTouchListener,
         MainMenuFragment.OnMenuFragmentTouchListener,
-        ChatHomeFragment.OnChatLoadedListener {
+        ChatHomeFragment.OnChatLoadedListener,
+        BattleEndListener {
 
     private static final int TEAM_SIZE_INT = 6;
     private static final int MIN_PLAYERS = 2;
@@ -116,6 +117,9 @@ public class BottomBarActivity extends BaseActivity implements
     private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mRuntimeTypeAdapterFactory).create();
     private boolean isAiBattle = false;
 
+    // BATTLE END
+    private BattleEndListener battleEndListener = this;
+
     //region Fragment callbacks
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
@@ -157,6 +161,7 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
+    //TODO Break the AI stuff out into methods i.e. use handleBattleResult
     public void onMoveClicked(Move move) {
         if (!isAiBattle) {
             if (mBattleHomeFragment != null) {
@@ -182,7 +187,33 @@ public class BottomBarActivity extends BaseActivity implements
                     mActiveBattle.startNewBattlePhase();
                 }
                 if (mActiveBattle instanceof AiBattle) {
-                    mBattleHomeFragment.appendMoveHistory("AI", ((AiBattle) mActiveBattle).showIntelligence());
+                    Move tmp = ((AiBattle) mActiveBattle).showIntelligence();
+                    mBattleHomeFragment.appendMoveHistory("AI", tmp);
+                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                    //mBattleHomeFragment.showMoveUI(movesReady);
+                    mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
+                    mActiveBattle.executeCurrentBattlePhase();
+
+                    for (CommandResult cmdR: mActiveBattle.getCurrentBattlePhase().getBattlePhaseResult().getCommandResults())
+                    {
+                        if (mActiveBattle.selfPokemonFainted() || mActiveBattle.oppPokemonFainted()) {
+                            if(mActiveBattle.isFinished()) {
+                                battleEndListener.onBattleEnd();
+                                break;
+                            }
+                            //TODO somehow handle the knocking out of a Pokemon mid-Phase
+                            break;
+                        }
+                        mActiveBattle.applyCommandResult(cmdR);
+                        updateUI();
+                    }
+                    updateUI();
+                    if(!mActiveBattle.isFinished()) {
+                        mActiveBattle.startNewBattlePhase();
+                    }
+                    else {
+                        battleEndListener.onBattleEnd();
+                    }
                 }
             }
         }
@@ -569,9 +600,9 @@ public class BottomBarActivity extends BaseActivity implements
             mActiveBattle.applyCommandResult(commandResult);
             updateUI();
             Log.d(TAG, commandResult.getTargetInfo().toString());
-            boolean isOver = mActiveBattle.isFinished();
-            if (isOver) {
-                Toast.makeText(mApplication, "A player has won", Toast.LENGTH_SHORT).show();
+
+            if (mActiveBattle.isFinished()) {
+                battleEndListener.onBattleEnd();
                 leaveRoom();
                 return;
             }
@@ -607,12 +638,13 @@ public class BottomBarActivity extends BaseActivity implements
 
     //region AI Battle
     private void startAiBattle() {
-        setCurrentPokemonPlayerTeam(getSavedTeam());
-        AiPlayer ai = new AiPlayer(mApplication.getBattleDatabase(), mCurrentPokemonPlayer);
-        mActiveBattle = new AiBattle(mCurrentPokemonPlayer, ai);
         mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
         refreshBattleFragment();
-        setupBattleUI(mCurrentPokemonPlayer, ai);
+        mMyId = "Player";
+        setCurrentPokemonPlayerTeam(getSavedTeam());
+        mOpponentPokemonPlayer = new AiPlayer(mApplication.getBattleDatabase(), mCurrentPokemonPlayer);
+        mActiveBattle = new AiBattle(mCurrentPokemonPlayer, (AiPlayer)mOpponentPokemonPlayer);
+        setupBattleUI(mCurrentPokemonPlayer, mOpponentPokemonPlayer);
     }
     //endregion
 
@@ -621,7 +653,7 @@ public class BottomBarActivity extends BaseActivity implements
         mCurrentPokemonPlayer = new PokemonPlayer(mMyId);
         mCurrentPokemonPlayer.setPokemonTeam(team);
     }
-    
+
     // Show error message about game being cancelled and return to main screen.
     private void showGameError() {
         BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
@@ -666,8 +698,8 @@ public class BottomBarActivity extends BaseActivity implements
 
     private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
         if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
-            mBattleHomeFragment.setPlayer(player);
-            mBattleHomeFragment.setOpponent(opponent);
+            mBattleHomeFragment.setPlayer(mCurrentPokemonPlayer);
+            mBattleHomeFragment.setOpponent(mOpponentPokemonPlayer);
             mBattleHomeFragment.setBattleVisible(true);
         }
     }
@@ -745,11 +777,13 @@ public class BottomBarActivity extends BaseActivity implements
                 mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
                 mBattleHomeFragment = new BattleHomeFragment();
                 mFragmentManager.beginTransaction().add(R.id.container, mBattleHomeFragment, "battle").commit();
+                mFragmentManager.executePendingTransactions();
             }
         } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
             if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
                 mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
                 mFragmentManager.beginTransaction().add(R.id.container, mMainMenuFragment, "main").commit();
+                mFragmentManager.executePendingTransactions();
             }
         }
     }
@@ -790,7 +824,7 @@ public class BottomBarActivity extends BaseActivity implements
         int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
         return c.getDrawable(id);
     }
-    
+
     private TeamsHomeFragment createTeamsHomeFragment() {
         TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
         // Set the team size
@@ -817,4 +851,33 @@ public class BottomBarActivity extends BaseActivity implements
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     //endregion
+
+    //region Battle End Listener
+    //TODO pass in some useful parameters for different tasks
+    public void onBattleEnd() {
+        //TODO push move history to Firebase, update records, give client BattlePhase list, etc
+        mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
+
+        if (!mMainMenuFragment.isAdded()) {
+            refreshBattleFragment();
+        }
+
+        //TODO Change this to reflect entire Pokemon team instead of just the first Pokemon
+        if (mActiveBattle.selfPokemonFainted()) {
+            for (Participant p: mParticipants) {
+                if (p.getParticipantId().equals(mOpponentPokemonPlayer.getPlayerId())) {
+                    Toast.makeText(mApplication, p.getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+                }
+            }
+
+        } else if (mActiveBattle.oppPokemonFainted()){
+            for (Participant p: mParticipants) {
+                if (p.getParticipantId().equals(mCurrentPokemonPlayer.getPlayerId())) {
+                    Toast.makeText(mApplication, p.getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+    //endregion
+
 }
