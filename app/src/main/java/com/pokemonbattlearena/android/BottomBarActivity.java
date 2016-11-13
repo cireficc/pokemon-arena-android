@@ -862,6 +862,15 @@ public class BottomBarActivity extends BaseActivity implements
             refreshBattleFragment();
         }
 
+        if (isAiBattle) {
+            if (mActiveBattle.selfPokemonFainted()) {
+                Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();
+            } else if (mActiveBattle.oppPokemonFainted()) {
+                Toast.makeText(mApplication," You have won the battle", Toast.LENGTH_LONG).show();
+
+            }
+            return;
+        }
         //TODO Change this to reflect entire Pokemon team instead of just the first Pokemon
         if (mActiveBattle.selfPokemonFainted()) {
             for (Participant p: mParticipants) {

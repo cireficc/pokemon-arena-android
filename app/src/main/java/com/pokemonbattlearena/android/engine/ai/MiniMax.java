@@ -71,8 +71,8 @@ public class MiniMax {
     }
 
     public double hFunction(Node n) {
-        return new Random().nextInt(1000);
-       // return n.getValue().movePower;
+        //return new Random().nextInt(1000);
+        return n.getValue().movePower;
     }
 
 
