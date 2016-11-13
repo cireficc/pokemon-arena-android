@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android.engine.match;
 
 import android.util.Log;
 
+import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Database;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -60,12 +61,13 @@ public class Battle {
 
     private void setFinished() {
         isFinished = self.getBattlePokemonTeam().allFainted() || opponent.getBattlePokemonTeam().allFainted();
+        //TODO Remove this as this is for the 1v1 Pokemon Scenario
         isFinished = self.getBattlePokemonTeam().getCurrentPokemon().isFainted() || opponent.getBattlePokemonTeam().getCurrentPokemon().isFainted();
     }
 
     public void startNewBattlePhase() {
 
-        Log.i(TAG, "Starting new battle phase");
+        Log.e(TAG, "Starting new battle phase");
         finishedBattlePhases.add(currentBattlePhase);
         Log.i(TAG, "Added current battle phase to finished phases");
         Log.i(TAG, "Created new battle phase");
@@ -108,6 +110,7 @@ public class Battle {
             Log.i(TAG, "Applying command result of type SwitchResult");
             applySwitchResult((SwitchResult) commandResult);
         }
+        setFinished();
     }
 
     private void applyAttackResult(AttackResult res) {
@@ -139,7 +142,7 @@ public class Battle {
         int recoilTaken = res.getRecoilTaken();
 
         Log.i(TAG, "Applying damage done: " + damageDone);
-        defendingPokemon.setCurrentHp(attackingPokemon.getCurrentHp() - damageDone);
+        defendingPokemon.setCurrentHp(defendingPokemon.getCurrentHp() - damageDone);
 
         Log.i(TAG, "Applying StatusEffect (maybe): " + statusEffectApplied);
         // If the Pokemon doesn't already have a StatusEffect, we can apply one
@@ -184,6 +187,71 @@ public class Battle {
         Log.i(TAG, "Applying recoil taken: " + recoilTaken);
         attackingPokemon.setCurrentHp(currentHp - recoilTaken);
 
+        int attackStage = res.getAttackStageChange();
+        int defenseStage = res.getDefenseStageChange();
+        int spAttackStage = res.getSpAttackStageChange();
+        int spDefenseStage = res.getSpDefenseStageChange();
+        int speedStage = res.getSpeedStageChange();
+        int critStage = res.getCritStageChange();
+
+        if( attackStage >= 0 ){
+            attackingPokemon.setAttackStage(attackingPokemon.getAttackStage() + attackStage);
+            Log.i(TAG, "Attack Stage +" + attackStage);
+            Log.i(TAG, "Attack Stage =" + attackingPokemon.getAttackStage());
+        }
+        else{
+            defendingPokemon.setAttackStage(defendingPokemon.getAttackStage() + attackStage);
+            Log.i(TAG, "Attack Stage " + attackStage);
+            Log.i(TAG, "Attack Stage =" + defendingPokemon.getAttackStage());
+        }
+
+        if( defenseStage >= 0 ){
+            attackingPokemon.setDefenseStage(attackingPokemon.getDefenseStage() + defenseStage);
+            Log.i(TAG, "Defense Stage +" + defenseStage + " Defense Stage =" + attackingPokemon.getDefenseStage());
+        }
+        else{
+            defendingPokemon.setDefenseStage(defendingPokemon.getDefenseStage() + defenseStage);
+            Log.i(TAG, "Defense Stage " + defenseStage + " Defense Stage =" + defendingPokemon.getDefenseStage());
+        }
+
+        if( spAttackStage >= 0 ){
+            attackingPokemon.setSpAttackStage(attackingPokemon.getSpAttackStage() + spAttackStage);
+            Log.i(TAG, "SpAttack Stage +" + spAttackStage + " SpAttack Stage =" + attackingPokemon.getSpAttackStage());
+        }
+        else{
+            defendingPokemon.setSpAttackStage(defendingPokemon.getSpAttackStage() + spAttackStage);
+            Log.i(TAG, "SpAttack Stage " + spAttackStage + " SpAttack Stage =" + defendingPokemon.getSpAttackStage());
+        }
+
+        if( spDefenseStage >= 0 ){
+            attackingPokemon.setSpDefenseStage(attackingPokemon.getSpDefenseStage() + spDefenseStage);
+            Log.i(TAG, "SpDefense Stage +" + spDefenseStage + " SpDefense Stage =" + attackingPokemon.getSpDefenseStage());
+        }
+        else{
+            defendingPokemon.setSpDefenseStage(defendingPokemon.getSpDefenseStage() + spDefenseStage);
+            Log.i(TAG, "SpDefense Stage " + spDefenseStage + " SpDefense Stage =" + defendingPokemon.getSpDefenseStage());
+        }
+
+        if( speedStage >= 0 ){
+            attackingPokemon.setSpeedStage(attackingPokemon.getSpeedStage() + speedStage);
+            Log.i(TAG, "Speed Stage +" + speedStage + " Speed Stage =" + attackingPokemon.getSpeedStage());
+        }
+        else{
+            defendingPokemon.setSpeedStage(defendingPokemon.getSpeedStage() + speedStage);
+            Log.i(TAG, "Speed Stage " + speedStage + " Speed Stage =" + defendingPokemon.getSpeedStage());
+        }
+
+        if( critStage >= 0 ){
+            attackingPokemon.setCritStage(attackingPokemon.getCritStage() + critStage);
+            Log.i(TAG, "Crit Stage +" + critStage);
+            Log.i(TAG, "Crit Stage =" + attackingPokemon.getCritStage());
+        }
+        else{
+            defendingPokemon.setCritStage(defendingPokemon.getCritStage() + critStage);
+            Log.i(TAG, "Crit Stage " + critStage);
+            Log.i(TAG, "Crit Stage =" + defendingPokemon.getCritStage());
+        }
+
         boolean attackerFainted = attackingPokemon.getCurrentHp() <= 0;
         boolean defenderFainted = defendingPokemon.getCurrentHp() <= 0;
 
@@ -206,10 +274,16 @@ public class Battle {
     }
 
     private BattlePokemonPlayer getPlayerFromId(String id) {
-        if (self.getId().equals(id)) {
-            return self;
-        } else {
-            return opponent;
-        }
+
+            if (self.getId().equals(id)) {
+                return self;
+            } else {
+                return opponent;
+            }
+
     }
+
+    public boolean oppPokemonFainted(){ return opponent.getBattlePokemonTeam().getCurrentPokemon().isFainted();}
+
+    public boolean selfPokemonFainted() { return self.getBattlePokemonTeam().getCurrentPokemon().isFainted();}
 }

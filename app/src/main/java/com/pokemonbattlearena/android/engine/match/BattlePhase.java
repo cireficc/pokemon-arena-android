@@ -32,7 +32,8 @@ public class BattlePhase {
 
             // Pokemon switching always happens first
             if (c1 instanceof Switch || c2 instanceof Switch) {
-                return 1;
+                Log.i(TAG, "There was a Switch command - prioritizing it");
+                return Integer.MIN_VALUE;
             }
 
             Attack a1 = (Attack) c1;
@@ -42,7 +43,7 @@ public class BattlePhase {
 
             Log.i(TAG, "Pokemon 1 speed: " + pokemon1Speed + " || Pokemon 2 speed: " + pokemon2Speed);
 
-            return pokemon2Speed -  pokemon1Speed;
+            return pokemon2Speed - pokemon1Speed;
         }
     };
 
@@ -72,28 +73,18 @@ public class BattlePhase {
         return commandComparator;
     }
 
-    public boolean queueAction(BattlePokemonPlayer attackingPlayer, BattlePokemonPlayer defendingPlayer, Move move) {
+    public boolean queueCommand(Command command) {
 
-        Log.i(TAG, "Queueing action (Move): " + move);
+        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
+        this.commands.add(command);
 
-        Attack attack = new Attack(attackingPlayer, defendingPlayer, move);
-
-        Log.i(TAG, "Adding Attack to command list");
-        this.commands.add(attack);
-        setPlayerReady(attackingPlayer);
-
-        return isPhaseReady();
-    }
-
-    public boolean queueAction(BattlePokemonPlayer attackingPlayer, int switchToPosition) {
-
-        Log.i(TAG, "Queueing action (Switch). Position to switch to: " + switchToPosition);
-
-        Switch aSwitch = new Switch(attackingPlayer, switchToPosition);
-
-        Log.i(TAG, "Adding Switch to command list");
-        this.commands.add(aSwitch);
-        setPlayerReady(attackingPlayer);
+        if (command instanceof Switch) {
+            Switch s = (Switch) command;
+            setPlayerReady(s.getAttackingPlayer());
+        } else if (command instanceof Attack) {
+            Attack a = (Attack) command;
+            setPlayerReady(a.getAttackingPlayer());
+        }
 
         return isPhaseReady();
     }

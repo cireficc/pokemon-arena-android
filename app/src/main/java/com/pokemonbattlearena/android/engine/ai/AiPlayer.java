@@ -18,6 +18,7 @@ public class AiPlayer extends PokemonPlayer {
     protected BattlePokemonPlayer aiBattler;
 
     public AiPlayer(Database db, PokemonPlayer opponent) {
+        super("AI");
         this.opponent = opponent;
         this.db = db;
         chooseTeam();
@@ -25,10 +26,12 @@ public class AiPlayer extends PokemonPlayer {
     }
 
     public void chooseTeam() {
-        PokemonTeam tmp = new PokemonTeam(1);
+        PokemonTeam tmp = new PokemonTeam(6);
 
-        int rnd = new Random().nextInt(db.getPokemons().size());
-        tmp.addPokemon(db.getPokemons().get(rnd));
+        for (int i = 0; i < 6; i++) {
+            int rnd = new Random().nextInt(db.getPokemons().size());
+            tmp.addPokemon(db.getPokemons().get(rnd));
+        }
         this.setPokemonTeam(tmp);
 
     }
@@ -40,6 +43,7 @@ public class AiPlayer extends PokemonPlayer {
     }
 
     public void setMoves() {
+        //TODO Set moves for all Pokemon
         Pokemon org = aiBattler.getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon();
         List<Move> moves = new ArrayList<>(4);
 
@@ -49,7 +53,6 @@ public class AiPlayer extends PokemonPlayer {
         }
 
         aiBattler.getBattlePokemonTeam().getCurrentPokemon().setMoveSet(moves);
-
     }
 
     public BattlePokemonPlayer getAiBattler() {
