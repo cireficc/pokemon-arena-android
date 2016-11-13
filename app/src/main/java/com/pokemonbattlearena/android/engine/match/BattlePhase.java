@@ -32,7 +32,8 @@ public class BattlePhase {
 
             // Pokemon switching always happens first
             if (c1 instanceof Switch || c2 instanceof Switch) {
-                return 1;
+                Log.i(TAG, "There was a Switch command - prioritizing it");
+                return Integer.MIN_VALUE;
             }
 
             Attack a1 = (Attack) c1;
@@ -42,7 +43,7 @@ public class BattlePhase {
 
             Log.i(TAG, "Pokemon 1 speed: " + pokemon1Speed + " || Pokemon 2 speed: " + pokemon2Speed);
 
-            return pokemon2Speed -  pokemon1Speed;
+            return pokemon2Speed - pokemon1Speed;
         }
     };
 
