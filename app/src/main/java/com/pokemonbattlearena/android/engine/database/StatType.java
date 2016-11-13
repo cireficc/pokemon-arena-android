@@ -7,7 +7,7 @@ public enum StatType {
     SPECIALATTACK("SpecialAttack"),
     SPECIALDEFENSE("SpecialDefense"),
     SPEED("Speed"),
-    CRIT("Crit");
+    CRITICALHIT("CriticalHit");
 
     private String type;
 

@@ -30,6 +30,12 @@ public class BattlePhase {
         @Override
         public int compare(Command c1, Command c2) {
 
+            // Pokemon switching always happens first
+            if (c1 instanceof Switch || c2 instanceof Switch) {
+                Log.i(TAG, "There was a Switch command - prioritizing it");
+                return Integer.MIN_VALUE;
+            }
+
             Attack a1 = (Attack) c1;
             Attack a2 = (Attack) c2;
             int pokemon1Speed = a1.getAttackingPokemon().getOriginalPokemon().getSpeed();
@@ -37,9 +43,7 @@ public class BattlePhase {
 
             Log.i(TAG, "Pokemon 1 speed: " + pokemon1Speed + " || Pokemon 2 speed: " + pokemon2Speed);
 
-            // TODO: Use instanceof for custom behavior
-
-            return pokemon2Speed -  pokemon1Speed;
+            return pokemon2Speed - pokemon1Speed;
         }
     };
 
@@ -69,15 +73,18 @@ public class BattlePhase {
         return commandComparator;
     }
 
-    public boolean queueAction(BattlePokemonPlayer attackingPlayer, BattlePokemonPlayer defendingPlayer, Move move) {
+    public boolean queueCommand(Command command) {
 
-        Log.i(TAG, "Queueing action (Move): " + move);
+        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
+        this.commands.add(command);
 
-        Attack attack = new Attack(attackingPlayer, defendingPlayer, move);
-
-        Log.i(TAG, "Adding Attack to command list");
-        this.commands.add(attack);
-        setPlayerReady(attackingPlayer);
+        if (command instanceof Switch) {
+            Switch s = (Switch) command;
+            setPlayerReady(s.getAttackingPlayer());
+        } else if (command instanceof Attack) {
+            Attack a = (Attack) command;
+            setPlayerReady(a.getAttackingPlayer());
+        }
 
         return isPhaseReady();
     }
