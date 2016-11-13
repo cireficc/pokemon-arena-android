@@ -22,8 +22,12 @@ public class AttackResult extends CommandResult {
     private int healingDone;
     private int recoilTaken;
     private boolean fainted;
-    private StatType statTypeApplied;
-    private int stageChange;
+    private int attackStageChange;
+    private int defenseStageChange;
+    private int spAttackStageChange;
+    private int spDefenseStageChange;
+    private int speedStageChange;
+    private int critStageChange;
 
     private AttackResult(Builder builder) {
 
@@ -43,8 +47,12 @@ public class AttackResult extends CommandResult {
         this.healingDone = builder.healingDone;
         this.recoilTaken = builder.recoilTaken;
         this.fainted = builder.fainted;
-        this.statTypeApplied = builder.statTypeApplied;
-        this.stageChange = builder.stageChange;
+        this.attackStageChange = builder.attackStageChange;
+        this.defenseStageChange = builder.defenseStageChange;
+        this.spAttackStageChange = builder.spAttackStageChange;
+        this.spDefenseStageChange = builder.spDefenseStageChange;
+        this.speedStageChange = builder.speedStageChange;
+        this.critStageChange = builder.critStageChange;
     }
 
     public int getMoveUsedId() {
@@ -95,9 +103,29 @@ public class AttackResult extends CommandResult {
         return fainted;
     }
 
-    public StatType getStatType() { return statTypeApplied; }
+    public int getAttackStageChange() {
+        return attackStageChange;
+    }
 
-    public int getStageChange() { return stageChange; }
+    public int getDefenseStageChange() {
+        return defenseStageChange;
+    }
+
+    public int getSpAttackStageChange() {
+        return spAttackStageChange;
+    }
+
+    public int getSpDefenseStageChange() {
+        return spDefenseStageChange;
+    }
+
+    public int getSpeedStageChange() {
+        return speedStageChange;
+    }
+
+    public int getCritStageChange() {
+        return critStageChange;
+    }
 
     protected static class Builder {
 
@@ -115,8 +143,12 @@ public class AttackResult extends CommandResult {
         private int healingDone;
         private int recoilTaken;
         private boolean fainted;
-        private StatType statTypeApplied;
-        private int stageChange;
+        private int attackStageChange;
+        private int defenseStageChange;
+        private int spAttackStageChange;
+        private int spDefenseStageChange;
+        private int speedStageChange;
+        private int critStageChange;
 
         protected Builder(TargetInfo targetInfo, int moveUsedId) {
             this.targetInfo = targetInfo;
@@ -178,13 +210,33 @@ public class AttackResult extends CommandResult {
             return this;
         }
 
-        protected Builder setStatTypeApplied(StatType statTypeApplied) {
-            this.statTypeApplied = statTypeApplied;
+        protected Builder setAttackStageChange(int stageChange) {
+            this.attackStageChange = stageChange;
             return this;
         }
 
-        protected Builder setStageChange(int stageChange) {
-            this.stageChange = stageChange;
+        protected Builder setDefenseStageChange(int stageChange) {
+            this.defenseStageChange = stageChange;
+            return this;
+        }
+
+        protected Builder setSpAttackStageChange(int stageChange) {
+            this.spAttackStageChange = stageChange;
+            return this;
+        }
+
+        protected Builder setSpDefenseStageChange(int stageChange) {
+            this.spDefenseStageChange = stageChange;
+            return this;
+        }
+
+        protected Builder setSpeedStageChange(int stageChange) {
+            this.speedStageChange = stageChange;
+            return this;
+        }
+
+        protected Builder setCritStageChange(int stageChange) {
+            this.critStageChange = stageChange;
             return this;
         }
 

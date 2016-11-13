@@ -9,6 +9,8 @@ import java.util.List;
 
 public class BattlePokemon {
 
+    final int MIN_STAGE = -6;
+    final int MAX_STAGE = 6;
     private transient Pokemon originalPokemon;
     private transient int currentHp;
     private transient StatusEffect statusEffect;
@@ -137,7 +139,7 @@ public class BattlePokemon {
     }
 
     public void setAttackStage(int attackStage) {
-        this.attackStage = attackStage;
+        this.attackStage = Math.min(Math.max(this.attackStage + attackStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getDefenseStage() {
@@ -145,7 +147,7 @@ public class BattlePokemon {
     }
 
     public void setDefenseStage(int defenseStage) {
-        this.defenseStage = defenseStage;
+        this.defenseStage = Math.min(Math.max(this.defenseStage + defenseStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getSpAttackStage() {
@@ -153,7 +155,7 @@ public class BattlePokemon {
     }
 
     public void setSpAttackStage(int spAttackStage) {
-        this.spAttackStage = spAttackStage;
+        this.spAttackStage = Math.min(Math.max(this.spAttackStage + spAttackStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getSpDefenseStage() {
@@ -161,7 +163,7 @@ public class BattlePokemon {
     }
 
     public void setSpDefenseStage(int spDefenseStage) {
-        this.spDefenseStage = spDefenseStage;
+        this.spDefenseStage = Math.min(Math.max(this.spDefenseStage + spDefenseStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getSpeedStage() {
@@ -169,7 +171,7 @@ public class BattlePokemon {
     }
 
     public void setSpeedStage(int speedStage) {
-        this.speedStage = speedStage;
+        this.speedStage = Math.min(Math.max(this.speedStage + speedStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getCritStage() {
@@ -177,6 +179,6 @@ public class BattlePokemon {
     }
 
     public void setCritStage(int critStage) {
-        this.critStage = critStage;
+        this.critStage = Math.min(Math.max(this.critStage + critStage, MIN_STAGE), MAX_STAGE);
     }
 }
