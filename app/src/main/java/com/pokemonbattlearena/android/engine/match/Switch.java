@@ -12,6 +12,14 @@ class Switch implements Command {
         this.positionToSwitchTo = positionToSwitchTo;
     }
 
+    public BattlePokemonPlayer getAttackingPlayer() {
+        return attackingPlayer;
+    }
+
+    public int getPositionToSwitchTo() {
+        return positionToSwitchTo;
+    }
+
     @Override
     public SwitchResult execute() {
 
