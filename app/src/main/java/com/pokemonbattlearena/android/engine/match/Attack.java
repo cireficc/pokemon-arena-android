@@ -74,7 +74,7 @@ public class Attack implements Command {
         }
 
         int damageDone = 0;
-        for (int i = 0; i < damageCalculator.getTimesHit(move); i ++) {
+        for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
             Log.i(TAG, "Partial damage: " + partialDamage);
             damageDone += partialDamage;
@@ -134,7 +134,7 @@ public class Attack implements Command {
         boolean doStageChange = stageChangeCalculator.doesApplyStageChange(move);
         Log.i(TAG, "Apply Stage change? " + doStageChange);
 
-        if(doStageChange) {
+        if (doStageChange) {
             int stageChange = move.getStageChange();
             StatType stageChangeStatType = move.getStageChangeStatType();
             Log.i(TAG, stageChange + " is the amount");
