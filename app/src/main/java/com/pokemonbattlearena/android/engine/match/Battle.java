@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android.engine.match;
 
 import android.util.Log;
 
+import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Database;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -60,12 +61,13 @@ public class Battle {
 
     private void setFinished() {
         isFinished = self.getBattlePokemonTeam().allFainted() || opponent.getBattlePokemonTeam().allFainted();
+        //TODO Remove this as this is for the 1v1 Pokemon Scenario
         isFinished = self.getBattlePokemonTeam().getCurrentPokemon().isFainted() || opponent.getBattlePokemonTeam().getCurrentPokemon().isFainted();
     }
 
     public void startNewBattlePhase() {
 
-        Log.i(TAG, "Starting new battle phase");
+        Log.e(TAG, "Starting new battle phase");
         finishedBattlePhases.add(currentBattlePhase);
         Log.i(TAG, "Added current battle phase to finished phases");
         Log.i(TAG, "Created new battle phase");
@@ -105,6 +107,7 @@ public class Battle {
             Log.i(TAG, "Applying command result of type AttackResult");
             applyAttackResult((AttackResult) commandResult);
         }
+        setFinished();
     }
 
     private void applyAttackResult(AttackResult res) {
@@ -136,7 +139,7 @@ public class Battle {
         int recoilTaken = res.getRecoilTaken();
 
         Log.i(TAG, "Applying damage done: " + damageDone);
-        defendingPokemon.setCurrentHp(attackingPokemon.getCurrentHp() - damageDone);
+        defendingPokemon.setCurrentHp(defendingPokemon.getCurrentHp() - damageDone);
 
         Log.i(TAG, "Applying StatusEffect (maybe): " + statusEffectApplied);
         // If the Pokemon doesn't already have a StatusEffect, we can apply one
@@ -190,10 +193,16 @@ public class Battle {
     }
 
     private BattlePokemonPlayer getPlayerFromId(String id) {
-        if (self.getId().equals(id)) {
-            return self;
-        } else {
-            return opponent;
-        }
+
+            if (self.getId().equals(id)) {
+                return self;
+            } else {
+                return opponent;
+            }
+
     }
+
+    public boolean oppPokemonFainted(){ return opponent.getBattlePokemonTeam().getCurrentPokemon().isFainted();}
+
+    public boolean selfPokemonFainted() { return self.getBattlePokemonTeam().getCurrentPokemon().isFainted();}
 }
