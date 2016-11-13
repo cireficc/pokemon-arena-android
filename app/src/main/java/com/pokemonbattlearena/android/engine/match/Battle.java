@@ -106,6 +106,9 @@ public class Battle {
         if (commandResult instanceof AttackResult) {
             Log.i(TAG, "Applying command result of type AttackResult");
             applyAttackResult((AttackResult) commandResult);
+        } else if (commandResult instanceof SwitchResult) {
+            Log.i(TAG, "Applying command result of type SwitchResult");
+            applySwitchResult((SwitchResult) commandResult);
         }
         setFinished();
     }
@@ -255,6 +258,19 @@ public class Battle {
         Log.i(TAG, "Applying fainted status. Attacker fainted? " + attackerFainted + " || defender fainted? " + defenderFainted);
         attackingPokemon.setFainted(attackerFainted);
         defendingPokemon.setFainted(defenderFainted);
+    }
+
+    private void applySwitchResult(SwitchResult res) {
+
+        TargetInfo targetInfo = res.getTargetInfo();
+
+        BattlePokemonPlayer attackingPlayer = getPlayerFromId(targetInfo.getAttackingPlayer().getId());
+        BattlePokemon attackingPokemon = attackingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+
+        Log.i(TAG, "Attacking player: " + targetInfo.getAttackingPlayer().getId());
+        Log.i(TAG, "Attacking player pkmn: " + attackingPokemon.getOriginalPokemon().getName());
+
+        attackingPlayer.getBattlePokemonTeam().switchPokemonAtPosition(res.getPositionOfPokemon());
     }
 
     private BattlePokemonPlayer getPlayerFromId(String id) {
