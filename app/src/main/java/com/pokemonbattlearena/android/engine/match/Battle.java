@@ -136,7 +136,7 @@ public class Battle {
         int recoilTaken = res.getRecoilTaken();
 
         Log.i(TAG, "Applying damage done: " + damageDone);
-        defendingPokemon.setCurrentHp(attackingPokemon.getCurrentHp() - damageDone);
+        defendingPokemon.setCurrentHp(defendingPokemon.getCurrentHp() - damageDone);
 
         Log.i(TAG, "Applying StatusEffect (maybe): " + statusEffectApplied);
         // If the Pokemon doesn't already have a StatusEffect, we can apply one
