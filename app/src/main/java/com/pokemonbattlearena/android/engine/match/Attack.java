@@ -161,6 +161,10 @@ public class Attack implements Command {
             }
         }
 
+        if (move.getName().equals("Haze")) {
+            builder.setIsHaze(true);
+        }
+
         return builder.build();
     }
 }
