@@ -11,7 +11,7 @@ import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StageChangeCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
-class Attack implements Command {
+public class Attack implements Command {
 
     private transient static final String TAG = Attack.class.getName();
 
@@ -25,7 +25,7 @@ class Attack implements Command {
     private transient static RecoilCalculator recoilCalculator = RecoilCalculator.getInstance();
     private transient static StageChangeCalculator stageChangeCalculator = StageChangeCalculator.getInstance();
 
-    Attack(BattlePokemonPlayer attacker, BattlePokemonPlayer defender, Move move) {
+    public Attack(BattlePokemonPlayer attacker, BattlePokemonPlayer defender, Move move) {
         this.attackingPlayer = attacker;
         this.defendingPlayer = defender;
         this.move = move;
