@@ -1,7 +1,9 @@
 package com.pokemonbattlearena.android.fragments.battle;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,7 +13,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -21,12 +25,19 @@ import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
+import com.pokemonbattlearena.android.fragments.team.PokemonGridAdapter;
+import com.pokemonbattlearena.android.fragments.team.PokemonGridViewItem;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by droidowl on 9/25/16.
@@ -40,12 +51,8 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     private boolean mIsActiveBattle = false;
     private boolean battleBegun = false;
     private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
-
-    private TypeModel mTypeModel;
-
-    private List<Move> mPlayerMoves;
-
     private Button[] mMoveButtons;
+    private TypeModel mTypeModel;
 
     private BattleViewItem mPlayerBattleView;
 
@@ -55,11 +62,21 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private OnBattleFragmentTouchListener mCallback;
 
+    private Map<Button, Move> mMoveButtonMap;
+
+    private Button mSwitchButton;
+
     public BattleHomeFragment() {
         super();
         mTypeModel = new TypeModel();
     }
 
+    public void showMoveButtons(boolean show) {
+        for (Button button : mMoveButtonMap.keySet()) {
+            int visibility = show ? View.VISIBLE : View.INVISIBLE;
+            button.setVisibility(visibility);
+        }
+    }
     public void showMoveUI(boolean show) {
         String locked = show ? "UNLOCKED":"LOCKED";
         Log.d(TAG, "UI is now " + locked);
@@ -68,14 +85,36 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         }
     }
 
+    private void configureButtonsWithMoves(List<Move> moves) {
+        mMoveButtonMap = new HashMap<>(4);
+        for (int i = 0; i < buttonIds.length; i++) {
+            Button b = mMoveButtons[i];
+            Move move = moves.get(i);
+            b.setOnClickListener(this);
+            if (move != null) {
+                b.setText(move.getName());
+                b.setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(move.getType1())));
+                b.setVisibility(View.VISIBLE);
+            }
+            mMoveButtonMap.put(b, move);
+        }
+    }
+
+    public void refreshActivePokemon(BattlePokemon self, BattlePokemon opponent) {
+        mPlayerBattleView.setActivePokemon(self.getOriginalPokemon());
+        mOpponentBattleView.setActivePokemon(opponent.getOriginalPokemon());
+        updateHealthBars(self.getCurrentHp(), opponent.getCurrentHp());
+    }
+
     public interface OnBattleFragmentTouchListener {
         void onCancelBattle(boolean isActiveBattle);
         void onMoveClicked(Move move);
+        void onSwitchPokemon(int position);
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
         mCancelBattleButton = (Button) view.findViewById(R.id.cancel_battle_button);
         mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
@@ -85,27 +124,16 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         View playerView = view.findViewById(R.id.player_1_ui);
         View opponentView = view.findViewById(R.id.player_2_ui);
 
-        TextView pokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
-        ImageView pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
-        SeekBar pokemonHpProgress = (SeekBar) playerView.findViewById(R.id.hp_imageview);
-        TextView pokemonHPText = (TextView) playerView.findViewById(R.id.hp_textview);
-
-        mPlayerBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHpProgress);
+        mPlayerBattleView = new BattleViewItem(playerView);
         mPlayerBattleView.setVisibility(false);
 
-        pokemonName = (TextView) opponentView.findViewById(R.id.active_name_textview);
-        pokemonImage = (ImageView) opponentView.findViewById(R.id.active_imageview);
-        pokemonHpProgress = (SeekBar)  opponentView.findViewById(R.id.hp_imageview);
-        pokemonHPText = (TextView)  opponentView.findViewById(R.id.hp_textview);
-
-        //TODO: don't create opponent until match starts
-
-        mOpponentBattleView = new BattleViewItem(pokemonImage, pokemonName, pokemonHPText, pokemonHpProgress);
+        mOpponentBattleView = new BattleViewItem(opponentView);
         mOpponentBattleView.setVisibility(false);
 
-
-
         setupMoveButtons(view);
+
+        mSwitchButton = (Button) view.findViewById(R.id.switch_button);
+        mSwitchButton.setOnClickListener(this);
         return view;
     }
 
@@ -134,20 +162,62 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                 mCallback.onCancelBattle(mIsActiveBattle);
                 break;
             case R.id.move_button_0:
-                mCallback.onMoveClicked(mPlayerMoves.get(0));
+                Log.d(TAG, mMoveButtonMap.get(v).getName());
+                mCallback.onMoveClicked(mMoveButtonMap.get(v));
                 break;
             case R.id.move_button_1:
-                mCallback.onMoveClicked(mPlayerMoves.get(1));
+                mCallback.onMoveClicked(mMoveButtonMap.get(v));
                 break;
             case R.id.move_button_2:
-                mCallback.onMoveClicked(mPlayerMoves.get(2));
+                mCallback.onMoveClicked(mMoveButtonMap.get(v));
                 break;
             case R.id.move_button_3:
-                mCallback.onMoveClicked(mPlayerMoves.get(3));
+                mCallback.onMoveClicked(mMoveButtonMap.get(v));
                 break;
+            case R.id.switch_button:
+                switchPokemon();
             default:
                 break;
         }
+    }
+
+    private void switchPokemon() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View switchView = inflater.inflate(R.layout.switch_layout, null, false);
+        ArrayList<Pokemon> pokemon = (ArrayList<Pokemon>) mPlayerBattleView.getActivePlayer().getPokemonTeam().getPokemons();
+        PokemonGridAdapter adapter = new PokemonGridAdapter(getActivity(), pokemon, pokemon.size());
+        final Integer[] selected = new Integer[1];
+        selected[0] = -1;
+        GridView gridView = (GridView) switchView.findViewById(R.id.switch_grid_view);
+        gridView.setAdapter(adapter);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (selected[0] == -1) {
+                    PokemonGridViewItem item = (PokemonGridViewItem) view.getTag();
+                    item.mCheckbox.setChecked(true);
+                    selected[0] = position;
+                }
+            }
+        });
+        builder.setTitle(getString(R.string.tap_a_pokemon_to_switch));
+        builder.setView(switchView);
+        builder.setCancelable(false);
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setPositiveButton("Switch", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mCallback.onSwitchPokemon(selected[0]);
+                dialog.dismiss();
+            }
+        });
+        builder.show();
     }
 
     private void setupMoveButtons(View v) {
@@ -160,22 +230,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
                 b.setOnClickListener(this);
                 mMoveButtons[i] = b;
             }
-        }
-    }
-
-    // set the buttons to the current activePokemon
-    private void configureMoveButtons() {
-        if (mPlayerMoves != null) {
-            for (int i = 0; i < buttonIds.length; i++) {
-                Move m = mPlayerMoves.get(i);
-                if (m != null) {
-                    mMoveButtons[i].setText(m.getName());
-                    mMoveButtons[i].setBackgroundColor(getActivity().getColor(mTypeModel.getColorForType(m.getType1())));
-                    mMoveButtons[i].setVisibility(View.VISIBLE);
-                }
-            }
-        } else {
-            Log.e(TAG, "No moves");
         }
     }
 
@@ -192,8 +246,9 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mPlayerBattleView.getPokemonImage().setImageDrawable(getDrawableForPokemon(getActivity(), activePokemon.getName()));
         mPlayerBattleView.getPokemonName().setText(activePokemon.getName());
         mPlayerBattleView.setHPBar(activePokemon.getHp());
-        mPlayerMoves = activePokemon.getActiveMoveList();
-        configureMoveButtons();
+        List<Move> moves = activePokemon.getActiveMoveList();
+        configureButtonsWithMoves(moves);
+        mSwitchButton.setVisibility(View.VISIBLE);
     }
 
     public void setOpponent(PokemonPlayer opponent) {

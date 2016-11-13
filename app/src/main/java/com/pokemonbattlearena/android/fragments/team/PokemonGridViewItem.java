@@ -9,12 +9,12 @@ import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 public class PokemonGridViewItem {
 
-    CardView card;
-    TextView mId;
-    TextView mName;
-    ImageView mImage;
-    ImageView mType1;
-    ImageView mType2;
-    CheckBox mCheckbox;
-    Pokemon pokemon;
+    public CardView card;
+    public TextView mId;
+    public TextView mName;
+    public ImageView mImage;
+    public ImageView mType1;
+    public ImageView mType2;
+    public CheckBox mCheckbox;
+    public Pokemon pokemon;
 }

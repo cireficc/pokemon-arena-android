@@ -151,6 +151,10 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
+    public void onSwitchPokemon(int position) {
+    }
+
+    @Override
     public void onAiBattleClicked() {
         isAiBattle = true;
         startAiBattle();
@@ -687,6 +691,7 @@ public class BottomBarActivity extends BaseActivity implements
             Log.d(TAG, name + ": " + currentHp);
 
             mBattleHomeFragment.updateHealthBars(health1, health2);
+//            mBattleHomeFragment.refreshActivePokemon(mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon(), mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon());
         }
     }
 

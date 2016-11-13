@@ -1,19 +1,23 @@
 package com.pokemonbattlearena.android.fragments.battle;
 
-import android.app.Activity;
-import android.graphics.Point;
-import android.os.Build;
+import android.content.Context;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
-import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.TypeModel;
+import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Spencer Amann on 10/20/16.
@@ -24,15 +28,16 @@ public class BattleViewItem {
     TextView pokemonName;
     TextView pokemonHPText;
     SeekBar pokemonHpProgress;
-    //TODO: Change how active pokemon is displayed once switching can happen!
     Pokemon activePokemon;
     PokemonPlayer activePlayer;
 
-    public BattleViewItem(ImageView pokemonImage, TextView pokemonName, TextView pokemonHPText, SeekBar pokemonHpProgress) {
-        this.pokemonImage = pokemonImage;
-        this.pokemonName = pokemonName;
-        this.pokemonHPText = pokemonHPText;
-        this.pokemonHpProgress = pokemonHpProgress;
+    private final static String TAG = BattleViewItem.class.getSimpleName();
+
+    public BattleViewItem(View playerView) {
+        this.pokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
+        this.pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
+        this.pokemonHpProgress = (SeekBar) playerView.findViewById(R.id.hp_imageview);
+        this.pokemonHPText = (TextView) playerView.findViewById(R.id.hp_textview);
     }
 
     public ImageView getPokemonImage() {
