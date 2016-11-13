@@ -155,7 +155,7 @@ public class Attack implements Command {
                 case SPEED:
                     builder.setSpeedStageChange(stageChange);
                     break;
-                case CRIT:
+                case CRITICALHIT:
                     builder.setCritStageChange(stageChange);
                     break;
             }
