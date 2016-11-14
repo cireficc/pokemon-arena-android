@@ -187,7 +187,7 @@ public class BottomBarActivity extends BaseActivity implements
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
                     boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(attack);
-                    mBattleHomeFragment.showMoveUI(movesReady);
+                    mBattleHomeFragment.enableButtonActions(movesReady);
                     if (movesReady) {
                         handleBattleResult();
                     }
