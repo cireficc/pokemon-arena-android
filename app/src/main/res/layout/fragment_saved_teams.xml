@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.pokemonbattlearena.android.fragments.team.SavedTeamsFragment"
+    tools:context=".BottomBarActivity"
     android:background="@color/color_charizard_light">
 
     <android.support.design.widget.FloatingActionButton

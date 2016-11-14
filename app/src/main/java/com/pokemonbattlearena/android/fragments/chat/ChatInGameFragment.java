@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android.fragments.chat;
 
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -49,7 +50,7 @@ import org.w3c.dom.Text;
  * Created by mitchcout on 10/22/2016.
  */
 
-public class ChatInGameFragment extends Fragment{
+public class ChatInGameFragment extends Fragment {
 
     private static final String TAG = ChatInGameFragment.class.getSimpleName();
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
@@ -69,6 +70,7 @@ public class ChatInGameFragment extends Fragment{
     private String chatMsg, chatUser;
     private String mUsername;
 
+    private FragmentManager mFragmentManager;
     private ChildEventListener mChildListener;
     private LayoutInflater layoutInflater;
 
@@ -130,6 +132,11 @@ public class ChatInGameFragment extends Fragment{
                     root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
                     switchChatButton.setText(R.string.to_game_chat);
                     chatTitle.setText(R.string.global_chat);
+                    //update UI
+
+
+                    //TODO: make this work
+                    ((ViewGroup)activity.findViewById(R.id.chat_holder)).removeView(activity.findViewById(R.id.include_in_game));
                 } else if(chatType == ChatType.GLOBAL) {
                     chatType = ChatType.IN_GAME;
                     root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType()).child(gameChatRoomName);
@@ -186,7 +193,6 @@ public class ChatInGameFragment extends Fragment{
         mChildListener = root.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mCallback.onChatLoaded();
                 appendChat(dataSnapshot);
             }
 
@@ -204,6 +210,7 @@ public class ChatInGameFragment extends Fragment{
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+        mCallback.onChatLoaded();
     }
 
     @Override
@@ -254,5 +261,16 @@ public class ChatInGameFragment extends Fragment{
                 scroller.fullScroll(View.FOCUS_DOWN);
             }
         });
+    }
+
+    public void deleteChatRoom() {
+        //if not already at in-game
+        if(chatType == ChatType.GLOBAL) {
+            chatType = ChatType.IN_GAME;
+            root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType()).child(gameChatRoomName);
+        }
+        if(root != null) {
+            root.removeValue();
+        }
     }
 }

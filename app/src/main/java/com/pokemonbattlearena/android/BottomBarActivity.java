@@ -771,6 +771,8 @@ public class BottomBarActivity extends BaseActivity implements
             }
         } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
             if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
+                //deletes in-game chat from Firebase
+                mChatInGameFragment.deleteChatRoom();
                 mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
                 mFragmentManager.beginTransaction().add(R.id.container, mMainMenuFragment, "main").commit();
             }
