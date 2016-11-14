@@ -1,6 +1,6 @@
 package com.pokemonbattlearena.android.engine.match;
 
-public class Switch implements Command {
+public class Switch extends Command {
 
     private transient static final String TAG = Switch.class.getName();
 

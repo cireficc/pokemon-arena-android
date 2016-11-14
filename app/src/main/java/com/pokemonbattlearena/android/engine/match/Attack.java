@@ -11,7 +11,7 @@ import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StageChangeCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
-public class Attack implements Command {
+public class Attack extends Command {
 
     private transient static final String TAG = Attack.class.getName();
 
@@ -43,14 +43,24 @@ public class Attack implements Command {
         return defendingPlayer;
     }
 
+
+    /*
+     * TODO: these getters use a filthy hack to get the Java object from the player's
+     * id. When serializing and sending a Command, the player's team info is lost (as
+     * the host, who has access to the actual objects, would be the one queueing commands).
+     * I can't think of a better way to do it though, because allowing consumers of the
+     * Battle Engine to create Command themselves cleans up the logic in the BE quite a bit.
+     */
     protected BattlePokemon getAttackingPokemon() {
 
-        return attackingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+        // TODO: Clean up this stupid, dirty hack
+        return Battle.getPlayerFromId(attackingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
     protected BattlePokemon getDefendingPokemon() {
 
-        return defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+        // TODO: Clean up this stupid, dirty hack
+        return Battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
 
@@ -74,7 +84,7 @@ public class Attack implements Command {
         }
 
         int damageDone = 0;
-        for (int i = 0; i < damageCalculator.getTimesHit(move); i ++) {
+        for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
             Log.i(TAG, "Partial damage: " + partialDamage);
             damageDone += partialDamage;
@@ -134,7 +144,7 @@ public class Attack implements Command {
         boolean doStageChange = stageChangeCalculator.doesApplyStageChange(move);
         Log.i(TAG, "Apply Stage change? " + doStageChange);
 
-        if(doStageChange) {
+        if (doStageChange) {
             int stageChange = move.getStageChange();
             StatType stageChangeStatType = move.getStageChangeStatType();
             Log.i(TAG, stageChange + " is the amount");
@@ -155,10 +165,14 @@ public class Attack implements Command {
                 case SPEED:
                     builder.setSpeedStageChange(stageChange);
                     break;
-                case CRIT:
+                case CRITICALHIT:
                     builder.setCritStageChange(stageChange);
                     break;
             }
+        }
+
+        if (move.getName().equals("Haze")) {
+            builder.setIsHaze(true);
         }
 
         return builder.build();

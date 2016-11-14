@@ -9,8 +9,8 @@ import java.util.List;
 
 public class BattlePokemon {
 
-    final int MIN_STAGE = -6;
-    final int MAX_STAGE = 6;
+    private transient final int MIN_STAGE = -6;
+    private transient final int MAX_STAGE = 6;
     private transient Pokemon originalPokemon;
     private transient int currentHp;
     private transient StatusEffect statusEffect;
