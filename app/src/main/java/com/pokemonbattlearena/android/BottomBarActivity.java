@@ -321,9 +321,15 @@ public class BottomBarActivity extends BaseActivity implements
                         } else if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
                             if (mChatInGameFragment != null && !mChatInGameFragment.isAdded()) {
                                 displaySavedTeam(false);
-                                mFragmentManager.beginTransaction()
-                                        .replace(R.id.container, mChatInGameFragment, "game_chat")
-                                        .commit();
+                                if(mRoomId.equals("AI_BATTLE")){
+                                    mFragmentManager.beginTransaction()
+                                            .replace(R.id.container, mChatHomeFragment, "chat")
+                                            .commit();
+                                } else {
+                                    mFragmentManager.beginTransaction()
+                                            .replace(R.id.container, mChatInGameFragment, "game_chat")
+                                            .commit();
+                                }
                                 showProgressDialog();
                             }
                             if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
@@ -503,7 +509,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onPeerLeft(Room room, List<String> peersWhoLeft) {
-        updateRoom(room);
         leaveRoom();
     }
 
@@ -536,7 +541,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onPeersDisconnected(Room room, List<String> peers) {
-        updateRoom(room);
         leaveRoom();
     }
     //endregion
@@ -630,6 +634,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     //region AI Battle
     private void startAiBattle() {
+        mRoomId="AI_BATTLE"; //mRoomId needs to be set or you can't exit the battle in leaveRoom() method
         setCurrentPokemonPlayerTeam(getSavedTeam());
         AiPlayer ai = new AiPlayer(mApplication.getBattleDatabase(), mCurrentPokemonPlayer);
         mActiveBattle = new AiBattle(mCurrentPokemonPlayer, ai);
@@ -757,25 +762,31 @@ public class BottomBarActivity extends BaseActivity implements
             mIsHost = false;
             mHostId = null;
             Log.d(TAG, "Left room everything is null.");
+            mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
+            refreshBattleFragment();
         }
-        mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
-        refreshBattleFragment();
     }
 
     private void refreshBattleFragment() {
         if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
             if (mFragmentManager != null && mMainMenuFragment.isAdded()) {
                 mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
-                mBattleHomeFragment = new BattleHomeFragment();
-                mFragmentManager.beginTransaction().add(R.id.container, mBattleHomeFragment, "battle").commit();
             }
+            mBattleHomeFragment = new BattleHomeFragment();
+            mFragmentManager.beginTransaction().add(R.id.container, mBattleHomeFragment, "battle").commit();
         } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
+            //deletes in-game chat from Firebase
+            mChatInGameFragment.deleteChatRoom();
             if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
-                //deletes in-game chat from Firebase
-                mChatInGameFragment.deleteChatRoom();
                 mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
                 mFragmentManager.beginTransaction().add(R.id.container, mMainMenuFragment, "main").commit();
             }
+            if (mFragmentManager != null && mChatInGameFragment.isAdded()) {
+                mFragmentManager.beginTransaction().remove(mChatInGameFragment).commit();
+                mBottomBar.getTabWithId(R.id.tab_battle).performClick();
+            }
+            //TODO: Add In-Game Team UI Handling here
+
         }
     }
 

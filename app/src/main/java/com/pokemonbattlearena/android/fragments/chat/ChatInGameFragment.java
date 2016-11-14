@@ -65,6 +65,7 @@ public class ChatInGameFragment extends Fragment {
     private EditText editText;
     private ScrollView scroller;
     private TextView chatTitle;
+    private ViewGroup chatHolder;
 
     private String tempKey;
     private String chatMsg, chatUser;
@@ -114,10 +115,8 @@ public class ChatInGameFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         switchChatButton = (Button) activity.findViewById(R.id.chat_switch_button);
-        sendMessage = (ImageButton) activity.findViewById(R.id.chat_send_button);
-        editText = (EditText) activity.findViewById(R.id.chat_message_input);
-        scroller = (ScrollView) activity.findViewById(R.id.chat_scroller);
         chatTitle = (TextView) activity.findViewById(R.id.chat_room_title_in_game);
+        chatHolder = (ViewGroup) activity.findViewById(R.id.chat_holder);
 
         DatabaseReference tempRoot = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
         gameChatRoomName = "Chat-"+mCallback.getHostId();
@@ -128,24 +127,52 @@ public class ChatInGameFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if(chatType == ChatType.IN_GAME) {
+                    root.removeEventListener(mChildListener);
                     chatType = ChatType.GLOBAL;
                     root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
                     switchChatButton.setText(R.string.to_game_chat);
                     chatTitle.setText(R.string.global_chat);
                     //update UI
-
-
-                    //TODO: make this work
-                    ((ViewGroup)activity.findViewById(R.id.chat_holder)).removeView(activity.findViewById(R.id.include_in_game));
+                    resetChatUI();
                 } else if(chatType == ChatType.GLOBAL) {
+                    root.removeEventListener(mChildListener);
                     chatType = ChatType.IN_GAME;
                     root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType()).child(gameChatRoomName);
                     switchChatButton.setText(R.string.to_global_chat);
                     chatTitle.setText(R.string.game_chat);
+                    //update UI
+                    resetChatUI();
                 }
             }
         });
 
+        setSendMessageListener();
+    }
+
+    private void resetChatUI() {
+        chatHolder.removeView(activity.findViewById(R.id.include_in_game));
+        View newChat = layoutInflater.inflate(R.layout.fragment_chatui, chatHolder, false);
+        newChat.setId(R.id.include_in_game);
+        chatHolder.addView(newChat);
+        updateRootListener();
+        scrollToBottom();
+        mCallback.onChatLoaded();
+        setSendMessageListener();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        //updates the UI with messages
+        updateRootListener();
+        scrollToBottom();
+        mCallback.onChatLoaded();
+    }
+
+    private void setSendMessageListener() {
+        sendMessage = (ImageButton) activity.findViewById(R.id.chat_send_button);
+        editText = (EditText) activity.findViewById(R.id.chat_message_input);
         //adds send button listener
         sendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,11 +212,7 @@ public class ChatInGameFragment extends Fragment {
         });
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        //updates the UI with messages
+    private void updateRootListener() {
         mChildListener = root.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -210,7 +233,6 @@ public class ChatInGameFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-        mCallback.onChatLoaded();
     }
 
     @Override
@@ -255,12 +277,7 @@ public class ChatInGameFragment extends Fragment {
         mMessageView.setText(msg);
 
         container.addView(chatMessage);
-        scroller.post(new Runnable() {
-            @Override
-            public void run() {
-                scroller.fullScroll(View.FOCUS_DOWN);
-            }
-        });
+        scrollToBottom();
     }
 
     public void deleteChatRoom() {
@@ -272,5 +289,15 @@ public class ChatInGameFragment extends Fragment {
         if(root != null) {
             root.removeValue();
         }
+    }
+
+    private void scrollToBottom(){
+        scroller = (ScrollView) activity.findViewById(R.id.chat_scroller);
+        scroller.post(new Runnable() {
+            @Override
+            public void run() {
+                scroller.fullScroll(View.FOCUS_DOWN);
+            }
+        });
     }
 }
