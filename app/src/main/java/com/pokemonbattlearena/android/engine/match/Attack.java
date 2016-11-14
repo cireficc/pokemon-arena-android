@@ -11,7 +11,7 @@ import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StageChangeCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
-public class Attack implements Command {
+public class Attack extends Command {
 
     private transient static final String TAG = Attack.class.getName();
 
