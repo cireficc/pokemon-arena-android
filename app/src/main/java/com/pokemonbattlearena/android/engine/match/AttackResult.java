@@ -28,6 +28,7 @@ public class AttackResult extends CommandResult {
     private int spDefenseStageChange;
     private int speedStageChange;
     private int critStageChange;
+    private boolean isHaze;
 
     private AttackResult(Builder builder) {
 
@@ -53,6 +54,7 @@ public class AttackResult extends CommandResult {
         this.spDefenseStageChange = builder.spDefenseStageChange;
         this.speedStageChange = builder.speedStageChange;
         this.critStageChange = builder.critStageChange;
+        this.isHaze = builder.isHaze;
     }
 
     public int getMoveUsedId() {
@@ -127,6 +129,10 @@ public class AttackResult extends CommandResult {
         return critStageChange;
     }
 
+    public boolean isHaze() {
+        return isHaze;
+    }
+
     protected static class Builder {
 
         private TargetInfo targetInfo;
@@ -149,6 +155,7 @@ public class AttackResult extends CommandResult {
         private int spDefenseStageChange;
         private int speedStageChange;
         private int critStageChange;
+        private boolean isHaze;
 
         protected Builder(TargetInfo targetInfo, int moveUsedId) {
             this.targetInfo = targetInfo;
@@ -237,6 +244,11 @@ public class AttackResult extends CommandResult {
 
         protected Builder setCritStageChange(int stageChange) {
             this.critStageChange = stageChange;
+            return this;
+        }
+
+        protected Builder setIsHaze(boolean isHaze) {
+            this.isHaze = isHaze;
             return this;
         }
 
