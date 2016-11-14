@@ -39,6 +39,7 @@ import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.AttackResult;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePhaseResult;
@@ -168,7 +169,8 @@ public class BottomBarActivity extends BaseActivity implements
                 mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
-                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                    Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(attack);
                     mBattleHomeFragment.showMoveUI(movesReady);
                     if (movesReady) {
                         handleBattleResult();
@@ -189,9 +191,11 @@ public class BottomBarActivity extends BaseActivity implements
                 if (mActiveBattle instanceof AiBattle) {
                     Move tmp = ((AiBattle) mActiveBattle).showIntelligence();
                     mBattleHomeFragment.appendMoveHistory("AI", tmp);
-                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                    Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(attack);
                     //mBattleHomeFragment.showMoveUI(movesReady);
-                    mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
+                    Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
+                    mActiveBattle.getCurrentBattlePhase().queueCommand(aiAttack);
                     mActiveBattle.executeCurrentBattlePhase();
 
                     for (CommandResult cmdR: mActiveBattle.getCurrentBattlePhase().getBattlePhaseResult().getCommandResults())
@@ -572,7 +576,8 @@ public class BottomBarActivity extends BaseActivity implements
 
             if (move.getName() != null && mIsHost) {
                 Log.d(TAG, "We got a move: " + move.getName());
-                boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), move);
+                Attack attack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), move);
+                boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueCommand(attack);
                 if (phaseReady) {
                     handleBattleResult();
                 }
