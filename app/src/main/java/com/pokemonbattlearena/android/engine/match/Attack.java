@@ -43,14 +43,24 @@ public class Attack extends Command {
         return defendingPlayer;
     }
 
+
+    /*
+     * TODO: these getters use a filthy hack to get the Java object from the player's
+     * id. When serializing and sending a Command, the player's team info is lost (as
+     * the host, who has access to the actual objects, would be the one queueing commands).
+     * I can't think of a better way to do it though, because allowing consumers of the
+     * Battle Engine to create Command themselves cleans up the logic in the BE quite a bit.
+     */
     protected BattlePokemon getAttackingPokemon() {
 
-        return attackingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+        // TODO: Clean up this stupid, dirty hack
+        return Battle.getPlayerFromId(attackingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
     protected BattlePokemon getDefendingPokemon() {
 
-        return defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+        // TODO: Clean up this stupid, dirty hack
+        return Battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
 
