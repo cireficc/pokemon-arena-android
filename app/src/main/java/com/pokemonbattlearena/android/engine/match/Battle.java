@@ -18,8 +18,8 @@ public class Battle {
     private transient static final String TAG = Battle.class.getName();
 
     // NOTE: self is always the host of the battle
-    BattlePokemonPlayer self;
-    BattlePokemonPlayer opponent;
+    static BattlePokemonPlayer self;
+    static BattlePokemonPlayer opponent;
     List<BattlePhase> finishedBattlePhases;
     transient BattlePhase currentBattlePhase;
     transient boolean isFinished;
@@ -284,7 +284,7 @@ public class Battle {
         attackingPlayer.getBattlePokemonTeam().switchPokemonAtPosition(res.getPositionOfPokemon());
     }
 
-    private BattlePokemonPlayer getPlayerFromId(String id) {
+    public static BattlePokemonPlayer getPlayerFromId(String id) {
 
         if (self.getId().equals(id)) {
             return self;
