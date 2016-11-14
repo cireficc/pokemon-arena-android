@@ -166,10 +166,28 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onSwitchPokemon(int position) {
-        mActiveBattle.getSelf().getBattlePokemonTeam().switchPokemonAtPosition(position);
-        mActiveBattle.getOpponent().getBattlePokemonTeam().switchPokemonAtPosition(position);
-        mBattleHomeFragment.refreshActivePokemon(mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon(), mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon());
+        Switch s = new Switch(mActiveBattle.getSelf(), position);
+        if (mIsHost) {
+            sendHostMessage(s);
+        } else {
+            sendClientMessage(s);
+        }
     }
+
+    private void sendHostMessage(Command c) {
+        boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(c);
+        mBattleHomeFragment.enableButtonActions(movesReady);
+        if (movesReady) {
+            handleBattleResult();
+        }
+    }
+
+    private void sendClientMessage(Command c) {
+        String gson = mCommandGson.toJson(c, Command.class);
+        sendMessage(gson);
+        mBattleHomeFragment.enableButtonActions(false);
+    }
+
 
     @Override
     public void onAiBattleClicked() {
@@ -186,16 +204,10 @@ public class BottomBarActivity extends BaseActivity implements
                 Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
-                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(attack);
-                    mBattleHomeFragment.enableButtonActions(movesReady);
-                    if (movesReady) {
-                        handleBattleResult();
-                    }
+                    sendHostMessage(attack);
                 } else {
                     Log.d(TAG, "Client: sending move: " + move.getName());
-                    String gson = mCommandGson.toJson(attack, Command.class);
-                    sendMessage(gson);
-                    mBattleHomeFragment.enableButtonActions(false);
+                    sendClientMessage(attack);
                 }
             }
         } else {
@@ -606,6 +618,7 @@ public class BottomBarActivity extends BaseActivity implements
                 }
 
                 mBattleHomeFragment.enableButtonActions(true);
+                mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
             }
         }
         hideProgressDialog();
@@ -626,6 +639,7 @@ public class BottomBarActivity extends BaseActivity implements
             }
         }
         mBattleHomeFragment.enableButtonActions(true);
+        mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
         String json = mCommandResultGson.toJson(result);
         sendMessage(json);
 

@@ -95,7 +95,9 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         }
     }
 
-    public void refreshActivePokemon(BattlePokemon self, BattlePokemon opponent) {
+    public void refreshActivePokemon(Battle activeBattle) {
+        BattlePokemon self = activeBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon();
+        BattlePokemon opponent = activeBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon();
         mPlayerBattleView.setActivePokemon(self.getOriginalPokemon(), getDrawableForPokemon(getActivity(), self.getOriginalPokemon().getName()));
         configureButtonsWithMoves(self.getMoveSet());
         mOpponentBattleView.setActivePokemon(opponent.getOriginalPokemon(), getDrawableForPokemon(getActivity(), opponent.getOriginalPokemon().getName()));
