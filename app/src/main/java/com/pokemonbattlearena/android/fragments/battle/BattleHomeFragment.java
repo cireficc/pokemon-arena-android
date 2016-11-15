@@ -16,11 +16,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -34,7 +31,6 @@ import com.pokemonbattlearena.android.fragments.team.PokemonGridViewItem;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,13 +41,11 @@ import java.util.Map;
  */
 
 public class BattleHomeFragment extends Fragment implements View.OnClickListener {
-    PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
-    private Button mCancelBattleButton;
+    private static int[] moveButtonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
-    private boolean mIsActiveBattle = false;
-    private static int[] buttonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
     private Button[] mMoveButtons;
+
     private TypeModel mTypeModel;
 
     private BattleViewItem mPlayerBattleView;
@@ -82,7 +76,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private void configureButtonsWithMoves(List<Move> moves) {
         mMoveButtonMap = new HashMap<>(4);
-        for (int i = 0; i < buttonIds.length; i++) {
+        for (int i = 0; i < moveButtonIds.length; i++) {
             Button b = mMoveButtons[i];
             Move move = moves.get(i);
             b.setOnClickListener(this);
@@ -105,7 +99,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     public interface OnBattleFragmentTouchListener {
-        void onCancelBattle(boolean isActiveBattle);
+        void onCancelBattle();
         void onMoveClicked(Move move);
         void onSwitchPokemon(int position);
     }
@@ -114,10 +108,11 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
-        mCancelBattleButton = (Button) view.findViewById(R.id.cancel_battle_button);
+        Button mCancelBattleButton = (Button) view.findViewById(R.id.cancel_battle_button);
+        mCancelBattleButton.setOnClickListener(this);
         mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
         mMoveHistoryText.setMovementMethod( new ScrollingMovementMethod());
-        mCancelBattleButton.setOnClickListener(this);
+
 
         View playerView = view.findViewById(R.id.player_1_ui);
         View opponentView = view.findViewById(R.id.player_2_ui);
@@ -157,7 +152,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         int id = v.getId();
         switch (id) {
             case R.id.cancel_battle_button:
-                mCallback.onCancelBattle(mIsActiveBattle);
+                mCallback.onCancelBattle();
                 break;
             case R.id.move_button_0:
                 Log.d(TAG, mMoveButtonMap.get(v).getName());
@@ -228,10 +223,10 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     private void setupMoveButtons(View v) {
-        mMoveButtons = new Button[buttonIds.length];
-        for (int i = 0; i < buttonIds.length; i++) {
+        mMoveButtons = new Button[moveButtonIds.length];
+        for (int i = 0; i < moveButtonIds.length; i++) {
             if (i < 4) {
-                int buttonId = buttonIds[i];
+                int buttonId = moveButtonIds[i];
                 Button b = (Button) v.findViewById(buttonId);
                 b.setVisibility(View.INVISIBLE);
                 b.setOnClickListener(this);

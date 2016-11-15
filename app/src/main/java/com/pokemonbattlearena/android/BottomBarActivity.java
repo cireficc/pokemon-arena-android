@@ -142,7 +142,7 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
-    public void onCancelBattle(boolean isActiveBattle) {
+    public void onCancelBattle() {
         leaveRoom();
     }
 
