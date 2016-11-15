@@ -2,49 +2,31 @@ package com.pokemonbattlearena.android.fragments.battle;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.graphics.Point;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
-import com.pokemonbattlearena.android.TypeBanAdapter;
 import com.pokemonbattlearena.android.TypeModel;
-import com.pokemonbattlearena.android.engine.ai.AiBattle;
-import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
-import org.w3c.dom.Text;
-
-import java.sql.Time;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by droidowl on 9/25/16.
@@ -69,12 +51,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private BattleViewItem mOpponentBattleView;
 
-    private Switch mTypeBanSwitch;
-
-    private GridView mTypeBanGrid;
-
-    private TextView mTypeBanTitle;
-
     private TextView mMoveHistoryText;
 
     private OnBattleFragmentTouchListener mCallback;
@@ -82,13 +58,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     public BattleHomeFragment() {
         super();
         mTypeModel = new TypeModel();
-    }
-
-    public void hideBans(boolean show) {
-        int visible = show ? View.VISIBLE : View.GONE;
-        mTypeBanTitle.setVisibility(visible);
-        mTypeBanGrid.setVisibility(visible);
-        mTypeBanSwitch.setVisibility(visible);
     }
 
     public void showMoveUI(boolean show) {
@@ -102,8 +71,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     public interface OnBattleFragmentTouchListener {
         void onCancelBattle(boolean isActiveBattle);
         void onMoveClicked(Move move);
-        void onTypeBanClicked(String type);
-        void onTypeBanLongClicked(String type);
     }
 
     @Nullable
@@ -114,31 +81,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
         mMoveHistoryText.setMovementMethod( new ScrollingMovementMethod());
         mCancelBattleButton.setOnClickListener(this);
-        mTypeBanGrid = (GridView) view.findViewById(R.id.type_ban_layout);
-        mTypeBanTitle = (TextView) view.findViewById(R.id.type_ban_title_text);
-        mTypeBanSwitch = (Switch) view.findViewById(R.id.type_ban_switch);
-        mTypeBanSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setTypeBanVisible(isChecked);
-            }
-        });
-        mTypeBanGrid.setAdapter(new TypeBanAdapter(getActivity()));
-        mTypeBanGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mCallback.onTypeBanClicked(TypeModel.typeNames[position]);
-                view.setBackgroundColor(getActivity().getColor(R.color.type_ban_banned_color));
-            }
-        });
-        mTypeBanGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                mCallback.onTypeBanLongClicked(TypeModel.typeNames[position]);
-                view.setBackgroundColor(getActivity().getColor(R.color.type_ban_background_color));
-                return true;
-            }
-        });
+
         View playerView = view.findViewById(R.id.player_1_ui);
         View opponentView = view.findViewById(R.id.player_2_ui);
 
@@ -164,12 +107,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
         setupMoveButtons(view);
         return view;
-    }
-
-    public void setTypeBanVisible(boolean isChecked) {
-        int visibility = isChecked ? View.VISIBLE : View.GONE;
-        mTypeBanGrid.setVisibility(visibility);
-        mTypeBanTitle.setVisibility(visibility);
     }
 
     @Override
@@ -274,8 +211,6 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
             mOpponentBattleView.setVisibility(visible);
             mMoveHistoryText.setText(String.format("Match Started: %s", DateFormat.getDateTimeInstance().format(new Date())));
             mMoveHistoryText.setVisibility(View.VISIBLE);
-            // don't need to show the switch if we are battling
-            mTypeBanSwitch.setVisibility(View.GONE);
         }
     }
 
