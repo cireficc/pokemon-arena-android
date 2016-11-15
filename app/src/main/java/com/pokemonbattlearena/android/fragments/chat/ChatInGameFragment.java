@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android.fragments.chat;
 
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -48,34 +50,40 @@ import org.w3c.dom.Text;
  * Created by mitchcout on 10/22/2016.
  */
 
-public class ChatHomeFragment extends Fragment{
+public class ChatInGameFragment extends Fragment {
 
-    private static final String TAG = ChatHomeFragment.class.getSimpleName();
+    private static final String TAG = ChatInGameFragment.class.getSimpleName();
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
     private BottomBarActivity activity;
     private DatabaseReference root;
+    private ChatType chatType;
+    private String gameChatRoomName;
 
+    private Button switchChatButton;
     private ImageButton sendMessage;
     private EditText editText;
     private ScrollView scroller;
+    private TextView chatTitle;
+    private ViewGroup chatHolder;
 
-    private String chatRoom;
     private String tempKey;
     private String chatMsg, chatUser;
     private String mUsername;
 
+    private FragmentManager mFragmentManager;
     private ChildEventListener mChildListener;
     private LayoutInflater layoutInflater;
 
-    private OnChatLoadedListener mCallback;
+    private OnGameChatLoadedListener mCallback;
 
-    public ChatHomeFragment() {
+    public ChatInGameFragment() {
         super();
     }
 
-    public interface OnChatLoadedListener {
+    public interface OnGameChatLoadedListener {
         void onChatLoaded();
+        String getHostId();
     }
 
     @Override
@@ -83,7 +91,7 @@ public class ChatHomeFragment extends Fragment{
         super.onAttach(context);
         activity = (BottomBarActivity) context;
         try {
-            mCallback = (ChatHomeFragment.OnChatLoadedListener) context;
+            mCallback = (ChatInGameFragment.OnGameChatLoadedListener) context;
         } catch (ClassCastException e) {
             Log.e(TAG, e.getMessage());
             throw new ClassCastException(context.toString() + "must implement listener");
@@ -93,9 +101,9 @@ public class ChatHomeFragment extends Fragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_chathome, container, false);
+        final View view = inflater.inflate(R.layout.fragment_chat_in_game, container, false);
 
-        chatRoom = "Global";
+        chatType = ChatType.IN_GAME;
         mUsername = Games.Players.getCurrentPlayer(mApplication.getGoogleApiClient()).getDisplayName();
         layoutInflater = inflater;
 
@@ -106,12 +114,65 @@ public class ChatHomeFragment extends Fragment{
     public void onViewCreated(View view, Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
+        switchChatButton = (Button) activity.findViewById(R.id.chat_switch_button);
+        chatTitle = (TextView) activity.findViewById(R.id.chat_room_title_in_game);
+        chatHolder = (ViewGroup) activity.findViewById(R.id.chat_holder);
+
+        DatabaseReference tempRoot = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
+        gameChatRoomName = "Chat-"+mCallback.getHostId();
+        root = tempRoot.child(gameChatRoomName);
+
+        //adds switch chat type listener
+        switchChatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(chatType == ChatType.IN_GAME) {
+                    root.removeEventListener(mChildListener);
+                    chatType = ChatType.GLOBAL;
+                    root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
+                    switchChatButton.setText(R.string.to_game_chat);
+                    chatTitle.setText(R.string.global_chat);
+                    //update UI
+                    resetChatUI();
+                } else if(chatType == ChatType.GLOBAL) {
+                    root.removeEventListener(mChildListener);
+                    chatType = ChatType.IN_GAME;
+                    root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType()).child(gameChatRoomName);
+                    switchChatButton.setText(R.string.to_global_chat);
+                    chatTitle.setText(R.string.game_chat);
+                    //update UI
+                    resetChatUI();
+                }
+            }
+        });
+
+        setSendMessageListener();
+    }
+
+    private void resetChatUI() {
+        chatHolder.removeView(activity.findViewById(R.id.include_in_game));
+        View newChat = layoutInflater.inflate(R.layout.fragment_chatui, chatHolder, false);
+        newChat.setId(R.id.include_in_game);
+        chatHolder.addView(newChat);
+        updateRootListener();
+        scrollToBottom();
+        mCallback.onChatLoaded();
+        setSendMessageListener();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        //updates the UI with messages
+        updateRootListener();
+        scrollToBottom();
+        mCallback.onChatLoaded();
+    }
+
+    private void setSendMessageListener() {
         sendMessage = (ImageButton) activity.findViewById(R.id.chat_send_button);
         editText = (EditText) activity.findViewById(R.id.chat_message_input);
-        scroller = (ScrollView) activity.findViewById(R.id.chat_scroller);
-
-        root = FirebaseDatabase.getInstance().getReference().child(chatRoom);
-
         //adds send button listener
         sendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,11 +212,7 @@ public class ChatHomeFragment extends Fragment{
         });
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        //updates the UI with messages
+    private void updateRootListener() {
         mChildListener = root.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -176,7 +233,6 @@ public class ChatHomeFragment extends Fragment{
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-        mCallback.onChatLoaded();
     }
 
     @Override
@@ -221,6 +277,22 @@ public class ChatHomeFragment extends Fragment{
         mMessageView.setText(msg);
 
         container.addView(chatMessage);
+        scrollToBottom();
+    }
+
+    public void deleteChatRoom() {
+        //if not already at in-game
+        if(chatType == ChatType.GLOBAL) {
+            chatType = ChatType.IN_GAME;
+            root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType()).child(gameChatRoomName);
+        }
+        if(root != null) {
+            root.removeValue();
+        }
+    }
+
+    private void scrollToBottom(){
+        scroller = (ScrollView) activity.findViewById(R.id.chat_scroller);
         scroller.post(new Runnable() {
             @Override
             public void run() {

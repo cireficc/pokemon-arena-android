@@ -48,6 +48,7 @@ import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
+import com.pokemonbattlearena.android.fragments.chat.ChatInGameFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
@@ -72,6 +73,7 @@ public class BottomBarActivity extends BaseActivity implements
         BattleHomeFragment.OnBattleFragmentTouchListener,
         MainMenuFragment.OnMenuFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener,
+        ChatInGameFragment.OnGameChatLoadedListener,
         BattleEndListener {
 
     private static final int TEAM_SIZE_INT = 6;
@@ -99,6 +101,7 @@ public class BottomBarActivity extends BaseActivity implements
     private BattleHomeFragment mBattleHomeFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
+    private ChatInGameFragment mChatInGameFragment;
 
     private BottomBar mBottomBar;
     private SharedPreferences mPreferences;
@@ -140,7 +143,7 @@ public class BottomBarActivity extends BaseActivity implements
     public void onBattleNowClicked() {
         // showing the progress dialog also creates it if its null
         mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
-        mFragmentManager.beginTransaction().replace(R.id.container, mBattleHomeFragment, "battle").commit();
+        refreshBattleFragment();
         startMatchMaking();
         showProgressDialog();
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -258,6 +261,7 @@ public class BottomBarActivity extends BaseActivity implements
         mTeamsHomeFragment = createTeamsHomeFragment();
         mBattleHomeFragment = new BattleHomeFragment();
         mChatHomeFragment = new ChatHomeFragment();
+        mChatInGameFragment = new ChatInGameFragment();
         mFragmentManager.beginTransaction()
                 .add(R.id.container, mMainMenuFragment, "main")
                 .commit();
@@ -315,8 +319,8 @@ public class BottomBarActivity extends BaseActivity implements
                             if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                                 mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
                             }
-                            if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
-                                mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
+                            if (mChatInGameFragment != null && mChatInGameFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mChatInGameFragment).commit();
                             }
                         }
                         break;
@@ -336,7 +340,22 @@ public class BottomBarActivity extends BaseActivity implements
                                 mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
                             }
                         } else if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
-
+                            if (mChatInGameFragment != null && !mChatInGameFragment.isAdded()) {
+                                displaySavedTeam(false);
+                                if(mRoomId.equals("AI_BATTLE")){
+                                    mFragmentManager.beginTransaction()
+                                            .replace(R.id.container, mChatHomeFragment, "chat")
+                                            .commit();
+                                } else {
+                                    mFragmentManager.beginTransaction()
+                                            .replace(R.id.container, mChatInGameFragment, "game_chat")
+                                            .commit();
+                                }
+                                showProgressDialog();
+                            }
+                            if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+                            }
                         }
                         break;
                     default:
@@ -511,7 +530,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onPeerLeft(Room room, List<String> peersWhoLeft) {
-        updateRoom(room);
         leaveRoom();
     }
 
@@ -544,7 +562,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onPeersDisconnected(Room room, List<String> peers) {
-        updateRoom(room);
         leaveRoom();
     }
     //endregion
@@ -638,6 +655,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     //region AI Battle
     private void startAiBattle() {
+        mRoomId="AI_BATTLE"; //mRoomId needs to be set or you can't exit the battle in leaveRoom() method
         mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
         refreshBattleFragment();
         mMyId = "Player";
@@ -766,9 +784,9 @@ public class BottomBarActivity extends BaseActivity implements
             mIsHost = false;
             mHostId = null;
             Log.d(TAG, "Left room everything is null.");
+            mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
+            refreshBattleFragment();
         }
-        mFragmentManager.beginTransaction().replace(R.id.container, mMainMenuFragment, "main").commit();
-        mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
     }
 
     private void refreshBattleFragment() {
@@ -780,11 +798,19 @@ public class BottomBarActivity extends BaseActivity implements
                 mFragmentManager.executePendingTransactions();
             }
         } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
+            //deletes in-game chat from Firebase
+            mChatInGameFragment.deleteChatRoom();
             if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
                 mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
                 mFragmentManager.beginTransaction().add(R.id.container, mMainMenuFragment, "main").commit();
                 mFragmentManager.executePendingTransactions();
             }
+            if (mFragmentManager != null && mChatInGameFragment.isAdded()) {
+                mFragmentManager.beginTransaction().remove(mChatInGameFragment).commit();
+                mBottomBar.getTabWithId(R.id.tab_battle).performClick();
+            }
+            //TODO: Add In-Game Team UI Handling here
+
         }
     }
 
@@ -852,6 +878,11 @@ public class BottomBarActivity extends BaseActivity implements
     }
     //endregion
 
+    @Override
+    public String getHostId() {
+        return mHostId;
+    }
+
     //region Battle End Listener
     //TODO pass in some useful parameters for different tasks
     public void onBattleEnd() {
@@ -888,5 +919,4 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
     //endregion
-
 }

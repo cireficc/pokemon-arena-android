@@ -8,10 +8,10 @@
     android:background="@color/bb_darkBackgroundColor">
 
     <TextView
-        android:text="Global Chat"
+        android:text="Game Chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/chat_room_title"
+        android:id="@+id/chat_room_title_in_game"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
@@ -20,9 +20,21 @@
         android:background="@color/bb_darkBackgroundColor"
         android:textColor="@color/cardview_light_background" />
 
-    <include layout="@layout/fragment_chatui"
+    <Button
+        android:text="@string/to_global_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/chat_holder"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/chat_switch_button" />
+
+    <RelativeLayout
+        android:id="@+id/chat_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/chat_room_title"/>
+        android:layout_below="@+id/chat_room_title_in_game">
+        <include layout="@layout/fragment_chatui"
+            android:id="@+id/include_in_game" />
+    </RelativeLayout>
 
 </RelativeLayout>
