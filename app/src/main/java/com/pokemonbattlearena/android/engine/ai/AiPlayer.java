@@ -30,6 +30,10 @@ public class AiPlayer extends PokemonPlayer {
 
         for (int i = 0; i < 6; i++) {
             int rnd = new Random().nextInt(db.getPokemons().size());
+            if (rnd == 9 || rnd == 10 || rnd == 12 || rnd == 13 || rnd == 128) {
+                rnd = new Random().nextInt(8);
+            }
+
             tmp.addPokemon(db.getPokemons().get(rnd));
         }
         this.setPokemonTeam(tmp);

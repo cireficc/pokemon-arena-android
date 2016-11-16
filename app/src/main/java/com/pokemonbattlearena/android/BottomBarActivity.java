@@ -121,7 +121,7 @@ public class BottomBarActivity extends BaseActivity implements
     private int mBattleMatchFlag = 0;
 
     //TODO Temporary integer used for AI switching. Need 2 kill
-    private int ind;
+    private int ind = 0;
 
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
@@ -245,7 +245,7 @@ public class BottomBarActivity extends BaseActivity implements
             mBattleHomeFragment.appendMoveHistory("AI", tmp);
             mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
 
-            if (mActiveBattle.oppPokemonFainted()) {
+            if (mActiveBattle.oppPokemonFainted() && ind < 5) {
                 ind++;
                 BattlePokemon cur = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon();
                 Switch aiSw = new Switch(mActiveBattle.getOpponent(), ind);
@@ -653,6 +653,11 @@ public class BottomBarActivity extends BaseActivity implements
 
     private void handleBattleResult() {
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
+        PokemonTeam pokes = new PokemonTeam(6);
+        for (BattlePokemon bp : mActiveBattle.getOpponent().getBattlePokemonTeam().getBattlePokemons()) {
+            pokes.addPokemon(bp.getOriginalPokemon());
+        }
+        setCurrentPokemonPlayerTeam(pokes);
 
         for (CommandResult commandResult : result.getCommandResults()) {
             //mActiveBattle.applyCommandResult(commandResult);
@@ -946,6 +951,7 @@ public class BottomBarActivity extends BaseActivity implements
         }
 
         if (isAiBattle) {
+            ind = 0;
             if (mActiveBattle.selfPokemonFainted()) {
                 Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();
             } else if (mActiveBattle.oppPokemonFainted()) {

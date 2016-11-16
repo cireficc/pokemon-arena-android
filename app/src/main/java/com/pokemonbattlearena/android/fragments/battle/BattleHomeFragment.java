@@ -19,6 +19,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import com.pokemonbattlearena.android.BottomBarActivity;
+import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -45,6 +46,7 @@ import java.util.Map;
 
 public class BattleHomeFragment extends Fragment implements View.OnClickListener {
     private final static String TAG = BattleHomeFragment.class.getSimpleName();
+    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private static int[] moveButtonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
     private Button[] mMoveButtons;
@@ -202,7 +204,9 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View switchView = inflater.inflate(R.layout.switch_layout, null, false);
+
         ArrayList<Pokemon> pokemon = (ArrayList<Pokemon>) mPlayerBattleView.getActivePlayer().getPokemonTeam().getPokemons();
+
         PokemonGridAdapter adapter = new PokemonGridAdapter(getActivity(), pokemon, R.layout.switch_grid_item);
         // keep track of if we selected a pokemon and which one was selected
         //    `selected[0]` holds the position of the pokemon the user tapped to switch. holds -1 if no pokemon selected.
