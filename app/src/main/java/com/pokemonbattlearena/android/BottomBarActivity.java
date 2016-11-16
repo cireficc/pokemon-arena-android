@@ -349,6 +349,7 @@ public class BottomBarActivity extends BaseActivity implements
                                 mFragmentManager.beginTransaction()
                                         .replace(R.id.container, mBattleHomeFragment, "battle")
                                         .commit();
+                                updateUI();
                             }
                             if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
                                 mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
@@ -645,7 +646,7 @@ public class BottomBarActivity extends BaseActivity implements
                     force = (Button)findViewById(R.id.switch_button);
                     force.performClick();
                 }
-                mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
+                updateUI();
             }
         }
         hideProgressDialog();
@@ -793,7 +794,7 @@ public class BottomBarActivity extends BaseActivity implements
             Log.d(TAG, name + ": " + currentHp);
 
             mBattleHomeFragment.updateHealthBars(health1, health2);
-//            mBattleHomeFragment.refreshActivePokemon(mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon(), mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon());
+            mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
         }
     }
 
