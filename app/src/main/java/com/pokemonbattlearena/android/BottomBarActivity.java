@@ -39,12 +39,16 @@ import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.AttackResult;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePhaseResult;
+import com.pokemonbattlearena.android.engine.match.Command;
 import com.pokemonbattlearena.android.engine.match.CommandResult;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
+import com.pokemonbattlearena.android.engine.match.Switch;
+import com.pokemonbattlearena.android.engine.match.SwitchResult;
 import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
@@ -83,7 +87,6 @@ public class BottomBarActivity extends BaseActivity implements
 
     // GOOGLE PLAY GAMES FIELDS
     private static final int RC_SIGN_IN = 9001;
-    private String mRoomCreatorId = null;
     private String mRoomId = null;
     private String mMyId = null;
     private ArrayList<Participant> mParticipants = null;
@@ -113,11 +116,18 @@ public class BottomBarActivity extends BaseActivity implements
 
     private int mBattleMatchFlag = 0;
 
-    private final RuntimeTypeAdapterFactory<CommandResult> mRuntimeTypeAdapterFactory = RuntimeTypeAdapterFactory
-            .of(CommandResult.class, "type")
-            .registerSubtype(AttackResult.class);
+    private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
+            .of(Command.class, "type")
+            .registerSubtype(Attack.class)
+            .registerSubtype(Switch.class);
 
-    private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mRuntimeTypeAdapterFactory).create();
+    private final RuntimeTypeAdapterFactory<CommandResult> mCommandResultRuntimeTypeAdapter = RuntimeTypeAdapterFactory
+            .of(CommandResult.class, "type")
+            .registerSubtype(AttackResult.class)
+            .registerSubtype(SwitchResult.class);
+
+    private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mCommandRuntimeTypeAdapter).create();
+    private final Gson mCommandResultGson = new GsonBuilder().registerTypeAdapterFactory(mCommandResultRuntimeTypeAdapter).create();
     private boolean isAiBattle = false;
 
     // BATTLE END
@@ -135,7 +145,7 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
-    public void onCancelBattle(boolean isActiveBattle) {
+    public void onCancelBattle() {
         leaveRoom();
     }
 
@@ -158,6 +168,31 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
+    public void onSwitchPokemon(int position) {
+        Switch s = new Switch(mActiveBattle.getSelf(), position);
+        if (mIsHost) {
+            sendHostMessage(s);
+        } else {
+            sendClientMessage(s);
+        }
+    }
+
+    private void sendHostMessage(Command c) {
+        boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(c);
+        mBattleHomeFragment.enableButtonActions(movesReady);
+        if (movesReady) {
+            handleBattleResult();
+        }
+    }
+
+    private void sendClientMessage(Command c) {
+        String gson = mCommandGson.toJson(c, Command.class);
+        sendMessage(gson);
+        mBattleHomeFragment.enableButtonActions(false);
+    }
+
+
+    @Override
     public void onAiBattleClicked() {
         isAiBattle = true;
         startAiBattle();
@@ -169,18 +204,13 @@ public class BottomBarActivity extends BaseActivity implements
         if (!isAiBattle) {
             if (mBattleHomeFragment != null) {
                 mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+                Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
-                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
-                    mBattleHomeFragment.showMoveUI(movesReady);
-                    if (movesReady) {
-                        handleBattleResult();
-                    }
+                    sendHostMessage(attack);
                 } else {
                     Log.d(TAG, "Client: sending move: " + move.getName());
-                    String gson = new Gson().toJson(move, Move.class);
-                    sendMessage(gson);
-                    mBattleHomeFragment.showMoveUI(false);
+                    sendClientMessage(attack);
                 }
             }
         } else {
@@ -192,9 +222,11 @@ public class BottomBarActivity extends BaseActivity implements
                 if (mActiveBattle instanceof AiBattle) {
                     Move tmp = ((AiBattle) mActiveBattle).showIntelligence();
                     mBattleHomeFragment.appendMoveHistory("AI", tmp);
-                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                    Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(attack);
                     //mBattleHomeFragment.showMoveUI(movesReady);
-                    mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
+                    Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
+                    mActiveBattle.getCurrentBattlePhase().queueCommand(aiAttack);
                     mActiveBattle.executeCurrentBattlePhase();
 
                     for (CommandResult cmdR: mActiveBattle.getCurrentBattlePhase().getBattlePhaseResult().getCommandResults())
@@ -584,18 +616,16 @@ public class BottomBarActivity extends BaseActivity implements
                 Log.e(TAG, e.getMessage());
             }
         } else {
-            Move move = new Gson().fromJson(bufferString, Move.class);
-            BattlePhaseResult resultFromJson = mCommandGson.fromJson(bufferString, BattlePhaseResult.class);
-
-            if (move.getName() != null && mIsHost) {
-                Log.d(TAG, "We got a move: " + move.getName());
-                boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueAction(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), move);
+            if (mIsHost) {
+                Command command = mCommandGson.fromJson(bufferString, Command.class);
+                Log.d(TAG, "We got a command from client of type: " + command.getClass());
+                boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueCommand(command);
                 if (phaseReady) {
                     handleBattleResult();
                 }
-            }
-            if (resultFromJson.getCommandResults() != null && !mIsHost) {
-                Log.d(TAG, "We got a command result" + resultFromJson.toString());
+            } else {
+                BattlePhaseResult resultFromJson = mCommandResultGson.fromJson(bufferString, BattlePhaseResult.class);
+                Log.d(TAG, "We got a battle phase result: " + resultFromJson.toString());
                 for (CommandResult commandResult : resultFromJson.getCommandResults()) {
                     // Update the internal state of the battle (only host really needs to do this, but opponent can too)
                     // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
@@ -604,7 +634,8 @@ public class BottomBarActivity extends BaseActivity implements
                     updateUI();
                 }
 
-                mBattleHomeFragment.showMoveUI(true);
+                mBattleHomeFragment.enableButtonActions(true);
+                mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
             }
         }
         hideProgressDialog();
@@ -624,8 +655,9 @@ public class BottomBarActivity extends BaseActivity implements
                 return;
             }
         }
-        mBattleHomeFragment.showMoveUI(true);
-        String json = mCommandGson.toJson(result);
+        mBattleHomeFragment.enableButtonActions(true);
+        mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
+        String json = mCommandResultGson.toJson(result);
         sendMessage(json);
 
 
@@ -737,6 +769,7 @@ public class BottomBarActivity extends BaseActivity implements
             Log.d(TAG, name + ": " + currentHp);
 
             mBattleHomeFragment.updateHealthBars(health1, health2);
+//            mBattleHomeFragment.refreshActivePokemon(mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon(), mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon());
         }
     }
 

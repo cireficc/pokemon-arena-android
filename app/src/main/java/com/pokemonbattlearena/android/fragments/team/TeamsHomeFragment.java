@@ -68,7 +68,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         selectedTeamArrayList = new ArrayList<>(mTeamSize);
         mApplication = PokemonBattleApplication.getInstance();
         mItemArray = (ArrayList<Pokemon>) mApplication.getBattleDatabase().getPokemons();
-        mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, mTeamSize);
+        mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, R.layout.builder_grid_item);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(this);
         mSaveButton.setOnClickListener(this);

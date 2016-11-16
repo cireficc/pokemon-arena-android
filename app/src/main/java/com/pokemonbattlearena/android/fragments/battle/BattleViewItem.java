@@ -1,17 +1,13 @@
 package com.pokemonbattlearena.android.fragments.battle;
 
-import android.app.Activity;
-import android.graphics.Point;
-import android.os.Build;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
@@ -24,31 +20,14 @@ public class BattleViewItem {
     TextView pokemonName;
     TextView pokemonHPText;
     SeekBar pokemonHpProgress;
-    //TODO: Change how active pokemon is displayed once switching can happen!
     Pokemon activePokemon;
     PokemonPlayer activePlayer;
-
-    public BattleViewItem(ImageView pokemonImage, TextView pokemonName, TextView pokemonHPText, SeekBar pokemonHpProgress) {
-        this.pokemonImage = pokemonImage;
-        this.pokemonName = pokemonName;
-        this.pokemonHPText = pokemonHPText;
-        this.pokemonHpProgress = pokemonHpProgress;
-    }
-
-    public ImageView getPokemonImage() {
-        return pokemonImage;
-    }
-
-    public TextView getPokemonName() {
-        return pokemonName;
-    }
-
-    public TextView getPokemonHPText() {
-        return pokemonHPText;
-    }
-
-    public SeekBar getPokemonHpProgress() {
-        return pokemonHpProgress;
+    
+    public BattleViewItem(View playerView) {
+        this.pokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
+        this.pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
+        this.pokemonHpProgress = (SeekBar) playerView.findViewById(R.id.hp_imageview);
+        this.pokemonHPText = (TextView) playerView.findViewById(R.id.hp_textview);
     }
 
     public PokemonPlayer getActivePlayer() {
@@ -59,12 +38,12 @@ public class BattleViewItem {
         this.activePlayer = player;
     }
 
-    public Pokemon getActivePokemon() {
-        return activePokemon;
-    }
-
-    public void setActivePokemon(Pokemon activePokemon) {
+    public void setActivePokemon(Pokemon activePokemon, Drawable d) {
         this.activePokemon = activePokemon;
+        this.pokemonHpProgress.setMax(activePokemon.getHp());
+        this.pokemonName.setText(activePokemon.getName());
+        this.pokemonImage.setImageDrawable(d);
+        setHPBar(activePokemon.getHp());
     }
 
     public void setVisibility(boolean visibility) {
