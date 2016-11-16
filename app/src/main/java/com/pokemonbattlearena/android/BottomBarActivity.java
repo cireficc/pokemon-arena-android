@@ -966,10 +966,10 @@ public class BottomBarActivity extends BaseActivity implements
        //         BattlePokemon mBP = mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons().get(i);
        //         BattlePokemon oBP = mActiveBattle.getOpponent().getBattlePokemonTeam().getBattlePokemons().get(i);
                 if (mActiveBattle.selfPokemonFainted()) {
-                    Toast.makeText(mApplication, mParticipants.get(0).getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
                     return;
                 } else if (mActiveBattle.oppPokemonFainted()){
-                    Toast.makeText(mApplication, mParticipants.get(1).getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
                     return;
                 }
         //    }
