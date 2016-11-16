@@ -114,7 +114,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
     private void updatePokemonImages(BattlePokemon self, BattlePokemon opponent) {
         mPlayerBattleView.setActivePokemon(self.getOriginalPokemon(), getDrawableForPokemon(self.getOriginalPokemon().getName(),typePokemon));
-        mOpponentBattleView.setActivePokemon(opponent.getOriginalPokemon(), getDrawableForPokemon(self.getOriginalPokemon().getName(), typePokemon));
+        mOpponentBattleView.setActivePokemon(opponent.getOriginalPokemon(), getDrawableForPokemon(opponent.getOriginalPokemon().getName(), typePokemon));
     }
 
     private void updateStatusEffects(StatusEffect playerEffect, StatusEffect opponentEffect) {
