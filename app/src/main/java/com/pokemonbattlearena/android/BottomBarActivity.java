@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -43,6 +44,8 @@ import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.AttackResult;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePhaseResult;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.Command;
 import com.pokemonbattlearena.android.engine.match.CommandResult;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
@@ -58,6 +61,7 @@ import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemon
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 
+import java.lang.reflect.GenericDeclaration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -116,6 +120,9 @@ public class BottomBarActivity extends BaseActivity implements
 
     private int mBattleMatchFlag = 0;
 
+    //TODO Temporary integer used for AI switching. Need 2 kill
+    private int ind;
+
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
             .registerSubtype(Attack.class)
@@ -170,11 +177,19 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onSwitchPokemon(int position) {
         Switch s = new Switch(mActiveBattle.getSelf(), position);
-        if (mIsHost) {
-            sendHostMessage(s);
+        if (!isAiBattle) {
+            if (mIsHost) {
+                sendHostMessage(s);
+            } else {
+                sendClientMessage(s);
+            }
         } else {
-            sendClientMessage(s);
+            AIBattleTurn(s);
         }
+    }
+
+    public BattlePokemonPlayer getBattler() {
+        return mActiveBattle.getSelf();
     }
 
     private void sendHostMessage(Command c) {
@@ -199,7 +214,6 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
-    //TODO Break the AI stuff out into methods i.e. use handleBattleResult
     public void onMoveClicked(Move move) {
         if (!isAiBattle) {
             if (mBattleHomeFragment != null) {
@@ -219,38 +233,29 @@ public class BottomBarActivity extends BaseActivity implements
                 if (mActiveBattle.getCurrentBattlePhase() == null) {
                     mActiveBattle.startNewBattlePhase();
                 }
-                if (mActiveBattle instanceof AiBattle) {
-                    Move tmp = ((AiBattle) mActiveBattle).showIntelligence();
-                    mBattleHomeFragment.appendMoveHistory("AI", tmp);
-                    Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
-                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(attack);
-                    //mBattleHomeFragment.showMoveUI(movesReady);
-                    Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
-                    mActiveBattle.getCurrentBattlePhase().queueCommand(aiAttack);
-                    mActiveBattle.executeCurrentBattlePhase();
-
-                    for (CommandResult cmdR: mActiveBattle.getCurrentBattlePhase().getBattlePhaseResult().getCommandResults())
-                    {
-                        if (mActiveBattle.selfPokemonFainted() || mActiveBattle.oppPokemonFainted()) {
-                            if(mActiveBattle.isFinished()) {
-                                battleEndListener.onBattleEnd();
-                                break;
-                            }
-                            //TODO somehow handle the knocking out of a Pokemon mid-Phase
-                            break;
-                        }
-                        mActiveBattle.applyCommandResult(cmdR);
-                        updateUI();
-                    }
-                    updateUI();
-                    if(!mActiveBattle.isFinished()) {
-                        mActiveBattle.startNewBattlePhase();
-                    }
-                    else {
-                        battleEndListener.onBattleEnd();
-                    }
-                }
+                Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                AIBattleTurn(attack);
             }
+        }
+    }
+
+    public void AIBattleTurn(Command cmd) {
+        if (mActiveBattle instanceof AiBattle) {
+            Move tmp = ((AiBattle) mActiveBattle).showIntelligence();
+            mBattleHomeFragment.appendMoveHistory("AI", tmp);
+            mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
+
+            if (mActiveBattle.oppPokemonFainted()) {
+                ind++;
+                BattlePokemon cur = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon();
+                Switch aiSw = new Switch(mActiveBattle.getOpponent(), ind);
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiSw);
+            } else {
+                Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiAttack);
+            }
+
+            handleBattleResult();
         }
     }
 
@@ -635,6 +640,11 @@ public class BottomBarActivity extends BaseActivity implements
                 }
 
                 mBattleHomeFragment.enableButtonActions(true);
+                if (mActiveBattle.selfPokemonFainted()) {
+                    Button force;
+                    force = (Button)findViewById(R.id.switch_button);
+                    force.performClick();
+                }
                 mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
             }
         }
@@ -645,22 +655,32 @@ public class BottomBarActivity extends BaseActivity implements
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
 
         for (CommandResult commandResult : result.getCommandResults()) {
-            mActiveBattle.applyCommandResult(commandResult);
+            //mActiveBattle.applyCommandResult(commandResult);
             updateUI();
             Log.d(TAG, commandResult.getTargetInfo().toString());
 
             if (mActiveBattle.isFinished()) {
                 battleEndListener.onBattleEnd();
-                leaveRoom();
+                if (!isAiBattle) {leaveRoom();}
                 return;
             }
         }
         mBattleHomeFragment.enableButtonActions(true);
         mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
-        String json = mCommandResultGson.toJson(result);
-        sendMessage(json);
+        updateUI();
+
+        if(!isAiBattle) {
+            String json = mCommandResultGson.toJson(result);
+            sendMessage(json);
+        }
 
         mActiveBattle.startNewBattlePhase();
+
+        if (mActiveBattle.selfPokemonFainted()) {
+            Button force;
+            force = (Button)findViewById(R.id.switch_button);
+            force.performClick();
+        }
     }
 
     @Override
@@ -934,20 +954,19 @@ public class BottomBarActivity extends BaseActivity implements
             }
             return;
         }
-        //TODO Change this to reflect entire Pokemon team instead of just the first Pokemon
-        if (mActiveBattle.selfPokemonFainted()) {
-            for (Participant p: mParticipants) {
-                if (p.getParticipantId().equals(mOpponentPokemonPlayer.getPlayerId())) {
-                    Toast.makeText(mApplication, p.getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
-                }
-            }
 
-        } else if (mActiveBattle.oppPokemonFainted()){
-            for (Participant p: mParticipants) {
-                if (p.getParticipantId().equals(mCurrentPokemonPlayer.getPlayerId())) {
-                    Toast.makeText(mApplication, p.getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+        if (mActiveBattle.isFinished()) {
+       //     for (int i = 0;i < 6; i ++) {
+       //         BattlePokemon mBP = mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons().get(i);
+       //         BattlePokemon oBP = mActiveBattle.getOpponent().getBattlePokemonTeam().getBattlePokemons().get(i);
+                if (mActiveBattle.selfPokemonFainted()) {
+                    Toast.makeText(mApplication, mParticipants.get(0).getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+                    return;
+                } else if (mActiveBattle.oppPokemonFainted()){
+                    Toast.makeText(mApplication, mParticipants.get(1).getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+                    return;
                 }
-            }
+        //    }
         }
     }
     //endregion

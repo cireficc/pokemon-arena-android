@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -25,6 +26,7 @@ import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.fragments.team.PokemonGridAdapter;
 import com.pokemonbattlearena.android.fragments.team.PokemonGridViewItem;
@@ -60,6 +62,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     private Map<Button, Move> mMoveButtonMap;
 
     private Button mSwitchButton;
+
 
     private final static int typePokemon = 0;
     private final static int typeStatus = 1;
@@ -316,4 +319,5 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         mPlayerBattleView.updateHealthBar(health1);
         mOpponentBattleView.updateHealthBar(health2);
     }
+
 }
