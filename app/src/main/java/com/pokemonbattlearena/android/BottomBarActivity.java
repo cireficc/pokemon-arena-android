@@ -660,7 +660,6 @@ public class BottomBarActivity extends BaseActivity implements
         String json = mCommandResultGson.toJson(result);
         sendMessage(json);
 
-
         mActiveBattle.startNewBattlePhase();
     }
 

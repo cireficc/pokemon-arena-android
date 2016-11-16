@@ -156,6 +156,8 @@ public class Battle {
         Log.i(TAG, "Applying Confusion (maybe): " + confused);
         if (!defendingPokemon.isConfused() && confused) {
             Log.i(TAG, "Pokemon is not already confused. Applying for " + confusedTurns + " turn(s)!");
+            defendingPokemon.setConfused(confused);
+            defendingPokemon.setConfusedTurns(confusedTurns);
         }
 
         Log.i(TAG, "Applying flinch: " + flinched);
