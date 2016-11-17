@@ -147,7 +147,6 @@ public class BottomBarActivity extends BaseActivity implements
             mBottomBar.selectTabWithId(R.id.tab_battle);
             setSavedTeam(pokemonJSON);
             displaySavedTeam(true);
-            setCurrentPokemonPlayerTeam(new Gson().fromJson(pokemonJSON, PokemonTeam.class));
         }
     }
 
@@ -655,10 +654,11 @@ public class BottomBarActivity extends BaseActivity implements
     private void handleBattleResult() {
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
         PokemonTeam pokes = new PokemonTeam(6);
-        for (BattlePokemon bp : mActiveBattle.getOpponent().getBattlePokemonTeam().getBattlePokemons()) {
+        for (BattlePokemon bp : mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons()) {
             pokes.addPokemon(bp.getOriginalPokemon());
         }
         setCurrentPokemonPlayerTeam(pokes);
+        displaySavedTeam(true);
 
         for (CommandResult commandResult : result.getCommandResults()) {
             //mActiveBattle.applyCommandResult(commandResult);
@@ -727,6 +727,11 @@ public class BottomBarActivity extends BaseActivity implements
     private void setCurrentPokemonPlayerTeam(PokemonTeam team) {
         mCurrentPokemonPlayer = new PokemonPlayer(mMyId);
         mCurrentPokemonPlayer.setPokemonTeam(team);
+        String json = new Gson().toJson(team, PokemonTeam.class);
+        setSavedTeam(json);
+        if (mBattleHomeFragment != null) {
+            mBattleHomeFragment.setPlayerTeam(team);
+        }
     }
 
     // Show error message about game being cancelled and return to main screen.

@@ -29,6 +29,7 @@ import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
+import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.team.PokemonGridAdapter;
 import com.pokemonbattlearena.android.fragments.team.PokemonGridViewItem;
 
@@ -130,6 +131,12 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
         Drawable drawable = getDrawableForPokemon(statusEffect.name().toLowerCase(), typeStatus);
         boolean isConfusion = statusEffect == StatusEffect.CONFUSION;
         battleViewItem.updateStatusEffect(isConfusion, drawable);
+    }
+
+    public void setPlayerTeam(PokemonTeam playerTeam) {
+        if (mPlayerBattleView != null && mPlayerBattleView.getActivePlayer() != null) {
+            mPlayerBattleView.getActivePlayer().setPokemonTeam(playerTeam);
+        }
     }
 
     public interface OnBattleFragmentTouchListener {
