@@ -22,7 +22,7 @@
     <color name="grass_type">#396430</color>
     <color name="flying_type">#68658C</color>
     <color name="fighting_type">#96241E</color>
-    <color name="fire_type">#E26C16</color>
+    <color name="fire_type">#e26c16</color>
     <color name="electric_type">#FDD333</color>
     <color name="rock_type">#827834</color>
     <color name="water_type">#0273BE</color>
@@ -36,5 +36,6 @@
     <color name="color_charizard_light">#ea704c</color>
     <color name="match_history_background">#bdbdbd</color>
     <color name="color_blastoise_light">#2488f7</color>
+    <color name="color_venusaur_lighter">#70b24f</color>
 
 </resources>

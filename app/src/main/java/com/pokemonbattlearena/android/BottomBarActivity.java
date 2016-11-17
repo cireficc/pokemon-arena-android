@@ -53,6 +53,7 @@ import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatInGameFragment;
+import com.pokemonbattlearena.android.fragments.team.SavedTeamsFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
@@ -102,6 +103,7 @@ public class BottomBarActivity extends BaseActivity implements
     private FragmentManager mFragmentManager;
     private MainMenuFragment mMainMenuFragment;
     private BattleHomeFragment mBattleHomeFragment;
+    private SavedTeamsFragment mSavedTeamsFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
     private ChatInGameFragment mChatInGameFragment;
@@ -290,6 +292,7 @@ public class BottomBarActivity extends BaseActivity implements
         mApplication.setGoogleApiClient(googleApiClient);
 
         mMainMenuFragment = new MainMenuFragment();
+        mSavedTeamsFragment = new SavedTeamsFragment();
         mTeamsHomeFragment = createTeamsHomeFragment();
         mBattleHomeFragment = new BattleHomeFragment();
         mChatHomeFragment = new ChatHomeFragment();
@@ -308,9 +311,9 @@ public class BottomBarActivity extends BaseActivity implements
                 switch (tabId) {
                     case R.id.tab_teams:
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
-                            if (mTeamsHomeFragment != null && !mTeamsHomeFragment.isAdded()) {
+                            if (mTeamsHomeFragment != null && !mSavedTeamsFragment.isAdded()) {
                                 mFragmentManager.beginTransaction()
-                                        .replace(R.id.container, mTeamsHomeFragment, "team")
+                                        .replace(R.id.container, mSavedTeamsFragment, "team")
                                         .commit();
                             }
                             if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {

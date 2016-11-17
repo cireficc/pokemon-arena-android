@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="95dp">
+        <android.support.v7.widget.CardView
+            android:id="@+id/saved_team_cardView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            card_view:cardCornerRadius="10dp"
+            card_view:cardBackgroundColor="@color/color_charizard">
+            <TextView
+                android:text="My Team Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView"
+                android:layout_weight="1"
+                android:layout_marginLeft="7dp"
+                android:layout_marginTop="5dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:textSize="15sp" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp">
+
+                <include layout="@layout/saved_team_pokemon_item"
+                    android:id="@+id/p1"/>
+
+                <include layout="@layout/saved_team_pokemon_item"
+                    android:id="@+id/p2"/>
+
+                <include layout="@layout/saved_team_pokemon_item"
+                    android:id="@+id/p3"/>
+
+                <include layout="@layout/saved_team_pokemon_item"
+                    android:id="@+id/p4"/>
+
+                <include layout="@layout/saved_team_pokemon_item"
+                    android:id="@+id/p5"/>
+
+                <include layout="@layout/saved_team_pokemon_item"
+                    android:id="@+id/p6"/>
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+</RelativeLayout>
