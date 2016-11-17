@@ -62,8 +62,6 @@ public class Battle {
 
     private void setFinished() {
         isFinished = self.getBattlePokemonTeam().allFainted() || opponent.getBattlePokemonTeam().allFainted();
-        //TODO Remove this as this is for the 1v1 Pokemon Scenario
-        isFinished = self.getBattlePokemonTeam().getCurrentPokemon().isFainted() || opponent.getBattlePokemonTeam().getCurrentPokemon().isFainted();
     }
 
     public void startNewBattlePhase() {
@@ -88,15 +86,23 @@ public class Battle {
 
             CommandResult commandResult = command.execute();
 
-            Log.i(TAG, "Adding command result to battle phase result");
-            battlePhaseResult.addCommandResult(commandResult);
+
+            if (commandResult instanceof AttackResult && (selfPokemonFainted() || oppPokemonFainted())) {
+
+            } else {
+                //if (!isFinished()) {
+                    applyCommandResult(commandResult);
+                    Log.i(TAG, "Adding command result to battle phase result");
+                    battlePhaseResult.addCommandResult(commandResult);
+                //}
+            }
+            setFinished();
         }
 
         Log.i(TAG, "Setting battle phase result on current battle phase");
         currentBattlePhase.setBattlePhaseResult(battlePhaseResult);
 
         Log.i(TAG, "Setting finished");
-        setFinished();
         Log.i(TAG, "Battle finished? " + isFinished);
 
         return battlePhaseResult;
