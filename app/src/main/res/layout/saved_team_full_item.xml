@@ -15,7 +15,7 @@
                 android:text="My Team Name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/textView"
+                android:id="@+id/team_name_textView"
                 android:layout_weight="1"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="5dp"

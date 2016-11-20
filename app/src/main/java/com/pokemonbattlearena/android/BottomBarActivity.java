@@ -312,6 +312,7 @@ public class BottomBarActivity extends BaseActivity implements
                     case R.id.tab_teams:
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
                             if (mTeamsHomeFragment != null && !mSavedTeamsFragment.isAdded()) {
+                                displaySavedTeam(false);
                                 mFragmentManager.beginTransaction()
                                         .replace(R.id.container, mSavedTeamsFragment, "team")
                                         .commit();

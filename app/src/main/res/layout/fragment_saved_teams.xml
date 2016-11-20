@@ -6,18 +6,16 @@
     tools:context=".BottomBarActivity"
     android:background="@color/color_charizard_light">
 
-    <!--
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.woxthebox.draglistview.DragListView
-            android:id="@+id/drag_list_view"
+            android:id="@+id/team_drag_list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
-     -->
 
-            <include layout="@layout/saved_team_full_item"
+            <!--<include layout="@layout/saved_team_full_item"
                 android:id="@+id/i3"
                 android:layout_width="match_parent"
                 android:layout_height="95dp"/>
@@ -34,11 +32,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="95dp"
                 android:layout_below="@+id/i2"
-                android:layout_alignParentStart="true" />
-    <!--
+                android:layout_alignParentStart="true" /> -->
         </com.woxthebox.draglistview.DragListView>
     </FrameLayout>
-    -->
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
