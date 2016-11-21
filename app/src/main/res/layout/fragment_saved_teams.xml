@@ -6,33 +6,30 @@
     tools:context=".BottomBarActivity"
     android:background="@color/color_charizard_light">
 
+    <TextView
+        android:text="Current Team"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/team_current_title"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="15dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
+        android:fontFamily="sans-serif-smallcaps"
+        android:textStyle="normal|bold"
+        android:textSize="22sp" />
+
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/team_current_title">
 
         <com.woxthebox.draglistview.DragListView
             android:id="@+id/team_drag_list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
 
-            <!--<include layout="@layout/saved_team_full_item"
-                android:id="@+id/i3"
-                android:layout_width="match_parent"
-                android:layout_height="95dp"/>
-
-            <include layout="@layout/saved_team_full_item"
-                android:id="@+id/i2"
-                android:layout_width="match_parent"
-                android:layout_height="95dp"
-                android:layout_below="@+id/i3"
-                android:layout_alignParentStart="true" />
-
-            <include layout="@layout/saved_team_full_item"
-                android:id="@+id/i1"
-                android:layout_width="match_parent"
-                android:layout_height="95dp"
-                android:layout_below="@+id/i2"
-                android:layout_alignParentStart="true" /> -->
         </com.woxthebox.draglistview.DragListView>
     </FrameLayout>
 

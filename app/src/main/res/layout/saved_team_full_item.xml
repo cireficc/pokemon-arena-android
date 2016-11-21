@@ -3,7 +3,7 @@
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="95dp">
+        android:layout_height="98dp">
         <android.support.v7.widget.CardView
             android:id="@+id/saved_team_cardView"
             android:layout_width="match_parent"
@@ -22,28 +22,11 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 android:textSize="15sp" />
             <LinearLayout
+                android:id="@+id/team_all_pokemon"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="10dp">
-
-                <include layout="@layout/saved_team_pokemon_item"
-                    android:id="@+id/p1"/>
-
-                <include layout="@layout/saved_team_pokemon_item"
-                    android:id="@+id/p2"/>
-
-                <include layout="@layout/saved_team_pokemon_item"
-                    android:id="@+id/p3"/>
-
-                <include layout="@layout/saved_team_pokemon_item"
-                    android:id="@+id/p4"/>
-
-                <include layout="@layout/saved_team_pokemon_item"
-                    android:id="@+id/p5"/>
-
-                <include layout="@layout/saved_team_pokemon_item"
-                    android:id="@+id/p6"/>
 
             </LinearLayout>
 

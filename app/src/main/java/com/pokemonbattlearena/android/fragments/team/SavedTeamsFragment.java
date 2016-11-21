@@ -10,12 +10,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.woxthebox.draglistview.DragItem;
 import com.woxthebox.draglistview.DragListView;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -41,15 +43,17 @@ public class SavedTeamsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_saved_teams, container, false);
         mDragListView = (DragListView) view.findViewById(R.id.team_drag_list_view);
         mDragListView.getRecyclerView().setVerticalScrollBarEnabled(true);
-//        mDragListView.setDragListListener(new DragListView.DragListListenerAdapter() {
+//        mDragListView.setDragListCallback(new DragListView.DragListCallbackAdapter() {
 //            @Override
-//            public void onItemDragStarted(int position) {
-//                mRefreshLayout.setEnabled(false);
+//            public boolean canDragItemAtPosition(int dragPosition) {
+//                // Can not drag item at position 1
+//                return dragPosition != 1;
 //            }
 //
 //            @Override
-//            public void onItemDragEnded(int fromPosition, int toPosition) {
-//                mRefreshLayout.setEnabled(true);
+//            public boolean canDropItemAtPosition(int dropPosition) {
+//                // Can not drop item at position 1
+//                return dropPosition != 1;
 //            }
 //        });
 
@@ -57,9 +61,12 @@ public class SavedTeamsFragment extends Fragment {
         String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
         PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
         mSavedTeams = new ArrayList<Pair<Long, PokemonTeam>>();
+        pokemonTeam.setTeamName("My Pokemon Team");
+//        TextView otherText = (TextView) inflater.inflate(R.layout.saved_team_other_textview, mDragListView, false);
         mSavedTeams.add(new Pair(new Long(0), pokemonTeam));
-        mSavedTeams.add(new Pair(new Long(1), pokemonTeam));
+//        mSavedTeams.add(new Pair(new Long(1), otherText));
         mSavedTeams.add(new Pair(new Long(2), pokemonTeam));
+        mSavedTeams.add(new Pair(new Long(3), pokemonTeam));
 
         setupListRecyclerView();
         return view;
@@ -70,16 +77,6 @@ public class SavedTeamsFragment extends Fragment {
         ItemAdapter listAdapter = new ItemAdapter(mSavedTeams, R.layout.saved_team_full_item, R.id.saved_team_cardView, false);
         mDragListView.setAdapter(listAdapter, true);
         mDragListView.setCanDragHorizontally(false);
-        mDragListView.setCustomDragItem(new MySavedTeamItem(getContext(), R.layout.saved_team_full_item));
-    }
-
-    private static class MySavedTeamItem extends DragItem {
-        public MySavedTeamItem(Context context, int layoutId) {
-            super(context, layoutId);
-        }
-        @Override
-        public void onBindDragView(View clickedView, View dragView){
-            //??????
-        }
+        mDragListView.setCustomDragItem(null);
     }
 }

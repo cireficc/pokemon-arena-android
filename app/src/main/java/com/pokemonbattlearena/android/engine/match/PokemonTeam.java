@@ -9,6 +9,7 @@ public class PokemonTeam {
 
     protected int size;
     protected List<Pokemon> pokemons;
+    protected String teamName;
 
     public PokemonTeam(int size) {
         this.size = size;
@@ -25,5 +26,13 @@ public class PokemonTeam {
 
     public void removePokemon(Pokemon p) {
         pokemons.remove(p);
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 }

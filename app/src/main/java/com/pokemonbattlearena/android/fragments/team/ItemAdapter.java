@@ -8,9 +8,12 @@ import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.woxthebox.draglistview.DragItemAdapter;
 
@@ -22,6 +25,8 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, PokemonTeam>, ItemAd
     private int mGrabHandleId;
     private boolean mDragOnLongPress;
 
+    private LayoutInflater inflater;
+
     public ItemAdapter(ArrayList<Pair<Long, PokemonTeam>> list, int layoutId, int grabHandleId, boolean dragOnLongPress) {
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
@@ -32,18 +37,24 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, PokemonTeam>, ItemAd
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        //create unique layout here?
-        View view = LayoutInflater.from(parent.getContext()).inflate(mLayoutId, parent, false);
-        String text = "This is a test "+viewType;
-        ((TextView) view.findViewById(R.id.team_name_textView)).setText(text);
+        inflater = LayoutInflater.from(parent.getContext());
+        View view = inflater.inflate(mLayoutId, parent, false);
+
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-
-//        holder.itemView.setTag(text);
+//        //position 1 will be a header, not a team
+//        if(position != 1){
+            //set team name
+            String text = ((PokemonTeam) mItemList.get(position).second).getTeamName();
+            holder.mTeamName.setText(text);
+            holder.itemView.setTag(text);
+            //set team images
+            holder.addPokemonTeam(((PokemonTeam) mItemList.get(position).second));
+//        }
     }
 
     @Override
@@ -54,10 +65,13 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, PokemonTeam>, ItemAd
     public class ViewHolder extends DragItemAdapter.ViewHolder {
 
         public TextView mTeamName;
+        public LinearLayout mPokemonTeam;
+
 
         public ViewHolder(final View itemView) {
             super(itemView, mGrabHandleId, mDragOnLongPress);
             mTeamName = (TextView) itemView.findViewById(R.id.team_name_textView);
+            mPokemonTeam = (LinearLayout) itemView.findViewById(R.id.team_all_pokemon);
         }
 
         @Override
@@ -69,6 +83,29 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, PokemonTeam>, ItemAd
         public boolean onItemLongClicked(View view) {
             //
             return true;
+        }
+
+        public void addPokemonTeam(PokemonTeam team) {
+            mPokemonTeam.removeAllViews();
+            for(Pokemon poke : team.getPokemons()) {
+                addPokemonToTeam(poke);
+            }
+        }
+
+        private void addPokemonToTeam(Pokemon pokemon) {
+            View pokemonItem;
+            pokemonItem = inflater.inflate(R.layout.saved_team_pokemon_item, mPokemonTeam, false);
+
+            //get views
+            TextView mPokemonName = (TextView) pokemonItem.findViewById(R.id.pokemon_team_item_textview);
+            ImageView mPokemonImage = (ImageView) pokemonItem.findViewById(R.id.pokemon_team_item_imageview);
+
+            //set values
+            mPokemonName.setText(pokemon.getName());
+            int PokemonImageId = pokemonItem.getContext().getResources().getIdentifier("ic_pokemon_" + pokemon.getName().toLowerCase(), "drawable", pokemonItem.getContext().getPackageName());
+            mPokemonImage.setImageResource(PokemonImageId);
+
+            mPokemonTeam.addView(pokemonItem);
         }
     }
 }
