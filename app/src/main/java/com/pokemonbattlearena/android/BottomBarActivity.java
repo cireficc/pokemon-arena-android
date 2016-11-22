@@ -332,7 +332,6 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             case WelcomeHelper.DEFAULT_WELCOME_SCREEN_REQUEST:
                     // The key of the welcome screen is in the Intent
-//                    String welcomeKey = intent.getStringExtra(SplashActivity.WELCOME_SCREEN_KEY);
 
                     if (resultCode == RESULT_OK) {
                         // Code here will run if the welcome screen was completed
@@ -340,8 +339,7 @@ public class BottomBarActivity extends BaseActivity implements
                         Toast.makeText(mApplication, name, Toast.LENGTH_SHORT).show();
                         displaySavedTeam(true);
                     } else {
-                        // Code here will run if the welcome screen was canceled
-                        // In most cases you'll want to call finish() here
+                        finish();
                     }
         }
         super.onActivityResult(requestCode, resultCode, intent);
