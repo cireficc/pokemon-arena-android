@@ -536,6 +536,7 @@ public class BottomBarActivity extends BaseActivity implements
                     // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
                     mActiveBattle.applyCommandResult(commandResult);
                     Log.d(TAG, commandResult.getTargetInfo().toString());
+                    //TODO: check if battle ended
                     updateUI();
                 }
 
@@ -640,7 +641,10 @@ public class BottomBarActivity extends BaseActivity implements
 
             if (mActiveBattle.isFinished()) {
                 battleEndListener.onBattleEnd();
-                if (!isAiBattle) {leaveRoom();}
+                if (!isAiBattle) {
+                    //TODO: don't leave the room since
+                    leaveRoom();
+                }
                 return;
             }
         }
