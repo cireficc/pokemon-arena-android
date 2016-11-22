@@ -20,11 +20,6 @@ import com.stephentuso.welcome.WelcomeConfiguration;
  */
 
 public class SplashActivity extends WelcomeActivity {
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-
     @Override
     protected WelcomeConfiguration configuration() {
         return new WelcomeConfiguration.Builder(this)
@@ -38,6 +33,8 @@ public class SplashActivity extends WelcomeActivity {
                     }
                 }.background(R.color.color_charizard))
                 .swipeToDismiss(true)
+                .exitAnimation(android.R.anim.fade_out)
+                .canSkip(false)
                 .build();
     }
 }

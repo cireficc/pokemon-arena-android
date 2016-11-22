@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -158,7 +159,7 @@ public class BottomBarActivity extends BaseActivity implements
         mWelcomeHelper = new WelcomeHelper(this, com.pokemonbattlearena.android.activity.SplashActivity.class);
         mWelcomeHelper.show(savedInstanceState);
 
-        mPreferences = getPreferences(Context.MODE_PRIVATE);
+        mPreferences = getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
@@ -199,6 +200,7 @@ public class BottomBarActivity extends BaseActivity implements
                 }
                 switch (tabId) {
                     case R.id.tab_teams:
+                        hideKeyboard();
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
                             if (mTeamsHomeFragment != null && !mTeamsHomeFragment.isAdded()) {
                                 mFragmentManager.beginTransaction()
@@ -216,6 +218,7 @@ public class BottomBarActivity extends BaseActivity implements
                         }
                         break;
                     case R.id.tab_battle:
+                        hideKeyboard();
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
                             if (mMainMenuFragment != null && !mMainMenuFragment.isAdded()) {
                                 mFragmentManager.beginTransaction()
@@ -289,6 +292,12 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mWelcomeHelper.onSaveInstanceState(outState);
     }
 
     @Override
