@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_charizard">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter a screen name for battle"
+        android:textStyle="bold"
+        android:textSize="22pt"/>
+<EditText
+    android:id="@+id/name_edit_text"
+    android:paddingTop="20dp"
+    android:text="screen name"
+    android:lines="1"
+    android:inputType="textNoSuggestions"
+    android:background="@color/color_blastoise"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+</LinearLayout>

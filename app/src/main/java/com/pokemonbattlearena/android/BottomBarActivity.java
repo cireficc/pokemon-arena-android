@@ -36,6 +36,8 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
+import com.pokemonbattlearena.android.activity.*;
+import com.pokemonbattlearena.android.activity.SplashActivity;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -59,6 +61,8 @@ import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
+import com.stephentuso.welcome.TitlePage;
+import com.stephentuso.welcome.WelcomeHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -138,6 +142,9 @@ public class BottomBarActivity extends BaseActivity implements
     // BATTLE END
     private BattleEndListener battleEndListener = this;
 
+    //Splash
+    private WelcomeHelper mWelcomeHelper;
+
     /********************************************************************************************
      * ACTIVITY
      *******************************************************************************************/
@@ -147,6 +154,9 @@ public class BottomBarActivity extends BaseActivity implements
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
+
+        mWelcomeHelper = new WelcomeHelper(this, com.pokemonbattlearena.android.activity.SplashActivity.class);
+        mWelcomeHelper.show(savedInstanceState);
 
         mPreferences = getPreferences(Context.MODE_PRIVATE);
 
@@ -177,6 +187,8 @@ public class BottomBarActivity extends BaseActivity implements
         mFragmentManager.beginTransaction()
                 .add(R.id.container, mMainMenuFragment, "main")
                 .commit();
+
+
 
         // Listens for a tab touch (Only first touch of new tab)
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
@@ -309,6 +321,18 @@ public class BottomBarActivity extends BaseActivity implements
                             requestCode, resultCode, R.string.signin_other_error);
                     Log.e(TAG, "Error signing in " + requestCode);
                 }
+            case WelcomeHelper.DEFAULT_WELCOME_SCREEN_REQUEST:
+                    // The key of the welcome screen is in the Intent
+//                    String welcomeKey = intent.getStringExtra(SplashActivity.WELCOME_SCREEN_KEY);
+
+                    if (resultCode == RESULT_OK) {
+                        // Code here will run if the welcome screen was completed
+                        String name = mPreferences.getString("default_name", "default");
+                        Toast.makeText(mApplication, name, Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Code here will run if the welcome screen was canceled
+                        // In most cases you'll want to call finish() here
+                    }
         }
         super.onActivityResult(requestCode, resultCode, intent);
     }
