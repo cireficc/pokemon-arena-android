@@ -25,4 +25,5 @@
 
     <string name="tap_a_pokemon_to_switch">Switch Pokemon</string>
     <string name="status_effects">Status Effects</string>
+    <string name="append_profile_text">\'s Team:</string>
 </resources>

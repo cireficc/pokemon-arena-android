@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -43,6 +44,7 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
     private PokemonGridAdapter mAdapter;
     private int teamSize = 6;
     private ArrayList<Pokemon> selectedTeamArrayList;
+    private TextView mSaveTeamText;
 
     private WelcomeFinisher welcomeFinisher;
 
@@ -56,6 +58,8 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_teamshome, container, false);
+        mSaveTeamText = (TextView) view.findViewById(R.id.save_first_team_textview);
+        mSaveTeamText.setVisibility(View.VISIBLE);
         mGridView = (GridView)  view.findViewById(R.id.team_gridview);
         mSaveButton = (Button) view.findViewById(R.id.save_team_button);
         selectedTeamArrayList = new ArrayList<>(teamSize);

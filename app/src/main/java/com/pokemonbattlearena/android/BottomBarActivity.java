@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -64,6 +65,8 @@ import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 import com.stephentuso.welcome.TitlePage;
 import com.stephentuso.welcome.WelcomeHelper;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -771,8 +774,11 @@ public class BottomBarActivity extends BaseActivity implements
 
     private boolean displaySavedTeam(boolean show) {
         String teamJSON = mPreferences.getString("pokemon_team", "mew");
-        View savedView = (View) findViewById(R.id.saved_team_layout);
-
+        View savedView = findViewById(R.id.saved_team_layout);
+        TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
+        String builder = mPreferences.getString(NameFragment.profile_name_key, "User") +
+                getString(R.string.append_profile_text);
+        savedText.setText(builder);
         if (!teamJSON.equals("mew") && show) {
             savedView.setVisibility(View.VISIBLE);
             PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);

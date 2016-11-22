@@ -20,7 +20,7 @@ import com.pokemonbattlearena.android.R;
  * Created by Spencer Amann on 11/22/16.
  */
 public class NameFragment extends Fragment {
-
+    public static String profile_name_key = "profile_name";
     private EditText mNameEditText;
     private String mName;
     private Button mSaveButton;
@@ -37,6 +37,12 @@ public class NameFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_name, container, false);
         mPreferences = getActivity().getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
         mNameEditText = (EditText) view.findViewById(R.id.name_edit_text);
+        mName = getProfileNameFromPrefs();
+        if (mName != null) {
+            mNameEditText.setText(mName);
+        } else {
+            mNameEditText.clearComposingText();
+        }
         mSaveButton = (Button) view.findViewById(R.id.save_name_button);
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,11 +57,20 @@ public class NameFragment extends Fragment {
         mName = mNameEditText.getText().toString().toLowerCase().trim();
         if (!mName.isEmpty()) {
             SharedPreferences.Editor edit = mPreferences.edit();
-            edit.putString("default_name", mName);
+
+            edit.putString(profile_name_key, mName);
             edit.apply();
             edit.commit();
         }
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mNameEditText.getWindowToken(), 0);
+    }
+
+    private String getProfileNameFromPrefs() {
+        String s = null;
+        if (mPreferences != null) {
+            s = mPreferences.getString(profile_name_key, "example");
+        }
+        return s;
     }
 }
