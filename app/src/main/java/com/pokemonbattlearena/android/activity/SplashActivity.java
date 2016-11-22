@@ -32,6 +32,13 @@ public class SplashActivity extends WelcomeActivity {
                         return new NameFragment();
                     }
                 }.background(R.color.color_charizard))
+                .page(new FragmentWelcomePage() {
+                    @Override
+                    protected Fragment fragment() {
+                        return new FirstTeamFragment();
+                    }
+                }.background(R.color.color_pikachu))
+                .useCustomDoneButton(true)
                 .swipeToDismiss(true)
                 .exitAnimation(android.R.anim.fade_out)
                 .canSkip(false)

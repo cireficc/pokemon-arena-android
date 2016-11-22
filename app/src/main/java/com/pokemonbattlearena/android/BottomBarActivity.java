@@ -338,6 +338,7 @@ public class BottomBarActivity extends BaseActivity implements
                         // Code here will run if the welcome screen was completed
                         String name = mPreferences.getString("default_name", "default");
                         Toast.makeText(mApplication, name, Toast.LENGTH_SHORT).show();
+                        displaySavedTeam(true);
                     } else {
                         // Code here will run if the welcome screen was canceled
                         // In most cases you'll want to call finish() here
@@ -729,7 +730,7 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     private PokemonTeam getSavedTeam() {
-        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
+        String teamJSON = mPreferences.getString("pokemon_team", "mew");
         if (!teamJSON.equals("mew")) {
             Log.d(TAG, "Got saved team: " + teamJSON);
             return new Gson().fromJson(teamJSON, PokemonTeam.class);
@@ -771,7 +772,7 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     private boolean displaySavedTeam(boolean show) {
-        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
+        String teamJSON = mPreferences.getString("pokemon_team", "mew");
         View savedView = (View) findViewById(R.id.saved_team_layout);
 
         if (!teamJSON.equals("mew") && show) {
@@ -798,7 +799,7 @@ public class BottomBarActivity extends BaseActivity implements
     private void setSavedTeam(String pokemonJSON) {
         SharedPreferences.Editor editor = mPreferences.edit();
         Log.d(TAG, "Setting team: " + pokemonJSON);
-        editor.putString("pokemonTeamJSON", pokemonJSON).apply();
+        editor.putString("pokemon_team", pokemonJSON).apply();
         editor.commit();
     }
 
