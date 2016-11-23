@@ -45,6 +45,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     private ArrayList<Pokemon> mItemArray;
     private PokemonBattleApplication mApplication;
     private GridView mGridView;
+    private Button mCancelButton;
     private Button mSaveButton;
     private PokemonGridAdapter mAdapter;
     private OnPokemonTeamSelectedListener mCallback;
@@ -57,6 +58,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
 
     public interface OnPokemonTeamSelectedListener {
         void onTeamSelected(String pokemonJSON);
+        void toggleAddTeamFragment();
     }
 
     @Nullable
@@ -64,6 +66,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_teamshome, container, false);
         mGridView = (GridView)  view.findViewById(R.id.team_gridview);
+        mCancelButton = (Button) view.findViewById(R.id.cancel_team_button);
         mSaveButton = (Button) view.findViewById(R.id.save_team_button);
         selectedTeamArrayList = new ArrayList<>(mTeamSize);
         mApplication = PokemonBattleApplication.getInstance();
@@ -71,6 +74,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, R.layout.builder_grid_item);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(this);
+        mCancelButton.setOnClickListener(this);
         mSaveButton.setOnClickListener(this);
         return view;
     }
@@ -94,12 +98,23 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
 
     @Override
     public void onClick(View v) {
-        if (selectedTeamArrayList.size() >= mTeamSize) {
-            PokemonTeam pokemonTeam = new PokemonTeam(mTeamSize);
-            for (Pokemon pokemon : selectedTeamArrayList) {
-                pokemonTeam.addPokemon(pokemon);
-            }
-            mCallback.onTeamSelected(new Gson().toJson(pokemonTeam));
+        switch (v.getId()) {
+            case R.id.save_team_button:
+                if (selectedTeamArrayList.size() >= mTeamSize) {
+                    PokemonTeam pokemonTeam = new PokemonTeam(mTeamSize);
+                    for (Pokemon pokemon : selectedTeamArrayList) {
+                        pokemonTeam.addPokemon(pokemon);
+                    }
+                    mCallback.onTeamSelected(new Gson().toJson(pokemonTeam));
+                }
+                break;
+
+            case R.id.cancel_team_button:
+                mCallback.toggleAddTeamFragment();
+                break;
+
+            default:
+                break;
         }
     }
 

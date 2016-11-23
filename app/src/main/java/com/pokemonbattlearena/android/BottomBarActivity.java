@@ -79,6 +79,7 @@ public class BottomBarActivity extends BaseActivity implements
         MainMenuFragment.OnMenuFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener,
         ChatInGameFragment.OnGameChatLoadedListener,
+        SavedTeamsFragment.OnSavedTeamsFragmentTouchListener,
         BattleEndListener {
 
     private static final int TEAM_SIZE_INT = 6;
@@ -139,10 +140,23 @@ public class BottomBarActivity extends BaseActivity implements
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
         if (mFragmentManager != null) {
-            mBottomBar.selectTabWithId(R.id.tab_battle);
             setSavedTeam(pokemonJSON);
-            displaySavedTeam(true);
             setCurrentPokemonPlayerTeam(new Gson().fromJson(pokemonJSON, PokemonTeam.class));
+            toggleAddTeamFragment();
+        }
+
+    }
+
+    @Override
+    public void toggleAddTeamFragment() {
+        if (mFragmentManager != null && mSavedTeamsFragment.isAdded()) {
+            mFragmentManager.beginTransaction().remove(mSavedTeamsFragment).commit();
+            mFragmentManager.beginTransaction().add(R.id.container, mTeamsHomeFragment, "team").commit();
+            mFragmentManager.executePendingTransactions();
+        } else if (mFragmentManager != null && mTeamsHomeFragment.isAdded()) {
+            mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
+            mFragmentManager.beginTransaction().add(R.id.container, mSavedTeamsFragment, "team").commit();
+            mFragmentManager.executePendingTransactions();
         }
     }
 
