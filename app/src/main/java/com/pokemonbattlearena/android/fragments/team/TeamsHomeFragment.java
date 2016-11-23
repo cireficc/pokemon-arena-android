@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -101,11 +102,8 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         switch (v.getId()) {
             case R.id.save_team_button:
                 if (selectedTeamArrayList.size() >= mTeamSize) {
-                    PokemonTeam pokemonTeam = new PokemonTeam(mTeamSize);
-                    for (Pokemon pokemon : selectedTeamArrayList) {
-                        pokemonTeam.addPokemon(pokemon);
-                    }
-                    mCallback.onTeamSelected(new Gson().toJson(pokemonTeam));
+                    //prompts team name and completes the team setup / save
+                    promptTeamName();
                 }
                 break;
 
@@ -116,6 +114,34 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
             default:
                 break;
         }
+    }
+
+    private void promptTeamName() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View moveSelectionView = inflater.inflate(R.layout.saved_team_name_dialog,(ViewGroup) getActivity().findViewById(R.id.teams_home),false);
+        final EditText mTeamName = (EditText) moveSelectionView.findViewById(R.id.team_name_dialog_editText);
+        builder.setTitle("Set Team Name");
+        builder.setView(moveSelectionView);
+        builder.setCancelable(false);
+        builder.setPositiveButton("Complete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                PokemonTeam pokemonTeam = new PokemonTeam(mTeamSize);
+                pokemonTeam.setTeamName(mTeamName.getText().toString());
+                for (Pokemon pokemon : selectedTeamArrayList) {
+                    pokemonTeam.addPokemon(pokemon);
+                }
+                mCallback.onTeamSelected(new Gson().toJson(pokemonTeam));
+            }
+        });
+        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.show();
     }
 
     @Override

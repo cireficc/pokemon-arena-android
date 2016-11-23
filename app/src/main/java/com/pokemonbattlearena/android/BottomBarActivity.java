@@ -32,6 +32,7 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
@@ -61,7 +62,9 @@ import com.roughike.bottombar.OnTabSelectListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_REAL_TIME_MESSAGE_SEND_FAILED;
@@ -140,8 +143,11 @@ public class BottomBarActivity extends BaseActivity implements
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
         if (mFragmentManager != null) {
-            setSavedTeam(pokemonJSON);
-            setCurrentPokemonPlayerTeam(new Gson().fromJson(pokemonJSON, PokemonTeam.class));
+            PokemonTeam team = new Gson().fromJson(pokemonJSON, PokemonTeam.class);
+            //add saved Team to Firebase
+            addSavedTeam(team.getTeamName(), pokemonJSON);
+
+            setCurrentPokemonPlayerTeam(team);
             toggleAddTeamFragment();
         }
 
@@ -815,11 +821,17 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
-    private void setSavedTeam(String pokemonJSON) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        Log.d(TAG, "Setting team: " + pokemonJSON);
-        editor.putString("pokemonTeamJSON", pokemonJSON).apply();
-        editor.commit();
+    private void addSavedTeam(String teamName, String pokemonJSON) {
+        DatabaseReference root = SavedTeamsFragment.root;
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(teamName, pokemonJSON);
+        root.updateChildren(map);
+
+        //keep this for now in case we need it
+//        SharedPreferences.Editor editor = mPreferences.edit();
+//        Log.d(TAG, "Setting team: " + pokemonJSON);
+//        editor.putString("pokemonTeamJSON", pokemonJSON).apply();
+//        editor.commit();
     }
 
     // Leave the room.

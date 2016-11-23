@@ -46,15 +46,12 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, PokemonTeam>, ItemAd
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-//        //position 1 will be a header, not a team
-//        if(position != 1){
-            //set team name
-            String text = ((PokemonTeam) mItemList.get(position).second).getTeamName();
-            holder.mTeamName.setText(text);
-            holder.itemView.setTag(text);
-            //set team images
-            holder.addPokemonTeam(((PokemonTeam) mItemList.get(position).second));
-//        }
+        //set team name
+        String text = (mItemList.get(position).second).getTeamName();
+        holder.mTeamName.setText(text);
+        holder.itemView.setTag(text);
+        //set team images
+        holder.addPokemonTeam((mItemList.get(position).second));
     }
 
     @Override
