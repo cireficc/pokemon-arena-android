@@ -123,6 +123,9 @@ public class BottomBarActivity extends BaseActivity implements
 
     private int mBattleMatchFlag = 0;
 
+    //SAVED TEAMS
+    private String newestAddedPokemonTeamName;
+
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
             .registerSubtype(Attack.class)
@@ -146,12 +149,18 @@ public class BottomBarActivity extends BaseActivity implements
         if (mFragmentManager != null) {
             PokemonTeam team = new Gson().fromJson(pokemonJSON, PokemonTeam.class);
             //add saved Team to Firebase
-            addSavedTeam(team.getTeamName(), pokemonJSON);
+            newestAddedPokemonTeamName = team.getTeamName();
+            addSavedTeam(newestAddedPokemonTeamName, pokemonJSON);
+
 
             setCurrentPokemonPlayerTeam(team);
             toggleAddTeamFragment();
         }
 
+    }
+
+    public String getNewestPokemonTeamName() {
+        return newestAddedPokemonTeamName;
     }
 
     @Override
@@ -292,7 +301,7 @@ public class BottomBarActivity extends BaseActivity implements
         setContentView(R.layout.activity_bottombar);
 
         mPreferences = getPreferences(Context.MODE_PRIVATE);
-
+        newestAddedPokemonTeamName = "";
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
         setSupportActionBar(toolbar);
@@ -829,7 +838,7 @@ public class BottomBarActivity extends BaseActivity implements
         root.updateChildren(map);
 
         //update the new order of all saved teams
-        updateTeamOrder();
+//        updateTeamOrder();
     }
 
     public void updateTeamOrder(){

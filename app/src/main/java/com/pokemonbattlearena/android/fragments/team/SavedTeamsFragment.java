@@ -45,10 +45,12 @@ public class SavedTeamsFragment extends Fragment {
     private final String teamsRootName = "Teams";
     private String username;
     private ChildEventListener mChildListener;
+    int longValue;
 
     private boolean onStartUp;
 
     private DragListView mDragListView;
+    private static int adapterListSizeCurrent;
     private static ArrayList<Pair<Long, PokemonTeam>> mSavedTeams;
     private SharedPreferences mPreferences;
     private FloatingActionButton addTeamButton;
@@ -58,6 +60,8 @@ public class SavedTeamsFragment extends Fragment {
     public SavedTeamsFragment() {
         onStartUp = true;
         mSavedTeams = new ArrayList<Pair<Long, PokemonTeam>>();
+        longValue = 0;
+        adapterListSizeCurrent = 0;
         //connect to this user's saved teams on Firebase
 //        username = Games.Players.getCurrentPlayer(mApplication.getGoogleApiClient()).getDisplayName();
         //TODO: replace below with user profile
@@ -74,7 +78,7 @@ public class SavedTeamsFragment extends Fragment {
         mChildListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    appendTeamsList(dataSnapshot);
+                appendTeamsList(dataSnapshot);
             }
 
             @Override
@@ -100,6 +104,7 @@ public class SavedTeamsFragment extends Fragment {
         void toggleAddTeamFragment();
         void updateTeamOrder();
         ArrayList<String> retrieveTeamOrder();
+        String getNewestPokemonTeamName();
     }
 
     @Override
@@ -149,7 +154,7 @@ public class SavedTeamsFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-
+        mCallback.updateTeamOrder();
         root.removeEventListener(mChildListener);
     }
 
@@ -159,6 +164,15 @@ public class SavedTeamsFragment extends Fragment {
 
         if(teamOrder == null || teamOrder.size() != mSavedTeams.size()){
             return mSavedTeams;
+        }
+        if(!teamOrder.contains(mCallback.getNewestPokemonTeamName())){
+            ArrayList<String> tempList = new ArrayList<String>();
+            //add newest pokemonTeam to the front of the list
+            tempList.add(mCallback.getNewestPokemonTeamName());
+            for(String name : teamOrder){
+                tempList.add(name);
+            }
+            teamOrder = tempList;
         }
         for (String team : teamOrder) {
             for (int i = 0; i < mSavedTeams.size(); i++) {
@@ -176,11 +190,17 @@ public class SavedTeamsFragment extends Fragment {
         if(dataSnapshot.getValue() != null) {
             String teamJSON = (String) dataSnapshot.getValue();
             PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
-            mSavedTeams.add(new Pair(new Long(mSavedTeams.size()), pokemonTeam));
-        }
-        if(!onStartUp) {
-            mSavedTeams = getOrderedSavedTeams();
-            setAdapter();
+            mSavedTeams.add(new Pair(new Long(longValue), pokemonTeam));
+            longValue++;
+
+            if(!onStartUp) {
+                mSavedTeams = getOrderedSavedTeams();
+                setAdapter();
+                if(mDragListView.getAdapter().getItemList().size() > adapterListSizeCurrent){
+                    mCallback.updateTeamOrder();
+                    adapterListSizeCurrent++;
+                }
+            }
         }
     }
 
