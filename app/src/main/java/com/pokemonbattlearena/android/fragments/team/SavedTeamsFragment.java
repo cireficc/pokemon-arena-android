@@ -196,9 +196,12 @@ public class SavedTeamsFragment extends Fragment {
             if(!onStartUp) {
                 mSavedTeams = getOrderedSavedTeams();
                 setAdapter();
+
                 if(mDragListView.getAdapter().getItemList().size() > adapterListSizeCurrent){
-                    mCallback.updateTeamOrder();
-                    adapterListSizeCurrent++;
+                    if(mCallback.retrieveTeamOrder().size() <= mSavedTeams.size()) {
+                        mCallback.updateTeamOrder();
+                        adapterListSizeCurrent++;
+                    }
                 }
             }
         }
