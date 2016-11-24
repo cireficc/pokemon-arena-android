@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -827,11 +828,46 @@ public class BottomBarActivity extends BaseActivity implements
         map.put(teamName, pokemonJSON);
         root.updateChildren(map);
 
-        //keep this for now in case we need it
-//        SharedPreferences.Editor editor = mPreferences.edit();
-//        Log.d(TAG, "Setting team: " + pokemonJSON);
-//        editor.putString("pokemonTeamJSON", pokemonJSON).apply();
-//        editor.commit();
+        //update the new order of all saved teams
+        updateTeamOrder();
+    }
+
+    public void updateTeamOrder(){
+        ArrayList<Pair<Long, PokemonTeam>> savedTeams;
+        ArrayList<String> teamOrder = new ArrayList<String>();
+        //put team order from drag listview into new Arraylist
+        savedTeams = mSavedTeamsFragment.getTeamOrder();
+        //populate temp ArrayList with all team names
+        for(Pair<Long, PokemonTeam> team : savedTeams){
+            teamOrder.add(team.second.getTeamName());
+        }
+
+        //add temp Arraylist to sharedpreferences for team order
+        SharedPreferences.Editor editor = mPreferences.edit();
+        String orderedTeamJSON = new Gson().toJson(teamOrder);
+        Log.d(TAG, "Setting saved team order: " + orderedTeamJSON);
+        editor.putString("orderedTeamJSON", orderedTeamJSON).apply();
+        editor.commit();
+
+        //add first team as your active team
+        String pokemonJSON = new Gson().toJson(savedTeams.get(0).second);
+        setCurrentTeam(pokemonJSON);
+    }
+
+    public ArrayList<String> retrieveTeamOrder(){
+        String orderedTeamJSON = mPreferences.getString("orderedTeamJSON", "mew");
+        if (!orderedTeamJSON.equals("mew")) {
+            Log.d(TAG, "Got team order: " + orderedTeamJSON);
+            return new Gson().fromJson(orderedTeamJSON, ArrayList.class);
+        }
+        return null;
+    }
+
+    private void setCurrentTeam(String pokemonJSON){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        Log.d(TAG, "Setting current team: " + pokemonJSON);
+        editor.putString("pokemonTeamJSON", pokemonJSON).apply();
+        editor.commit();
     }
 
     // Leave the room.
