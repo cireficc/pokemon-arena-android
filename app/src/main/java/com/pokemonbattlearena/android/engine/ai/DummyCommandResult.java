@@ -10,10 +10,12 @@ public class DummyCommandResult {
 
     public String moveName;
     public double movePower;
+    public Move move;
 
     public DummyCommandResult(Move move) {
         this.moveName = move.getName();
         this.movePower = move.getPower();
+        this.move = move;
     }
 
     public double getMovePower() {
@@ -23,6 +25,8 @@ public class DummyCommandResult {
     public String getMoveName() {
         return moveName;
     }
+
+    public Move getMove() { return move;}
 
     public void setMoveName(String moveName) {
         this.moveName = moveName;

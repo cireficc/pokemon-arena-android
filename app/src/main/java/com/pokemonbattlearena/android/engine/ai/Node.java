@@ -30,13 +30,6 @@ public class Node {
         children[i] = n;
     }
 
-    public void setChildren( Node[] t) {
-        int list = children.length;
-     //   for (int i= 0; i<= list; i++) {
-     //       children.add(list, t[i]);
-     //   }
-    }
-
     public Node getChild(int i){
         return children[i];
     }

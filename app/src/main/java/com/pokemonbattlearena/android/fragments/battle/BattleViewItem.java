@@ -1,21 +1,15 @@
 package com.pokemonbattlearena.android.fragments.battle;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.view.Display;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
+import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
 /**
@@ -26,32 +20,26 @@ public class BattleViewItem {
     ImageView pokemonImage;
     TextView pokemonName;
     TextView pokemonHPText;
-    ImageView pokemonHPImage;
-    //TODO: Change how active pokemon is displayed once switching can happen!
+    SeekBar pokemonHpProgress;
     Pokemon activePokemon;
+    //TODO: use battle pokemon player
+    //TODO: create a method to update the player when the battle changes
     PokemonPlayer activePlayer;
+    boolean hasConfusion = false;
+    ImageView confusedStatusImage;
+    ImageView extraStatusImage;
 
-    public BattleViewItem(ImageView pokemonImage, TextView pokemonName, TextView pokemonHPText, ImageView pokemonHPImage) {
-        this.pokemonImage = pokemonImage;
-        this.pokemonName = pokemonName;
-        this.pokemonHPText = pokemonHPText;
-        this.pokemonHPImage = pokemonHPImage;
-    }
+    private final static String TAG = BattleViewItem.class.getSimpleName();
 
-    public ImageView getPokemonImage() {
-        return pokemonImage;
-    }
-
-    public TextView getPokemonName() {
-        return pokemonName;
-    }
-
-    public TextView getPokemonHPText() {
-        return pokemonHPText;
-    }
-
-    public ImageView getPokemonHPImage() {
-        return pokemonHPImage;
+    public BattleViewItem(View playerView, boolean isSelf) {
+        this.pokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
+        this.pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
+        this.pokemonHpProgress = (SeekBar) playerView.findViewById(R.id.hp_imageview);
+        this.pokemonHPText = (TextView) playerView.findViewById(R.id.hp_textview);
+        this.confusedStatusImage = (ImageView) playerView.findViewById(R.id.status_effect_confusion);
+        this.extraStatusImage = (ImageView) playerView.findViewById(R.id.extra_status_effect);
+        this.confusedStatusImage.setVisibility(View.GONE);
+        this.extraStatusImage.setVisibility(View.GONE);
     }
 
     public PokemonPlayer getActivePlayer() {
@@ -62,36 +50,51 @@ public class BattleViewItem {
         this.activePlayer = player;
     }
 
-    public Pokemon getActivePokemon() {
-        return activePokemon;
-    }
-
-    public void setActivePokemon(Pokemon activePokemon) {
+    public void setActivePokemon(Pokemon activePokemon, Drawable d) {
         this.activePokemon = activePokemon;
+        this.pokemonHpProgress.setMax(activePokemon.getHp());
+        this.pokemonName.setText(activePokemon.getName());
+        this.pokemonImage.setImageDrawable(d);
+
+        setHPBar(activePokemon.getHp());
     }
 
     public void setVisibility(boolean visibility) {
         int visible = visibility ? View.VISIBLE : View.INVISIBLE;
-        pokemonImage.setVisibility(visible);
-        pokemonName.setVisibility(visible);
-        pokemonHPImage.setVisibility(visible);
-        pokemonHPText.setVisibility(visible);
+        this.pokemonImage.setVisibility(visible);
+        this.pokemonName.setVisibility(visible);
+        this.pokemonHpProgress.setVisibility(visible);
+        this.pokemonHPText.setVisibility(visible);
     }
 
-    public void updateHealthBar(Activity a, int amount) {
-        Display display = a.getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
+    public void updateHealthBar(int amount) {
+        Log.e("UPDATING HEALTH AT", "HEALTH: " + amount);
+       pokemonHpProgress.setProgress(amount);
+    }
 
-        int width = pokemonHPImage.getWidth() - amount;
-        int height = pokemonHPImage.getHeight();
+    public void setHPBar(int hp) {
+        pokemonHpProgress.setMax(hp);
+        pokemonHpProgress.setProgress(hp);
+    }
 
-//        Bitmap bMap = BitmapFactory.decodeResource(a.getResources(), R.drawable.healthbar);
-//        Bitmap bMapScaled = Bitmap.createScaledBitmap(bMap, width, height, true);
-//        pokemonHPImage.setImageBitmap(bMapScaled);
-//        Drawable dr = a.getResources().getDrawable(R.drawable.healthbar);
-//        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
-//        Drawable d = new BitmapDrawable(a.getResources(), Bitmap.createScaledBitmap(bitmap, width, height, true));
-//        pokemonHPImage.setImageDrawable(d);
+    public boolean getConfusion() {
+        return hasConfusion;
+    }
+
+    public void updateStatusEffect(boolean isConfusion, Drawable d) {
+        if (isConfusion) {
+            hasConfusion = isConfusion;
+            confusedStatusImage.setImageDrawable(d);
+            confusedStatusImage.setVisibility(View.VISIBLE);
+        } else {
+            extraStatusImage.setImageDrawable(d);
+            extraStatusImage.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void removeStatusEffects() {
+        hasConfusion = false;
+        this.confusedStatusImage.setImageResource(0);
+        this.extraStatusImage.setImageResource(0);
     }
 }

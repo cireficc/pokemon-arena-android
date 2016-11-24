@@ -1,13 +1,11 @@
 package com.pokemonbattlearena.android.engine.ai;
 
-import android.nfc.Tag;
 import android.util.Log;
 
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
-
 import java.util.Random;
 
 import static android.content.ContentValues.TAG;
@@ -73,8 +71,8 @@ public class MiniMax {
     }
 
     public double hFunction(Node n) {
-        return new Random().nextInt(1000);
-       // return n.getValue().movePower;
+        //return new Random().nextInt(1000);
+        return n.getValue().movePower;
     }
 
 

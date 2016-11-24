@@ -68,7 +68,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         selectedTeamArrayList = new ArrayList<>(mTeamSize);
         mApplication = PokemonBattleApplication.getInstance();
         mItemArray = (ArrayList<Pokemon>) mApplication.getBattleDatabase().getPokemons();
-        mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, mTeamSize);
+        mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, R.layout.builder_grid_item);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(this);
         mSaveButton.setOnClickListener(this);
@@ -139,6 +139,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                 builder.setPositiveButton("Save Moves", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        selectedPokemon.setActiveMoveList(selectedMoves);
                         selectedTeamArrayList.add(selectedPokemon);
                         item.mCheckbox.setChecked(true);
                     }

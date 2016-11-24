@@ -159,7 +159,6 @@ public class ChatHomeFragment extends Fragment{
         mChildListener = root.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mCallback.onChatLoaded();
                 appendChat(dataSnapshot);
             }
 
@@ -177,6 +176,7 @@ public class ChatHomeFragment extends Fragment{
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+        mCallback.onChatLoaded();
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.pokemonbattlearena.android.engine.match;
 import android.util.Log;
 
 import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.StatType;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.calculators.DamageCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.HealingCalculator;
@@ -10,7 +11,7 @@ import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StageChangeCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
-class Attack implements Command {
+public class Attack extends Command {
 
     private transient static final String TAG = Attack.class.getName();
 
@@ -24,7 +25,7 @@ class Attack implements Command {
     private transient static RecoilCalculator recoilCalculator = RecoilCalculator.getInstance();
     private transient static StageChangeCalculator stageChangeCalculator = StageChangeCalculator.getInstance();
 
-    Attack(BattlePokemonPlayer attacker, BattlePokemonPlayer defender, Move move) {
+    public Attack(BattlePokemonPlayer attacker, BattlePokemonPlayer defender, Move move) {
         this.attackingPlayer = attacker;
         this.defendingPlayer = defender;
         this.move = move;
@@ -42,14 +43,24 @@ class Attack implements Command {
         return defendingPlayer;
     }
 
+
+    /*
+     * TODO: these getters use a filthy hack to get the Java object from the player's
+     * id. When serializing and sending a Command, the player's team info is lost (as
+     * the host, who has access to the actual objects, would be the one queueing commands).
+     * I can't think of a better way to do it though, because allowing consumers of the
+     * Battle Engine to create Command themselves cleans up the logic in the BE quite a bit.
+     */
     protected BattlePokemon getAttackingPokemon() {
 
-        return attackingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+        // TODO: Clean up this stupid, dirty hack
+        return Battle.getPlayerFromId(attackingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
     protected BattlePokemon getDefendingPokemon() {
 
-        return defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+        // TODO: Clean up this stupid, dirty hack
+        return Battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
 
@@ -73,7 +84,7 @@ class Attack implements Command {
         }
 
         int damageDone = 0;
-        for (int i = 0; i <= damageCalculator.getTimesHit(move); i++){
+        for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
             Log.i(TAG, "Partial damage: " + partialDamage);
             damageDone += partialDamage;
@@ -133,11 +144,35 @@ class Attack implements Command {
         boolean doStageChange = stageChangeCalculator.doesApplyStageChange(move);
         Log.i(TAG, "Apply Stage change? " + doStageChange);
 
-        if(doStageChange) {
-            Log.i(TAG, move.getStageChange() + " is the amount");
-            Log.i(TAG, move.getStageChangeStatType() + " is the stage type");
-            builder.setStageChange(move.getStageChange());
-            builder.setStatTypeApplied(move.getStageChangeStatType());
+        if (doStageChange) {
+            int stageChange = move.getStageChange();
+            StatType stageChangeStatType = move.getStageChangeStatType();
+            Log.i(TAG, stageChange + " is the amount");
+            Log.i(TAG, stageChangeStatType + " is the stage type");
+            switch (stageChangeStatType) {
+                case ATTACK:
+                    builder.setAttackStageChange(stageChange);
+                    break;
+                case DEFENSE:
+                    builder.setDefenseStageChange(stageChange);
+                    break;
+                case SPECIALATTACK:
+                    builder.setSpAttackStageChange(stageChange);
+                    break;
+                case SPECIALDEFENSE:
+                    builder.setSpDefenseStageChange(stageChange);
+                    break;
+                case SPEED:
+                    builder.setSpeedStageChange(stageChange);
+                    break;
+                case CRITICALHIT:
+                    builder.setCritStageChange(stageChange);
+                    break;
+            }
+        }
+
+        if (move.getName().equals("Haze")) {
+            builder.setIsHaze(true);
         }
 
         return builder.build();

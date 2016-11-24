@@ -1,5 +1,6 @@
 package com.pokemonbattlearena.android.engine.ai;
 
+import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
@@ -14,8 +15,8 @@ public class AiBattle extends Battle {
         this.intelligence = new MiniMax(this.getOpponent(), this.getSelf());
     }
 
-    public String showIntelligence() {
+    public Move showIntelligence() {
 
-        return intelligence.choose().getValue().toString();
+        return intelligence.choose().getValue().getMove();
     }
 }
