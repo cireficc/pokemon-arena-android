@@ -869,7 +869,7 @@ public class BottomBarActivity extends BaseActivity implements
             Log.d(TAG, "Got team order: " + orderedTeamJSON);
             return new Gson().fromJson(orderedTeamJSON, ArrayList.class);
         }
-        return null;
+        return new ArrayList<String>();
     }
 
     private void setCurrentTeam(String pokemonJSON){

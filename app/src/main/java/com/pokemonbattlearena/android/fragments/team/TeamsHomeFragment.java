@@ -60,6 +60,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     public interface OnPokemonTeamSelectedListener {
         void onTeamSelected(String pokemonJSON);
         void toggleAddTeamFragment();
+        ArrayList<String> retrieveTeamOrder();
     }
 
     @Nullable
@@ -129,10 +130,19 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
             public void onClick(DialogInterface dialog, int which) {
                 PokemonTeam pokemonTeam = new PokemonTeam(mTeamSize);
                 pokemonTeam.setTeamName(mTeamName.getText().toString());
-                for (Pokemon pokemon : selectedTeamArrayList) {
-                    pokemonTeam.addPokemon(pokemon);
+                //does not allow a null team name
+                if(pokemonTeam.getTeamName() == null || pokemonTeam.getTeamName().equals("")){
+                    Toast.makeText(mApplication, "Please enter a team name", Toast.LENGTH_SHORT).show();
                 }
-                mCallback.onTeamSelected(new Gson().toJson(pokemonTeam));
+                //checks if team name already exists
+                else if(mCallback.retrieveTeamOrder().contains(pokemonTeam.getTeamName())) {
+                    Toast.makeText(mApplication, "Team name already exists", Toast.LENGTH_SHORT).show();
+                } else {
+                    for (Pokemon pokemon : selectedTeamArrayList) {
+                        pokemonTeam.addPokemon(pokemon);
+                    }
+                    mCallback.onTeamSelected(new Gson().toJson(pokemonTeam));
+                }
             }
         });
         builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
