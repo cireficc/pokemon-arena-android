@@ -120,10 +120,10 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     private void promptTeamName() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View moveSelectionView = inflater.inflate(R.layout.saved_team_name_dialog,(ViewGroup) getActivity().findViewById(R.id.teams_home),false);
-        final EditText mTeamName = (EditText) moveSelectionView.findViewById(R.id.team_name_dialog_editText);
+        View saveTeamView = inflater.inflate(R.layout.saved_team_name_dialog,(ViewGroup) getActivity().findViewById(R.id.teams_home),false);
+        final EditText mTeamName = (EditText) saveTeamView.findViewById(R.id.team_name_dialog_editText);
         builder.setTitle("Set Team Name");
-        builder.setView(moveSelectionView);
+        builder.setView(saveTeamView);
         builder.setCancelable(false);
         builder.setPositiveButton("Complete", new DialogInterface.OnClickListener() {
             @Override

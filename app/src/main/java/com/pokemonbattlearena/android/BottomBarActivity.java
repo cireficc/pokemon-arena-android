@@ -836,9 +836,11 @@ public class BottomBarActivity extends BaseActivity implements
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(teamName, pokemonJSON);
         root.updateChildren(map);
+    }
 
-        //update the new order of all saved teams
-//        updateTeamOrder();
+    public void deleteSavedTeam(String teamName) {
+        DatabaseReference root = SavedTeamsFragment.root;
+        root.child(teamName).removeValue();
     }
 
     public void updateTeamOrder(){

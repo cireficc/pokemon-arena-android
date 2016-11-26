@@ -1,11 +1,14 @@
 package com.pokemonbattlearena.android.fragments.team;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
@@ -55,6 +58,8 @@ public class SavedTeamsFragment extends Fragment {
     private SharedPreferences mPreferences;
     private FloatingActionButton addTeamButton;
 
+    private View.OnClickListener deleteListener;
+    private View.OnClickListener editListener;
     private OnSavedTeamsFragmentTouchListener mCallback;
 
     public SavedTeamsFragment() {
@@ -105,6 +110,7 @@ public class SavedTeamsFragment extends Fragment {
         void updateTeamOrder();
         ArrayList<String> retrieveTeamOrder();
         String getNewestPokemonTeamName();
+        void deleteSavedTeam(String teamName);
     }
 
     @Override
@@ -127,6 +133,46 @@ public class SavedTeamsFragment extends Fragment {
                 mCallback.toggleAddTeamFragment();
             }
         });
+        deleteListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final View view = v;
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = LayoutInflater.from(getActivity());
+                View deleteView = inflater.inflate(R.layout.saved_team_delete_dialog,(ViewGroup) getActivity().findViewById(R.id.teams_home),false);
+                builder.setTitle("Delete Team");
+                builder.setView(deleteView);
+                builder.setCancelable(false);
+                builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String teamName = (String)((TextView)((View)view.getParent()).findViewById(R.id.team_name_textView)).getText();
+                        for(int i = 0; i < mSavedTeams.size(); i++){
+                            if(mSavedTeams.get(i).second.getTeamName().equals(teamName)){
+                                mSavedTeams.remove(i);
+                            }
+                        }
+                        setAdapter();
+                        mCallback.deleteSavedTeam(teamName);
+
+                        mCallback.updateTeamOrder();
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //do nothing, just cancel
+                    }
+                });
+                builder.show();
+            }
+        };
+        editListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        };
 
         setupListRecyclerView();
         return view;
@@ -227,7 +273,7 @@ public class SavedTeamsFragment extends Fragment {
     }
 
     private void setAdapter() {
-        ItemAdapter listAdapter = new ItemAdapter(mSavedTeams, R.layout.saved_team_full_item, R.id.saved_team_cardView, false);
+        ItemAdapter listAdapter = new ItemAdapter(mSavedTeams, R.layout.saved_team_full_item, R.id.saved_team_cardView, false, deleteListener, editListener);
         mDragListView.setAdapter(listAdapter, true);
     }
 
