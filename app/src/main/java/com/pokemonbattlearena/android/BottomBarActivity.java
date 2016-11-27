@@ -32,7 +32,6 @@ import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
-import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
@@ -305,8 +304,8 @@ public class BottomBarActivity extends BaseActivity implements
                     // failed. The R.string.signin_failure should reference an error
                     // string in your strings.xml file that tells the user they
                     // could not be signed in, such as "Unable to sign in."
-                    BaseGameUtils.showActivityResultError(this,
-                            requestCode, resultCode, R.string.signin_other_error);
+                    //BaseGameUtils.showActivityResultError(this,
+                    //        requestCode, resultCode, R.string.signin_other_error);
                     Log.e(TAG, "Error signing in " + requestCode);
                 }
         }
@@ -607,8 +606,8 @@ public class BottomBarActivity extends BaseActivity implements
     //region AI Helper Methods
     public void AIBattleTurn(Command cmd) {
         if (mActiveBattle instanceof AiBattle) {
-            Move tmp = ((AiBattle) mActiveBattle).showIntelligence();
-            mBattleHomeFragment.appendMoveHistory("AI", tmp);
+            Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
+            //mBattleHomeFragment.appendMoveHistory("AI", tmp);
             mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
 
             if (mActiveBattle.oppPokemonFainted() && ind < 5) {
@@ -617,8 +616,8 @@ public class BottomBarActivity extends BaseActivity implements
                 Switch aiSw = new Switch(mActiveBattle.getOpponent(), ind);
                 mActiveBattle.getCurrentBattlePhase().queueCommand(aiSw);
             } else {
-                Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
-                mActiveBattle.getCurrentBattlePhase().queueCommand(aiAttack);
+              //  Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiCommand);
             }
 
             handleBattleResult();
@@ -811,7 +810,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     // Show error message about game being cancelled and return to main screen.
     private void showGameError() {
-        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
+        //BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
     }
     //endregion
 
@@ -1000,11 +999,12 @@ public class BottomBarActivity extends BaseActivity implements
             mResolvingConnectionFailure = true;
 
             // Attempt to resolve the connection failure using BaseGameUtils.
-            if (!BaseGameUtils.resolveConnectionFailure(this,
-                    mApplication.getGoogleApiClient(), connectionResult,
-                    RC_SIGN_IN, getString(R.string.signin_other_error))) {
-                mResolvingConnectionFailure = false;
-            }
+
+        //     if (!BaseGameUtils.resolveConnectionFailure(this,
+        //            mApplication.getGoogleApiClient(), connectionResult,
+        //            RC_SIGN_IN, getString(R.string.signin_other_error))) {
+        //        mResolvingConnectionFailure = false;
+        //    }
         }
     }
     //endregion

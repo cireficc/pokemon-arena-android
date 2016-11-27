@@ -1,5 +1,6 @@
 package com.pokemonbattlearena.android.engine.match;
 
+import com.pokemonbattlearena.android.engine.ai.StatePokemon;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 import java.util.ArrayList;
@@ -9,6 +10,15 @@ import java.util.List;
 public class BattlePokemonTeam {
 
     public List<BattlePokemon> battlePokemons;
+
+    public BattlePokemonTeam (StatePokemon[] statePokemons) {
+
+       this.battlePokemons = new ArrayList<>();
+        for (StatePokemon sp: statePokemons) {
+            this.battlePokemons.add(sp.toBattle());
+        }
+
+    }
 
     public BattlePokemonTeam(PokemonTeam pokemonTeam) {
 

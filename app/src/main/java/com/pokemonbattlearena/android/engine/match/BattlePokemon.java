@@ -15,32 +15,32 @@ public class BattlePokemon {
     private transient int currentHp;
     private transient StatusEffect statusEffect;
     private transient int statusEffectTurns;
-    private transient boolean confused;
+    private transient boolean confused = false;
     private transient int confusedTurns;
-    private transient boolean flinched;
+    private transient boolean flinched = false;
     private transient int chargingForTurns;
     private transient int rechargingForTurns;
-    private transient boolean fainted;
-    private transient int attackStage;
-    private transient int defenseStage;
-    private transient int spAttackStage;
-    private transient int spDefenseStage;
-    private transient int speedStage;
-    private transient int critStage;
+    private transient boolean fainted = false;
+    private transient int attackStage = 0;
+    private transient int defenseStage = 0;
+    private transient int spAttackStage = 0;
+    private transient int spDefenseStage = 0;
+    private transient int speedStage = 0;
+    private transient int critStage = 0;
     private transient List<Move> moveSet;
 
     public BattlePokemon(Pokemon pokemon) {
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
-        this.confused = false;
-        this.flinched = false;
-        this.fainted = false;
-        this.attackStage = 0;
-        this.defenseStage = 0;
-        this.spAttackStage = 0;
-        this.spDefenseStage = 0;
-        this.speedStage = 0;
-        this.critStage = 0;
+      //  this.confused = false;
+      //  this.flinched = false;
+      // this.fainted = false;
+      //  this.attackStage = 0;
+      //  this.defenseStage = 0;
+      //  this.spAttackStage = 0;
+      //  this.spDefenseStage = 0;
+      //  this.speedStage = 0;
+      //  this.critStage = 0;
         this.moveSet = pokemon.getActiveMoveList();
     }
 

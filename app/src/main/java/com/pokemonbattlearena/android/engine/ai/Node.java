@@ -1,5 +1,9 @@
 package com.pokemonbattlearena.android.engine.ai;
 
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
+import com.pokemonbattlearena.android.engine.match.Command;
+
 /**
  * Created by nathan on 10/25/16.
  */
@@ -7,23 +11,22 @@ package com.pokemonbattlearena.android.engine.ai;
 public class Node {
 
     protected Node[] children;
-    DummyCommandResult gameState;
+    protected StatePokemon[] stateTeam;
     protected double hValue;
+    protected Command command;
 
 
-    public Node(DummyCommandResult res) {
+    public Node(BattlePokemonTeam currentState, Command command) {
 
-        children = new Node[4];
-        this.gameState = res;
+        children = new Node[81];
+        this.stateTeam = new StatePokemon[6];
+        this.command = command;
 
-    }
-
-    public DummyCommandResult getValue() {
-        return gameState;
-    }
-
-    public void setValue(DummyCommandResult res) {
-        gameState = res;
+        int i = 0;
+        for (BattlePokemon bp: currentState.getBattlePokemons()) {
+            stateTeam[i] = new StatePokemon(bp);
+           i++;
+        }
     }
 
     public void setChildAt(int i, Node n) {
@@ -57,8 +60,5 @@ public class Node {
        this.hValue = h;
     }
 
-    @Override
-    public String toString() {
-        return getValue().toString();
-    }
+    public Command getCommand() { return command; }
 }
