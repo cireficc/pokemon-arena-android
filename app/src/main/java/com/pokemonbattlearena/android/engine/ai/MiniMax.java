@@ -36,7 +36,7 @@ public class MiniMax {
     protected int maxHuHP;
 
 
-    protected int depth = 7;
+    protected int depth = 1;
 
     MiniMax(BattlePokemonPlayer aiPlayer, BattlePokemonPlayer humanPlayer) {
         this.gamePossibilities = new GameTree();
@@ -76,7 +76,6 @@ public class MiniMax {
             Log.e(TAG, "buildTree: Hit the depth" );
             return n;
         }
-        int i = 0;
         for (int j = 0; j < 4; j++) {
             for (int k = 0; k < 4; k++) {
 
@@ -88,7 +87,7 @@ public class MiniMax {
 
                 Battle childState = new Battle(huPlayer, aiPlayer);
                 Command aiCommand = new Attack(aiPlayer, huPlayer, aiTeam.getCurrentPokemon().getMoveSet().get(j));
-                Command huCommand = new Attack(huPlayer, aiPlayer, huTeam.getCurrentPokemon().getMoveSet().get(i));
+                Command huCommand = new Attack(huPlayer, aiPlayer, huTeam.getCurrentPokemon().getMoveSet().get(k));
 
                 childState.getCurrentBattlePhase().queueCommand(aiCommand);
                 childState.getCurrentBattlePhase().queueCommand(huCommand);
@@ -99,8 +98,7 @@ public class MiniMax {
 
                 Node ne = new Node(aiTeam, huTeam, aiCommand);
 
-                n.setChildAt(i, (buildTree(d - 1, ne)));
-                i++;
+                n.addChild(buildTree(d - 1, ne));
             }
         }
         return n;

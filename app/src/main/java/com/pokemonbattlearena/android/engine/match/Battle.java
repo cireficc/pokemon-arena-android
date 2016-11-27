@@ -34,6 +34,8 @@ public class Battle {
                 new BattlePokemonPlayer(player1),
                 (player2 instanceof  AiPlayer ? ((AiPlayer) player2).getAiBattler() : new BattlePokemonPlayer(player2))
         );
+        staticSelf = self;
+        staticOpponent = opponent;
     }
 
     //AI is always opponent.
@@ -44,11 +46,7 @@ public class Battle {
     }
 
     public static Battle createBattle(PokemonPlayer player1, PokemonPlayer player2) {
-        final Battle battle = new Battle (player1, player2);
-
-        staticSelf = battle.getSelf();
-        staticOpponent = battle.getOpponent();
-        return battle;
+        return new Battle (player1, player2);
     }
 
 

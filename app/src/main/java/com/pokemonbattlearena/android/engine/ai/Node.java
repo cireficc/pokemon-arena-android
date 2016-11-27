@@ -4,13 +4,16 @@ import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Command;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by nathan on 10/25/16.
  */
 
 public class Node {
 
-    protected Node[] children;
+    protected List<Node> children = new ArrayList<>();
     protected StatePokemon[] aiTeam;
     protected StatePokemon[] huTeam;
     protected double hValue;
@@ -20,7 +23,6 @@ public class Node {
 
     public Node(BattlePokemonTeam currentAI, BattlePokemonTeam currentHu, Command command) {
 
-        children = new Node[81];
         this.aiTeam = new StatePokemon[6];
         this.huTeam = new StatePokemon[6];
         this.command = command;
@@ -37,12 +39,12 @@ public class Node {
         }
     }
 
-    public void setChildAt(int i, Node n) {
-        children[i] = n;
+    public void addChild(Node n) {
+        children.add(n);
     }
 
     public Node getChild(int i){
-        return children[i];
+        return children.get(i);
     }
 
     public void setBestChild(Node bestChild) {
@@ -54,15 +56,15 @@ public class Node {
     }
 
     public int numberOfChildren() {
-        return children.length;
+        return children.size();
     }
 
-    public Node[] getChildren() {
+    public List<Node> getChildren() {
         return children;
     }
 
     public boolean isLeaf() {
-        if (children.length ==0) {
+        if (children.isEmpty()) {
             return true;
         }
         return false;
