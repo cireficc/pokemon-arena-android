@@ -1,11 +1,15 @@
 package com.pokemonbattlearena.android.engine.ai;
 
+import android.util.Log;
+
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Command;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by nathan on 10/25/16.
@@ -19,6 +23,7 @@ public class Node {
     protected double hValue;
     protected Command command;
     protected Node bestChild;
+    protected int numDominating = 1;
 
 
     public Node(BattlePokemonTeam currentAI, BattlePokemonTeam currentHu, Command command) {
@@ -83,4 +88,31 @@ public class Node {
     }
 
     public Command getCommand() { return command; }
+
+    public int getNumDominating() {
+        return numDominating;
+    }
+
+    public void setNumDominating(int numDominating) {
+        this.numDominating = numDominating;
+    }
+
+
+    public void printTree() {
+        toStringHelper(0, this);
+    }
+
+    private static void toStringHelper(int i, Node node) {
+        final StringBuilder sb = new StringBuilder();
+        for (int j = 0; j < i; j++) {
+            sb.append("  ");
+        }
+        sb.append("Node: hValue - " + node.hValue + " Command - " + node.command);
+        sb.append("\n");
+        Log.d(TAG, sb.toString());
+        for (Node child: node.getChildren()) {
+            toStringHelper(i+1, child);
+        }
+    }
+
 }

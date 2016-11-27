@@ -32,7 +32,7 @@ public class BattlePhase {
 
             // Pokemon switching always happens first
             if (c1 instanceof Switch || c2 instanceof Switch) {
-                Log.i(TAG, "There was a Switch command - prioritizing it");
+//                Log.i(TAG, "There was a Switch command - prioritizing it");
                 return Integer.MIN_VALUE;
             }
 
@@ -41,7 +41,7 @@ public class BattlePhase {
             int pokemon1Speed = a1.getAttackingPokemon().getOriginalPokemon().getSpeed();
             int pokemon2Speed = a2.getAttackingPokemon().getOriginalPokemon().getSpeed();
 
-            Log.i(TAG, "Pokemon 1 speed: " + pokemon1Speed + " || Pokemon 2 speed: " + pokemon2Speed);
+//            Log.i(TAG, "Pokemon 1 speed: " + pokemon1Speed + " || Pokemon 2 speed: " + pokemon2Speed);
 
             return pokemon2Speed - pokemon1Speed;
         }
@@ -75,7 +75,7 @@ public class BattlePhase {
 
     public boolean queueCommand(Command command) {
 
-        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
+//        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
         this.commands.add(command);
 
         if (command instanceof Switch) {
@@ -91,13 +91,13 @@ public class BattlePhase {
 
     private void setPlayerReady(BattlePokemonPlayer player) {
 
-        Log.i(TAG, "Setting player ready");
+//        Log.i(TAG, "Setting player ready");
 
         if(player.equals(player1)) {
-            Log.i(TAG, "Player 1 ready");
+//            Log.i(TAG, "Player 1 ready");
             player1Ready = true;
         } else {
-            Log.i(TAG, "Player 2 ready");
+//            Log.i(TAG, "Player 2 ready");
             player2Ready = true;
         }
     }
@@ -105,7 +105,7 @@ public class BattlePhase {
     private boolean isPhaseReady() {
 
         boolean ready = (player1Ready && player2Ready);
-        Log.i(TAG, "Is phase ready (both players ready): " + ready);
+//        Log.i(TAG, "Is phase ready (both players ready): " + ready);
 
         return ready;
     }

@@ -55,11 +55,9 @@ public class MiniMax {
 
 
         gamePossibilities.setRoot(buildTree(depth, new Node(aiTeam, huTeam, null)));
-
-        //  for (int i = 0; i < 4; i++) {
-        //      Log.d(TAG, gamePossibilities.getRoot().getChild(i).toString());
-        //  }
-        //   Log.d(TAG, "" + chooseBestMove(gamePossibilities.getRoot(), depth, isAi));
+        Log.e(TAG, "----------------------------------------------------");
+        Log.e(TAG, "Total size: " + gamePossibilities.getRoot().numDominating);
+        gamePossibilities.getRoot().printTree();
     }
 
     public static int calculateTeamHP(BattlePokemonTeam team) {
@@ -97,8 +95,9 @@ public class MiniMax {
                 // for (CommandResult cmd : res.getCommandResults()) {}
 
                 Node ne = new Node(aiTeam, huTeam, aiCommand);
-
-                n.addChild(buildTree(d - 1, ne));
+                Node child = buildTree(d-1, ne);
+                n.addChild(child);
+                n.numDominating += child.numDominating;
             }
         }
         return n;
