@@ -11,6 +11,7 @@ import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Battle {
@@ -83,18 +84,44 @@ public class Battle {
         currentBattlePhase = new BattlePhase(self, opponent);
     }
 
+    /*
+     * A custom Comparator to determine the order of commands (player actions).
+     * Pokemon switching always occurs first. Attack order is determined by the
+     * Pokemon's speed - the faster Pokemon attacks first. However, some moves
+     * such as Quick Attack will give the attacker priority in the queue.
+     */
+    private transient Comparator<Command> commandComparator = new Comparator<Command>() {
+        @Override
+        public int compare(Command c1, Command c2) {
+
+            // Pokemon switching always happens first
+            if (c1 instanceof Switch || c2 instanceof Switch) {
+//                Log.i(TAG, "There was a Switch command - prioritizing it");
+                return Integer.MIN_VALUE;
+            }
+
+            Attack a1 = (Attack) c1;
+            Attack a2 = (Attack) c2;
+            int pokemon1Speed = a1.getAttackingPokemon(Battle.this).getOriginalPokemon().getSpeed();
+            int pokemon2Speed = a2.getAttackingPokemon(Battle.this).getOriginalPokemon().getSpeed();
+
+//            Log.i(TAG, "Pokemon 1 speed: " + pokemon1Speed + " || Pokemon 2 speed: " + pokemon2Speed);
+
+            return pokemon2Speed - pokemon1Speed;
+        }
+    };
     public BattlePhaseResult executeCurrentBattlePhase() {
 
        // Log.i(TAG, "Executing current battle phase from Battle");
 
       //  Log.i(TAG, "Sorting commands by priority");
-        Collections.sort(currentBattlePhase.getCommands(), BattlePhase.getCommandComparator());
+        Collections.sort(currentBattlePhase.getCommands(), commandComparator);
         BattlePhaseResult battlePhaseResult = new BattlePhaseResult();
 
         for (Command command : currentBattlePhase.getCommands()) {
        //     Log.i(TAG, "Executing command of type: " + command.getClass());
 
-            CommandResult commandResult = command.execute();
+            CommandResult commandResult = command.execute(this);
 
 
             if (commandResult instanceof AttackResult && (selfPokemonFainted() || oppPokemonFainted())) {
@@ -302,12 +329,12 @@ public class Battle {
         attackingPlayer.getBattlePokemonTeam().switchPokemonAtPosition(res.getPositionOfPokemon());
     }
 
-    public static BattlePokemonPlayer getPlayerFromId(String id) {
+    public BattlePokemonPlayer getPlayerFromId(String id) {
 
-        if (staticSelf.getId().equals(id)) {
-            return staticSelf;
+        if (self.getId().equals(id)) {
+            return self;
         } else {
-            return staticOpponent;
+            return opponent;
         }
 
     }

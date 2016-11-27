@@ -51,24 +51,24 @@ public class Attack extends Command {
      * I can't think of a better way to do it though, because allowing consumers of the
      * Battle Engine to create Command themselves cleans up the logic in the BE quite a bit.
      */
-    protected BattlePokemon getAttackingPokemon() {
+    protected BattlePokemon getAttackingPokemon(Battle battle) {
 
         // TODO: Clean up this stupid, dirty hack
-        return Battle.getPlayerFromId(attackingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
+        return battle.getPlayerFromId(attackingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
-    protected BattlePokemon getDefendingPokemon() {
+    protected BattlePokemon getDefendingPokemon(Battle battle) {
 
         // TODO: Clean up this stupid, dirty hack
-        return Battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
+        return battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
 
     @Override
-    public AttackResult execute() {
+    public AttackResult execute(Battle battle) {
 
-        BattlePokemon attackingPokemon = getAttackingPokemon();
-        BattlePokemon defendingPokemon = getDefendingPokemon();
+        BattlePokemon attackingPokemon = getAttackingPokemon(battle);
+        BattlePokemon defendingPokemon = getDefendingPokemon(battle);
         TargetInfo targetInfo =
                 new TargetInfo(attackingPlayer, defendingPlayer, attackingPokemon, defendingPokemon);
         AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move.getId());

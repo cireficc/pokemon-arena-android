@@ -84,8 +84,8 @@ public class MiniMax {
                 BattlePokemonPlayer huPlayer = new BattlePokemonPlayer(human.getId(), huTeam);
 
                 Battle childState = new Battle(huPlayer, aiPlayer);
-                Command aiCommand = new Attack(aiPlayer, huPlayer, aiTeam.getCurrentPokemon().getMoveSet().get(j));
-                Command huCommand = new Attack(huPlayer, aiPlayer, huTeam.getCurrentPokemon().getMoveSet().get(k));
+                Command aiCommand = new Attack(aiPlayer, huPlayer, aiTeam.getCurrentPokemon().getMoveSet().get(j), childState);
+                Command huCommand = new Attack(huPlayer, aiPlayer, huTeam.getCurrentPokemon().getMoveSet().get(k), childState);
 
                 childState.getCurrentBattlePhase().queueCommand(aiCommand);
                 childState.getCurrentBattlePhase().queueCommand(huCommand);
