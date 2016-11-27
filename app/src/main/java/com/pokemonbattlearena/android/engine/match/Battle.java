@@ -18,25 +18,37 @@ public class Battle {
     private transient static final String TAG = Battle.class.getName();
 
     // NOTE: self is always the host of the battle
-    static BattlePokemonPlayer self;
-    static BattlePokemonPlayer opponent;
-    List<BattlePhase> finishedBattlePhases;
+    BattlePokemonPlayer self;
+    BattlePokemonPlayer opponent;
+    static BattlePokemonPlayer staticSelf;
+    static BattlePokemonPlayer staticOpponent;
+    List<BattlePhase> finishedBattlePhases = new ArrayList<>();
     transient BattlePhase currentBattlePhase;
     transient boolean isFinished;
 
     public Battle() {
     }
 
-    public Battle(PokemonPlayer player1, PokemonPlayer player2) {
-        this.self = new BattlePokemonPlayer(player1);
-        if (player2 instanceof AiPlayer) {
-            this.opponent = ((AiPlayer) player2).getAiBattler();
-        } else {
-            this.opponent = new BattlePokemonPlayer(player2);
-        }
+    protected Battle(PokemonPlayer player1, PokemonPlayer player2) {
+        this(
+                new BattlePokemonPlayer(player1),
+                (player2 instanceof  AiPlayer ? ((AiPlayer) player2).getAiBattler() : new BattlePokemonPlayer(player2))
+        );
+    }
 
-        this.finishedBattlePhases = new ArrayList<>();
+    //AI is always opponent.
+    public Battle(BattlePokemonPlayer self, BattlePokemonPlayer opponent) {
+        this.self = self;
+        this.opponent = opponent;
         this.currentBattlePhase = new BattlePhase(self, opponent);
+    }
+
+    public static Battle createBattle(PokemonPlayer player1, PokemonPlayer player2) {
+        final Battle battle = new Battle (player1, player2);
+
+        staticSelf = battle.getSelf();
+        staticOpponent = battle.getOpponent();
+        return battle;
     }
 
 
@@ -294,10 +306,10 @@ public class Battle {
 
     public static BattlePokemonPlayer getPlayerFromId(String id) {
 
-        if (self.getId().equals(id)) {
-            return self;
+        if (staticSelf.getId().equals(id)) {
+            return staticSelf;
         } else {
-            return opponent;
+            return staticOpponent;
         }
 
     }

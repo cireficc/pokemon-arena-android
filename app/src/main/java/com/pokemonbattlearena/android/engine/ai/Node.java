@@ -11,21 +11,29 @@ import com.pokemonbattlearena.android.engine.match.Command;
 public class Node {
 
     protected Node[] children;
-    protected StatePokemon[] stateTeam;
+    protected StatePokemon[] aiTeam;
+    protected StatePokemon[] huTeam;
     protected double hValue;
     protected Command command;
+    protected Node bestChild;
 
 
-    public Node(BattlePokemonTeam currentState, Command command) {
+    public Node(BattlePokemonTeam currentAI, BattlePokemonTeam currentHu, Command command) {
 
         children = new Node[81];
-        this.stateTeam = new StatePokemon[6];
+        this.aiTeam = new StatePokemon[6];
+        this.huTeam = new StatePokemon[6];
         this.command = command;
 
         int i = 0;
-        for (BattlePokemon bp: currentState.getBattlePokemons()) {
-            stateTeam[i] = new StatePokemon(bp);
+        for (BattlePokemon bp: currentAI.getBattlePokemons()) {
+            aiTeam[i] = new StatePokemon(bp);
            i++;
+        }
+        i = 0;
+        for (BattlePokemon bp: currentHu.getBattlePokemons()) {
+            huTeam[i] = new StatePokemon(bp);
+            i++;
         }
     }
 
@@ -35,6 +43,14 @@ public class Node {
 
     public Node getChild(int i){
         return children[i];
+    }
+
+    public void setBestChild(Node bestChild) {
+        this.bestChild = bestChild;
+    }
+
+    public Node getBestChild() {
+        return bestChild;
     }
 
     public int numberOfChildren() {
@@ -58,6 +74,10 @@ public class Node {
 
     public void setHValue(double h) {
        this.hValue = h;
+    }
+
+    public void setCommand(Command command) {
+        this.command = command;
     }
 
     public Command getCommand() { return command; }

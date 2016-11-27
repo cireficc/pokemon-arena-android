@@ -514,7 +514,7 @@ public class BottomBarActivity extends BaseActivity implements
             try {
                 mOpponentPokemonPlayer = new Gson().fromJson(bufferString, PokemonPlayer.class);
                 Log.d(TAG, "Incoming Battle Message Received: " + mOpponentPokemonPlayer.getPokemonTeam().toString());
-                mActiveBattle = new Battle(mCurrentPokemonPlayer, mOpponentPokemonPlayer);
+                mActiveBattle = Battle.createBattle(mCurrentPokemonPlayer, mOpponentPokemonPlayer);
                 setupBattleUI(mCurrentPokemonPlayer, mOpponentPokemonPlayer);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
