@@ -9,7 +9,9 @@ import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DamageCalculator {
@@ -18,9 +20,26 @@ public class DamageCalculator {
 
     private static final String TAG = DamageCalculator.class.getName();
 
-    private static final double[] critStages = new double[]{
+    private static final double[] CRIT_STAGES = new double[]{
             6.25, 12.50, 25.00, 33.30, 50.00
     };
+
+    private final static Map<Integer, Double> STAGE_MULTIPLIER = new HashMap<Integer, Double>()
+    {{
+        put(-6, 0.25);
+        put(-5, 0.28);
+        put(-4, 0.33);
+        put(-3, 0.4);
+        put(-2, 0.5);
+        put(-1, 0.66);
+        put(0, 1.0);
+        put(1, 1.5);
+        put(2, 2.0);
+        put(3, 2.5);
+        put(4, 3.0);
+        put(5, 3.5);
+        put(6, 4.0);
+    }};
 
     private static final int MAX_CHANCE = 100;
 
@@ -109,12 +128,12 @@ public class DamageCalculator {
         double critBarrier = MAX_CHANCE;
         if (valid.contains(move.getName())) {
             if (attacker.getCritStage() < 3) {
-                critBarrier -= critStages[attacker.getCritStage() + 2];
+                critBarrier -= CRIT_STAGES[attacker.getCritStage() + 2];
             } else {
-                critBarrier -= critStages[4];
+                critBarrier -= CRIT_STAGES[4];
             }
         } else {
-            critBarrier -= critStages[attacker.getCritStage()];
+            critBarrier -= CRIT_STAGES[attacker.getCritStage()];
         }
         if (ThreadLocalRandom.current().nextInt(MAX_CHANCE) >= critBarrier) {
             return true;
@@ -151,8 +170,10 @@ public class DamageCalculator {
             return 0;
         }
 
-        double attack = (move.getMoveType() == MoveType.PHYSICAL) ? originalAttacker.getAttack() : originalAttacker.getSpecialAttack();
-        double defense = (move.getMoveType() == MoveType.PHYSICAL) ? originalTarget.getDefense() : originalTarget.getSpecialDefense();
+        double attack = (move.getMoveType() == MoveType.PHYSICAL) ? originalAttacker.getAttack() * STAGE_MULTIPLIER.get(attacker.getAttackStage())
+                : originalAttacker.getSpecialAttack( ) * STAGE_MULTIPLIER.get(attacker.getSpAttackStage());
+        double defense = (move.getMoveType() == MoveType.PHYSICAL) ? originalTarget.getDefense() * STAGE_MULTIPLIER.get(target.getDefenseStage())
+                : originalTarget.getSpecialDefense() * STAGE_MULTIPLIER.get(target.getSpDefenseStage());
 
         double levelCalc = ((2 * POKEMON_LEVEL) + 10) / 250.0;
         double statCalc = attack / defense;
