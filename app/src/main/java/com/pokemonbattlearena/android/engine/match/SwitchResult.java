@@ -36,7 +36,7 @@ public class SwitchResult extends CommandResult {
 
         protected SwitchResult build() {
 
-            Log.i(TAG, "Building SwitchResult");
+//            Log.i(TAG, "Building SwitchResult");
             return new SwitchResult(this);
         }
     }

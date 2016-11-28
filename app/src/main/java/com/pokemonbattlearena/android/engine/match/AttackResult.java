@@ -254,7 +254,7 @@ public class AttackResult extends CommandResult {
 
         protected AttackResult build() {
 
-            Log.i(TAG, "Building AttackResult");
+//            Log.i(TAG, "Building AttackResult");
             return new AttackResult(this);
         }
     }
