@@ -51,63 +51,63 @@ public class Attack extends Command {
      * I can't think of a better way to do it though, because allowing consumers of the
      * Battle Engine to create Command themselves cleans up the logic in the BE quite a bit.
      */
-    protected BattlePokemon getAttackingPokemon() {
+    protected BattlePokemon getAttackingPokemon(Battle battle) {
 
         // TODO: Clean up this stupid, dirty hack
-        return Battle.getPlayerFromId(attackingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
+        return battle.getPlayerFromId(attackingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
-    protected BattlePokemon getDefendingPokemon() {
+    protected BattlePokemon getDefendingPokemon(Battle battle) {
 
         // TODO: Clean up this stupid, dirty hack
-        return Battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
+        return battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
 
     @Override
-    public AttackResult execute() {
+    public AttackResult execute(Battle battle) {
 
-        BattlePokemon attackingPokemon = getAttackingPokemon();
-        BattlePokemon defendingPokemon = getDefendingPokemon();
+        BattlePokemon attackingPokemon = getAttackingPokemon(battle);
+        BattlePokemon defendingPokemon = getDefendingPokemon(battle);
         TargetInfo targetInfo =
                 new TargetInfo(attackingPlayer, defendingPlayer, attackingPokemon, defendingPokemon);
         AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move.getId());
 
         if (move.isChargingMove()) {
-            Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
+//            Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
             builder.setChargingTurns(move.getChargingTurns());
         }
 
         if (move.isRechargeMove()) {
-            Log.i(TAG, move.getName() + " is recharge move (for " + move.getRechargeTurns() + " turns)");
+//            Log.i(TAG, move.getName() + " is recharge move (for " + move.getRechargeTurns() + " turns)");
             builder.setRechargingTurns(move.getRechargeTurns());
         }
 
         int damageDone = 0;
         for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
-            Log.i(TAG, "Partial damage: " + partialDamage);
+//            Log.i(TAG, "Partial damage: " + partialDamage);
             damageDone += partialDamage;
         }
 
-        Log.i(TAG, "Total damage: " + damageDone);
+//        Log.i(TAG, "Total damage: " + damageDone);
         builder.setDamageDone(damageDone);
 
         int remainingHp = defendingPokemon.getCurrentHp() - damageDone;
 
         // If the defender faints, we can return early and skip other calculations
         if (remainingHp <= 0) {
-            Log.d(TAG, defendingPokemon.getOriginalPokemon().getName() + " fainted!");
+//            Log.d(TAG, defendingPokemon.getOriginalPokemon().getName() + " fainted!");
             builder.setFainted(true);
             return builder.build();
         }
 
         boolean flinched = statusEffectCalculator.doesApplyFlinch(move);
-        Log.i(TAG, move.getName() + " caused flinch? " + flinched);
+//        Log.i(TAG, move.getName() + " caused flinch? " + flinched);
         builder.setFlinched(flinched);
 
         boolean applyStatusEffect = statusEffectCalculator.doesApplyStatusEffect(move, defendingPokemon);
-        Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
+//        Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
 
         if (applyStatusEffect) {
             StatusEffect effect = move.getStatusEffect();
@@ -122,33 +122,33 @@ public class Attack extends Command {
                 builder.setStatusEffectTurns(turns);
             }
 
-            Log.i(TAG, "Effect: " + effect + " applied for " + turns + " turns");
+//            Log.i(TAG, "Effect: " + effect + " applied for " + turns + " turns");
         }
 
         if (move.isSelfHeal()) {
-            Log.i(TAG, move.getName() + " is self heal of type " + move.getSelfHealType());
+//            Log.i(TAG, move.getName() + " is self heal of type " + move.getSelfHealType());
 
             int toHeal = healingCalculator.getHealAmount(attackingPokemon, move, damageDone);
             builder.setHealingDone(toHeal);
 
-            Log.i(TAG, "Max HP: " + attackingPokemon.getOriginalPokemon().getHp() + "; HP to heal: " + toHeal);
+//            Log.i(TAG, "Max HP: " + attackingPokemon.getOriginalPokemon().getHp() + "; HP to heal: " + toHeal);
         }
 
         if (move.isRecoil()) {
-            Log.i(TAG, move.getName() + " is recoil type");
+//            Log.i(TAG, move.getName() + " is recoil type");
             int recoilTaken = recoilCalculator.getRecoilAmount(attackingPokemon, move, damageDone);
-            Log.i(TAG, attackingPokemon.getOriginalPokemon().getName() + " takes " + recoilTaken + " recoil damage");
+//            Log.i(TAG, attackingPokemon.getOriginalPokemon().getName() + " takes " + recoilTaken + " recoil damage");
             builder.setRecoilTaken(recoilTaken);
         }
 
         boolean doStageChange = stageChangeCalculator.doesApplyStageChange(move);
-        Log.i(TAG, "Apply Stage change? " + doStageChange);
+//        Log.i(TAG, "Apply Stage change? " + doStageChange);
 
         if (doStageChange) {
             int stageChange = move.getStageChange();
             StatType stageChangeStatType = move.getStageChangeStatType();
-            Log.i(TAG, stageChange + " is the amount");
-            Log.i(TAG, stageChangeStatType + " is the stage type");
+//            Log.i(TAG, stageChange + " is the amount");
+//            Log.i(TAG, stageChangeStatType + " is the stage type");
             switch (stageChangeStatType) {
                 case ATTACK:
                     builder.setAttackStageChange(stageChange);
@@ -176,5 +176,10 @@ public class Attack extends Command {
         }
 
         return builder.build();
+    }
+
+    @Override
+    public String toString() {
+        return this.move.getName();
     }
 }

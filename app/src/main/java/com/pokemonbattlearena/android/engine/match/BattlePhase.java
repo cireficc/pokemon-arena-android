@@ -20,32 +20,6 @@ public class BattlePhase {
     private List<Command> commands;
     private BattlePhaseResult battlePhaseResult;
 
-    /*
-     * A custom Comparator to determine the order of commands (player actions).
-     * Pokemon switching always occurs first. Attack order is determined by the
-     * Pokemon's speed - the faster Pokemon attacks first. However, some moves
-     * such as Quick Attack will give the attacker priority in the queue.
-     */
-    private static transient Comparator<Command> commandComparator = new Comparator<Command>() {
-        @Override
-        public int compare(Command c1, Command c2) {
-
-            // Pokemon switching always happens first
-            if (c1 instanceof Switch || c2 instanceof Switch) {
-                Log.i(TAG, "There was a Switch command - prioritizing it");
-                return Integer.MIN_VALUE;
-            }
-
-            Attack a1 = (Attack) c1;
-            Attack a2 = (Attack) c2;
-            int pokemon1Speed = a1.getAttackingPokemon().getOriginalPokemon().getSpeed();
-            int pokemon2Speed = a2.getAttackingPokemon().getOriginalPokemon().getSpeed();
-
-            Log.i(TAG, "Pokemon 1 speed: " + pokemon1Speed + " || Pokemon 2 speed: " + pokemon2Speed);
-
-            return pokemon2Speed - pokemon1Speed;
-        }
-    };
 
     BattlePhase(BattlePokemonPlayer player1, BattlePokemonPlayer player2) {
         this.player1 = player1;
@@ -69,13 +43,9 @@ public class BattlePhase {
         this.battlePhaseResult = battlePhaseResult;
     }
 
-    public static Comparator<Command> getCommandComparator() {
-        return commandComparator;
-    }
-
     public boolean queueCommand(Command command) {
 
-        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
+//        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
         this.commands.add(command);
 
         if (command instanceof Switch) {
@@ -91,13 +61,13 @@ public class BattlePhase {
 
     private void setPlayerReady(BattlePokemonPlayer player) {
 
-        Log.i(TAG, "Setting player ready");
+//        Log.i(TAG, "Setting player ready");
 
         if(player.equals(player1)) {
-            Log.i(TAG, "Player 1 ready");
+//            Log.i(TAG, "Player 1 ready");
             player1Ready = true;
         } else {
-            Log.i(TAG, "Player 2 ready");
+//            Log.i(TAG, "Player 2 ready");
             player2Ready = true;
         }
     }
@@ -105,7 +75,7 @@ public class BattlePhase {
     private boolean isPhaseReady() {
 
         boolean ready = (player1Ready && player2Ready);
-        Log.i(TAG, "Is phase ready (both players ready): " + ready);
+//        Log.i(TAG, "Is phase ready (both players ready): " + ready);
 
         return ready;
     }

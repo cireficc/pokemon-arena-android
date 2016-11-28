@@ -21,7 +21,7 @@ public class Switch extends Command {
     }
 
     @Override
-    public SwitchResult execute() {
+    public SwitchResult execute(Battle battle) {
 
         TargetInfo targetInfo = new TargetInfo(attackingPlayer);
         SwitchResult.Builder builder = new SwitchResult.Builder(targetInfo);

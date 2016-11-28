@@ -102,7 +102,7 @@ public class DamageCalculator {
         Pokemon originalTarget = target.getOriginalPokemon();
         final int POKEMON_LEVEL = 100;
 
-        Log.d(TAG, "\n\nCalculating damage for " + move.getName() + " against " + originalTarget.getName());
+//        Log.d(TAG, "\n\nCalculating damage for " + move.getName() + " against " + originalTarget.getName());
 
         switch(move.getName()) {
             case "Night Shade":
@@ -121,7 +121,7 @@ public class DamageCalculator {
 
         // Database converts nulls to 0; null power means it does 0 damage
         if (move.getPower() == 0) {
-            Log.d(TAG, "Move power was 0; does 0 damage");
+//            Log.d(TAG, "Move power was 0; does 0 damage");
             return 0;
         }
 
@@ -150,21 +150,21 @@ public class DamageCalculator {
         double totalDamage = damage * modifier;
         int totalDamageRounded = (int) Math.round(totalDamage);
 
-        Log.d(TAG, "Attack: " + attack);
-        Log.d(TAG, "Defense: " + defense);
-        Log.d(TAG, "Level Calc: " + levelCalc);
-        Log.d(TAG, "Stat Calc: " + statCalc);
-        Log.d(TAG, "Base Power: " + basePower);
-        Log.d(TAG, "Damage (before modifier): " + damage);
-        Log.d(TAG, "STAB: " + stabBonus);
-        Log.d(TAG, "Type1 Effectiveness: " + getType1Effectiveness(move, target));
-        Log.d(TAG, "Type2 Effectiveness: " + getType2Effectiveness(move, target));
-        Log.d(TAG, "Overall Type Effectiveness: " + typeEffectiveness);
-        Log.d(TAG, "Crit Multiplier: " + critMultiplier);
-        Log.d(TAG, "Random % Modifier: " + roll);
-        Log.d(TAG, "Modifier Calc:: " + modifier);
-        Log.d(TAG, "Total Damage: " + totalDamage);
-        Log.d(TAG, "Total Damage (rounded): " + totalDamageRounded);
+//        Log.d(TAG, "Attack: " + attack);
+//        Log.d(TAG, "Defense: " + defense);
+//        Log.d(TAG, "Level Calc: " + levelCalc);
+//        Log.d(TAG, "Stat Calc: " + statCalc);
+//        Log.d(TAG, "Base Power: " + basePower);
+//        Log.d(TAG, "Damage (before modifier): " + damage);
+//        Log.d(TAG, "STAB: " + stabBonus);
+//        Log.d(TAG, "Type1 Effectiveness: " + getType1Effectiveness(move, target));
+//        Log.d(TAG, "Type2 Effectiveness: " + getType2Effectiveness(move, target));
+//        Log.d(TAG, "Overall Type Effectiveness: " + typeEffectiveness);
+//        Log.d(TAG, "Crit Multiplier: " + critMultiplier);
+//        Log.d(TAG, "Random % Modifier: " + roll);
+//        Log.d(TAG, "Modifier Calc:: " + modifier);
+//        Log.d(TAG, "Total Damage: " + totalDamage);
+//        Log.d(TAG, "Total Damage (rounded): " + totalDamageRounded);
 
         return totalDamageRounded;
     }

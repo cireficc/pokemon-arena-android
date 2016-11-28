@@ -29,19 +29,6 @@ public final class GameTree {
         return root == null;
     }
 
-    public DummyCommandResult getData(Node n) {
-        if (!isEmpty()) {
-            return root.getValue();
-        }
-        return null;
-    }
-
-    public void setData(DummyCommandResult res) {
-        if(!isEmpty()){
-            getRoot().setValue(res);
-        }
-    }
-
     public void insertNode (Node prev, Node cur){
         if (prev != null) {
          //   prev.setChild(cur);
