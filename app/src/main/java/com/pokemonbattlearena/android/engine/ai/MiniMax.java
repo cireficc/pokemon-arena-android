@@ -108,13 +108,10 @@ public class MiniMax {
     }
 
     public Node choose() {
-        return chooseBestMove(gamePossibilities.getRoot(), depth).getBestChild();
+        return chooseBestMove(gamePossibilities.getRoot()).getBestChild();
     }
 
-    public Node chooseBestMove(Node n, int depth) {
-        if (depth == 0) {
-            return n;
-        }
+    public Node chooseBestMove(Node n) {
 
         double humanMaxDamageReceived = hFunction(maxHuHP, calculateTeamHP(new BattlePokemonTeam(n.huTeam)));
         double aiMinDamageReceived = hFunction(maxAIHP, calculateTeamHP(new BattlePokemonTeam(n.aiTeam)));
@@ -122,7 +119,7 @@ public class MiniMax {
         n.setHValue(curValue);
 
         for (Node child : n.children) {
-            double childValue = chooseBestMove(child, depth - 1).getHValue();
+            double childValue = chooseBestMove(child).getHValue();
 
             if (curValue <= childValue) {
                 curValue = childValue;
