@@ -1,8 +1,6 @@
 package com.pokemonbattlearena.android.engine.ai;
 
 import android.util.Log;
-
-import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePhaseResult;
@@ -10,13 +8,7 @@ import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Command;
-import com.pokemonbattlearena.android.engine.match.CommandResult;
-
-import java.util.Random;
-
 import static android.content.ContentValues.TAG;
-import static java.lang.Double.MIN_VALUE;
-import static java.lang.Integer.MAX_VALUE;
 
 /**
  * Created by nathan on 10/2/16.
