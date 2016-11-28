@@ -8,6 +8,8 @@ import com.pokemonbattlearena.android.engine.database.MoveType;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DamageCalculator {
@@ -16,24 +18,30 @@ public class DamageCalculator {
 
     private static final String TAG = DamageCalculator.class.getName();
 
+    private static final double[] critStages = new double[]{
+            6.25, 12.50, 25.00, 33.30, 50.00
+    };
+
+    private static final int MAX_CHANCE = 100;
+
     //Row type effectiveness vs Column type
-    private static final double[][] TYPE_MULTIPLIERS = new double[][] {
-            {1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, 0.5,   0,   1}, // Normal
-            {1, 0.5, 0.5,   1,   2,   2,   1,   1,   1,   1,   1,   2, 0.5,   1, 0.5}, // Fire
-            {1,   2, 0.5,   1, 0.5,   1,   1,   1,   2,   1,   1,   1,   2,   1, 0.5}, // Water
-            {1,   1,   2, 0.5, 0.5,   1,   1,   1,   0,   2,   1,   1,   1,   1, 0.5}, // Electric
-            {1, 0.5,   2,   1, 0.5,   1,   1, 0.5,   2, 0.5,   1, 0.5,   2,   1, 0.5}, // Grass
-            {1, 0.5, 0.5,   1,   2, 0.5,   1,   1,   2,   2,   1,   1,   1,   1,   2}, // Ice
-            {2,   1,   1,   1,   1,   2,   1, 0.5,   1, 0.5, 0.5, 0.5,   2,   0,   1}, // Fighting
-            {1,   1,   1,   1,   2,   1,   1, 0.5, 0.5,   1,   1,   1, 0.5, 0.5,   1}, // Poison
-            {1,   2,   1,   2, 0.5,   1,   1,   2,   1,   0,   1, 0.5,   2,   1,   1}, // Ground
-            {1,   1,   1, 0.5,   2,   1,   2,   1,   1,   1,   1,   2, 0.5,   1,   1}, // Flying
-            {1,   1,   1,   1,   1,   1,   2,   2,   1,   1, 0.5,   1,   1,   1,   1}, // Psychic
-            {1, 0.5,   1,   1,   2,   1, 0.5, 0.5,   1, 0.5,   2,   1,   1, 0.5,   1}, // Bug
-            {1,   2,   1,   1,   1,   2, 0.5,   1, 0.5,   2,   1,   2,   1,   1,   1}, // Rock
-            {0,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   1,   1,   2,   1}, // Ghost
-            {1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2}  // Dragon
-     //      No   Fr   Wa   El   Ga   Ic   Fg   Po   Gr   Fl   Py   Bu   Ro   Gh   Dr
+    private static final double[][] TYPE_MULTIPLIERS = new double[][]{
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0, 1}, // Normal
+            {1, 0.5, 0.5, 1, 2, 2, 1, 1, 1, 1, 1, 2, 0.5, 1, 0.5}, // Fire
+            {1, 2, 0.5, 1, 0.5, 1, 1, 1, 2, 1, 1, 1, 2, 1, 0.5}, // Water
+            {1, 1, 2, 0.5, 0.5, 1, 1, 1, 0, 2, 1, 1, 1, 1, 0.5}, // Electric
+            {1, 0.5, 2, 1, 0.5, 1, 1, 0.5, 2, 0.5, 1, 0.5, 2, 1, 0.5}, // Grass
+            {1, 0.5, 0.5, 1, 2, 0.5, 1, 1, 2, 2, 1, 1, 1, 1, 2}, // Ice
+            {2, 1, 1, 1, 1, 2, 1, 0.5, 1, 0.5, 0.5, 0.5, 2, 0, 1}, // Fighting
+            {1, 1, 1, 1, 2, 1, 1, 0.5, 0.5, 1, 1, 1, 0.5, 0.5, 1}, // Poison
+            {1, 2, 1, 2, 0.5, 1, 1, 2, 1, 0, 1, 0.5, 2, 1, 1}, // Ground
+            {1, 1, 1, 0.5, 2, 1, 2, 1, 1, 1, 1, 2, 0.5, 1, 1}, // Flying
+            {1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 0.5, 1, 1, 1, 1}, // Psychic
+            {1, 0.5, 1, 1, 2, 1, 0.5, 0.5, 1, 0.5, 2, 1, 1, 0.5, 1}, // Bug
+            {1, 2, 1, 1, 1, 2, 0.5, 1, 0.5, 2, 1, 2, 1, 1, 1}, // Rock
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1}, // Ghost
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2}  // Dragon
+            //      No   Fr   Wa   El   Ga   Ic   Fg   Po   Gr   Fl   Py   Bu   Ro   Gh   Dr
     };
 
     private static final int MAX_ACCURACY = 100;
@@ -88,12 +96,30 @@ public class DamageCalculator {
         }
     }
 
-    public int getTimesHit(Move move){
+    public int getTimesHit(Move move) {
 
         int hits = ThreadLocalRandom.current().nextInt(move.getMinHits(), move.getMaxHits() + 1);
         Log.i(TAG, "Move hits " + hits + " times (min: " + move.getMinHits() + "; max: " + move.getMaxHits() + ")");
 
         return hits;
+    }
+
+    public boolean moveCrit(BattlePokemon attacker, Move move) {
+        List valid = Arrays.asList("Crabhammer", "Karate Chop", "Razor Leaf", "Razor Wind", "Slash");
+        double critBarrier = MAX_CHANCE;
+        if (valid.contains(move.getName())) {
+            if (attacker.getCritStage() < 3) {
+                critBarrier -= critStages[attacker.getCritStage() + 2];
+            } else {
+                critBarrier -= critStages[4];
+            }
+        } else {
+            critBarrier -= critStages[attacker.getCritStage()];
+        }
+        if (ThreadLocalRandom.current().nextInt(MAX_CHANCE) >= critBarrier) {
+            return true;
+        }
+        return false;
     }
 
     public int calculateDamage(BattlePokemon attacker, Move move, BattlePokemon target) {
@@ -104,7 +130,7 @@ public class DamageCalculator {
 
         Log.d(TAG, "\n\nCalculating damage for " + move.getName() + " against " + originalTarget.getName());
 
-        switch(move.getName()) {
+        switch (move.getName()) {
             case "Night Shade":
             case "Seismic Toss":
                 return POKEMON_LEVEL;
@@ -140,7 +166,8 @@ public class DamageCalculator {
 
         double typeEffectiveness = getOverallTypeEffectiveness(move, target);
 
-        double critMultiplier = 1;
+        double critMultiplier = moveCrit(attacker, move) ? 2 : 1;
+
         final int MAX = 100;
         final int MIN = 85;
         double roll = (ThreadLocalRandom.current().nextInt((MAX - MIN) + 1) + MIN) / 100.0;
