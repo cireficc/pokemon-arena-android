@@ -15,8 +15,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -36,6 +38,8 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
+import com.pokemonbattlearena.android.activity.*;
+import com.pokemonbattlearena.android.activity.SplashActivity;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -59,6 +63,10 @@ import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
+import com.stephentuso.welcome.TitlePage;
+import com.stephentuso.welcome.WelcomeHelper;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -138,6 +146,9 @@ public class BottomBarActivity extends BaseActivity implements
     // BATTLE END
     private BattleEndListener battleEndListener = this;
 
+    //Splash
+    private WelcomeHelper mWelcomeHelper;
+
     /********************************************************************************************
      * ACTIVITY
      *******************************************************************************************/
@@ -148,7 +159,10 @@ public class BottomBarActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
 
-        mPreferences = getPreferences(Context.MODE_PRIVATE);
+        mWelcomeHelper = new WelcomeHelper(this, com.pokemonbattlearena.android.activity.SplashActivity.class);
+        mWelcomeHelper.show(savedInstanceState);
+
+        mPreferences = getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
@@ -178,6 +192,8 @@ public class BottomBarActivity extends BaseActivity implements
                 .add(R.id.container, mMainMenuFragment, "main")
                 .commit();
 
+
+
         // Listens for a tab touch (Only first touch of new tab)
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
@@ -187,6 +203,7 @@ public class BottomBarActivity extends BaseActivity implements
                 }
                 switch (tabId) {
                     case R.id.tab_teams:
+                        hideKeyboard();
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
                             if (mTeamsHomeFragment != null && !mTeamsHomeFragment.isAdded()) {
                                 mFragmentManager.beginTransaction()
@@ -204,6 +221,7 @@ public class BottomBarActivity extends BaseActivity implements
                         }
                         break;
                     case R.id.tab_battle:
+                        hideKeyboard();
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
                             if (mMainMenuFragment != null && !mMainMenuFragment.isAdded()) {
                                 mFragmentManager.beginTransaction()
@@ -280,6 +298,12 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mWelcomeHelper.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onStart() {
         if (mApplication.getGoogleApiClient() != null && mApplication.getGoogleApiClient().isConnected()) {
             Log.w(TAG, "GameHelper: client was already connected on onStart()");
@@ -309,6 +333,17 @@ public class BottomBarActivity extends BaseActivity implements
                             requestCode, resultCode, R.string.signin_other_error);
                     Log.e(TAG, "Error signing in " + requestCode);
                 }
+            case WelcomeHelper.DEFAULT_WELCOME_SCREEN_REQUEST:
+                    // The key of the welcome screen is in the Intent
+
+                    if (resultCode == RESULT_OK) {
+                        // Code here will run if the welcome screen was completed
+                        String name = mPreferences.getString("default_name", "default");
+                        Toast.makeText(mApplication, name, Toast.LENGTH_SHORT).show();
+                        displaySavedTeam(true);
+                    } else {
+                        finish();
+                    }
         }
         super.onActivityResult(requestCode, resultCode, intent);
     }
@@ -696,7 +731,7 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     private PokemonTeam getSavedTeam() {
-        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
+        String teamJSON = mPreferences.getString("pokemon_team", "mew");
         if (!teamJSON.equals("mew")) {
             Log.d(TAG, "Got saved team: " + teamJSON);
             return new Gson().fromJson(teamJSON, PokemonTeam.class);
@@ -738,9 +773,12 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     private boolean displaySavedTeam(boolean show) {
-        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
-        View savedView = (View) findViewById(R.id.saved_team_layout);
-
+        String teamJSON = mPreferences.getString("pokemon_team", "mew");
+        View savedView = findViewById(R.id.saved_team_layout);
+        TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
+        String builder = mPreferences.getString(NameFragment.profile_name_key, "User") +
+                getString(R.string.append_profile_text);
+        savedText.setText(builder);
         if (!teamJSON.equals("mew") && show) {
             savedView.setVisibility(View.VISIBLE);
             PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
@@ -765,7 +803,7 @@ public class BottomBarActivity extends BaseActivity implements
     private void setSavedTeam(String pokemonJSON) {
         SharedPreferences.Editor editor = mPreferences.edit();
         Log.d(TAG, "Setting team: " + pokemonJSON);
-        editor.putString("pokemonTeamJSON", pokemonJSON).apply();
+        editor.putString("pokemon_team", pokemonJSON).apply();
         editor.commit();
     }
 

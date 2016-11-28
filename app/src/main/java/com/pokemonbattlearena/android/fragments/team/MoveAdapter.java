@@ -67,6 +67,6 @@ public class MoveAdapter extends BaseAdapter {
 
     public class MoveViewHolder {
         TextView moveText;
-        CheckBox moveCheckbox;
+        public CheckBox moveCheckbox;
     }
 }
