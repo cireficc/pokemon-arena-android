@@ -26,6 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.activity.NameFragment;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
 import com.woxthebox.draglistview.DragItem;
@@ -67,17 +68,23 @@ public class SavedTeamsFragment extends Fragment {
         mSavedTeams = new ArrayList<Pair<Long, PokemonTeam>>();
         longValue = 0;
         adapterListSizeCurrent = 0;
+
+    }
+
+    public interface OnSavedTeamsFragmentTouchListener {
+        void toggleAddTeamFragment();
+        void updateTeamOrder();
+        ArrayList<String> retrieveTeamOrder();
+        String getNewestPokemonTeamName();
+        void deleteSavedTeam(String teamName);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         //connect to this user's saved teams on Firebase
-//        username = Games.Players.getCurrentPlayer(mApplication.getGoogleApiClient()).getDisplayName();
-        //TODO: replace below with user profile
-        //TODO: replace below with user profile
-        //TODO: replace below with user profile
-        //TODO: replace below with user profile
-        //TODO: replace below with user profile
-        //TODO: replace below with user profile
-        //TODO: replace below with user profile
-        //TODO: replace below with user profile
-        username = "TestingMitch";
+        mPreferences = getActivity().getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
+        username = mPreferences.getString(NameFragment.profile_name_key, "User");
         root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);
         //listener for populating saved teams page
         mChildListener = new ChildEventListener() {
@@ -103,20 +110,6 @@ public class SavedTeamsFragment extends Fragment {
         root.addChildEventListener(mChildListener);
         root.removeEventListener(mChildListener);
         onStartUp = false;
-    }
-
-    public interface OnSavedTeamsFragmentTouchListener {
-        void toggleAddTeamFragment();
-        void updateTeamOrder();
-        ArrayList<String> retrieveTeamOrder();
-        String getNewestPokemonTeamName();
-        void deleteSavedTeam(String teamName);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
     }
 
     @Override

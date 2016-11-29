@@ -12,11 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
@@ -30,7 +33,9 @@ import com.stephentuso.welcome.WelcomeFinisher;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Spencer Amann on 11/22/16.
@@ -45,6 +50,9 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
     private int teamSize = 6;
     private ArrayList<Pokemon> selectedTeamArrayList;
     private TextView mSaveTeamText;
+    private final String headRootName = "Users";
+    private final String teamsRootName = "Teams";
+    private final int mTeamSize = 6;
 
     private WelcomeFinisher welcomeFinisher;
 
@@ -83,7 +91,8 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
                 pokemonTeam.addPokemon(pokemon);
             }
             saveTeam(pokemonTeam);
-            welcomeFinisher.finish();
+        } else {
+            Toast.makeText(mApplication, "You must have" +mTeamSize+" Pokemon in your team", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -153,10 +162,48 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     private void saveTeam(PokemonTeam team) {
-        SharedPreferences.Editor edit = mPreferences.edit();
-        String json = new Gson().toJson(team, PokemonTeam.class);
-        edit.putString("pokemon_team", json);
-        edit.apply();
-        edit.commit();
+        final PokemonTeam pTeam = team;
+        //Request New Team Name
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View saveTeamView = inflater.inflate(R.layout.saved_team_name_dialog,(ViewGroup) getActivity().findViewById(R.id.teams_home),false);
+        final EditText mTeamName = (EditText) saveTeamView.findViewById(R.id.team_name_dialog_editText);
+        builder.setTitle("Set Team Name");
+        builder.setView(saveTeamView);
+        builder.setCancelable(false);
+        builder.setPositiveButton("Complete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                PokemonTeam pokemonTeam = pTeam;
+                pokemonTeam.setTeamName(mTeamName.getText().toString());
+                //does not allow a null team name
+                if(pokemonTeam.getTeamName() == null || pokemonTeam.getTeamName().equals("")){
+                    Toast.makeText(mApplication, "Please enter a team name", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    //Set Active Pokemon Team
+                    SharedPreferences.Editor edit = mPreferences.edit();
+                    String json = new Gson().toJson(pokemonTeam, PokemonTeam.class);
+                    edit.putString("pokemon_team", json);
+                    edit.apply();
+                    edit.commit();
+                    //Add Team to Firebase
+                    String username = mPreferences.getString(NameFragment.profile_name_key, "example");
+                    DatabaseReference root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);;
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put(pokemonTeam.getTeamName(), json);
+                    root.updateChildren(map);
+                    //end SplashActivity
+                    welcomeFinisher.finish();
+                }
+            }
+        });
+        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.show();
     }
 }

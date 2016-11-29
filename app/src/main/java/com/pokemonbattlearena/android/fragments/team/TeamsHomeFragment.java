@@ -106,7 +106,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                     //prompts team name and completes the team setup / save
                     promptTeamName();
                 } else {
-                    Toast.makeText(mApplication, "You must have 6 Pokemon in your team", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mApplication, "You must have" +mTeamSize+" Pokemon in your team", Toast.LENGTH_SHORT).show();
                 }
                 break;
 

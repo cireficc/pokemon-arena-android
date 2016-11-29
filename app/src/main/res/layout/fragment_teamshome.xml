@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:id="@+id/teams_home"
     tools:context=".BottomBarActivity">
-    <LinearLayout
     <TextView
         android:id="@+id/save_first_team_textview"
         android:layout_width="match_parent"
@@ -17,9 +16,12 @@
         android:textStyle="bold"
         android:textSize="10pt"
         android:visibility="gone"/>
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp">
+
         <Button
             android:id="@+id/cancel_team_button"
             android:layout_width="0dp"
@@ -27,6 +29,7 @@
             android:background="@drawable/ic_pokeball_cancel_button"
             android:layout_marginLeft="5dp"
             android:layout_height="60dp"
+            android:layout_below="@+id/save_first_team_textview"
             android:scaleX=".95"
             android:scaleY=".95" />
         <Button
