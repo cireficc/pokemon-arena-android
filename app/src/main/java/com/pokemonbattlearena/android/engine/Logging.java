@@ -2,20 +2,26 @@ package com.pokemonbattlearena.android.engine;
 
 import android.util.Log;
 
+import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.RecoilAmount;
 import com.pokemonbattlearena.android.engine.database.SelfHealAmount;
 import com.pokemonbattlearena.android.engine.database.SelfHealType;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
+import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.AttackResult;
+import com.pokemonbattlearena.android.engine.match.Battle;
+import com.pokemonbattlearena.android.engine.match.BattlePhase;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.Command;
+import com.pokemonbattlearena.android.engine.match.Switch;
+import com.pokemonbattlearena.android.engine.match.SwitchResult;
 import com.pokemonbattlearena.android.engine.match.TargetInfo;
 import com.pokemonbattlearena.android.engine.match.calculators.DamageCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.HealingCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
-
-import static android.content.ContentValues.TAG;
+import com.pokemonbattlearena.android.engine.match.calculators.StageChangeCalculator;
+import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
 /**
  * Created by nathan on 11/27/16.
@@ -23,27 +29,59 @@ import static android.content.ContentValues.TAG;
 
 public class Logging {
 
+    //Attack Classes
+    public static boolean logExecuteAttack = false;
+    public static boolean logAttackResult = false;
+    //Battle
+    public static boolean logStartNewBattlePhase = true;
+    public static boolean logComparator = false;
+    public static boolean logExecuteCommand = false;
+    public static boolean logExecuteCurrentBattlePhase = true;
+    public static boolean logApplyAttackResult = true;
+    public static boolean logStatusEffects = false;
+    public static boolean logHealing = true;
+    public static boolean logStages = false;
+    public static boolean logApplySwitchResult = true;
+    public static boolean logQueueCommand = false;
+    public static boolean logSetPlayerReady = false;
+    public static boolean logIsPhaseReady = false;
+    //Switch
+    public static boolean logSwitchResult = true;
+    //Control these from Battle
+    //Damage Calculator
+    public static boolean logGetTimesHit = false;
+    public static boolean logCalculateDamage = false;
+    //Healing Calculator
+    public static boolean logGetHealAmount = true;
+    public static boolean logDirectHealAmount = true;
+    public static boolean logAbsorbHealAmount = true;
+    //Recoil Calculator
+    public static boolean logGetRecoilAmount = true;
+
     //BATTLE CLASS LOGS
     public static void logStartNewBattlePhase() {
+        String TAG = Battle.class.getName();
         Log.e(TAG, "Starting new battle phase");
         Log.i(TAG, "Added current battle phase to finished phases");
         Log.i(TAG, "Created new battle phase");
     }
 
     public static void logComparator(int pokemon1Speed, int pokemon2Speed) {
-        Log.i(TAG, "There was a Switch command - prioritizing it");
+        String TAG = Battle.class.getName();
         Log.i(TAG, "Pokemon 1 speed: " + pokemon1Speed + " || Pokemon 2 speed: " + pokemon2Speed);
         Log.i(TAG, "Sorting commands by priority");
     }
 
     public static void logExecuteCommand(Command command) {
+        String TAG = Battle.class.getName();
         Log.i(TAG, "Executing command from current BattlePhase of type: " + command.getClass());
         Log.i(TAG, "Adding command result to battle phase result");
     }
     public static void logExecuteCurrentBattlePhase(boolean isFinished) {
-         Log.i(TAG, "Setting battle phase result on current battle phase");
-         Log.i(TAG, "Setting finished");
-         Log.i(TAG, "Battle finished? " + isFinished);
+        String TAG = Battle.class.getName();
+        Log.i(TAG, "Setting battle phase result on current battle phase");
+        Log.i(TAG, "Setting finished");
+        Log.i(TAG, "Battle finished? " + isFinished);
     }
 
     public static void logApplyAttackResult(String attackingPlayerId,
@@ -56,6 +94,7 @@ public class Logging {
                                             AttackResult res,
                                             boolean attackerFainted,
                                             boolean defenderFainted) {
+        String TAG = Battle.class.getName();
         Log.i(TAG, "Applying command result of type AttackResult");
         Log.i(TAG, "Attacking player: " + attackingPlayerId);
         Log.i(TAG, "Attacking player pkmn: " + attackingPokemon.getOriginalPokemon().getName());
@@ -77,6 +116,7 @@ public class Logging {
                                         int confusedTurns,
                                         int chargingTurns,
                                         int rechargingTurns) {
+        String TAG = Battle.class.getName();
         if (defendingPokemon.getStatusEffect() == null && statusEffectApplied != null) {
             Log.i(TAG, "Pokemon doesn't already have a StatusEffect. Applying for " + statusEffectTurns + " turn(s)!");
         }
@@ -92,11 +132,12 @@ public class Logging {
 
         Log.i(TAG, "Applying flinch: " + flinched);
 
-        }
+    }
 
     public static void logHealing(int healingDone,
                                   int maxHp,
                                   int healedTo) {
+        String TAG = Battle.class.getName();
         Log.i(TAG, "Applying healing done: " + healingDone);
         if (healedTo >= maxHp) {
             Log.i(TAG, "Healing was over max HP; healing to max HP: " + maxHp);
@@ -113,6 +154,7 @@ public class Logging {
                                  int spDefenseStage,
                                  int speedStage,
                                  int critStage) {
+        String TAG = Battle.class.getName();
         if (attackStage >= 0) {
             Log.i(TAG, "Attack Stage +" + attackStage);
             Log.i(TAG, "Attack Stage =" + attackingPokemon.getAttackStage());
@@ -155,6 +197,8 @@ public class Logging {
     }
 
     public static void logApplySwitchResult(TargetInfo targetInfo, BattlePokemon attackingPokemon) {
+        String TAG = Battle.class.getName();
+        Log.i(TAG, "There was a Switch command - prioritizing it");
         Log.i(TAG, "Applying command result of type SwitchResult");
         Log.i(TAG, "Attacking player: " + targetInfo.getAttackingPlayer().getId());
         Log.i(TAG, "Attacking player pkmn: " + attackingPokemon.getOriginalPokemon().getName());
@@ -244,6 +288,95 @@ public class Logging {
             Log.i(TAG, moveName + " is a crash move. Attacker takes " + recoiled + " damage");
         }
         Log.i(TAG, moveName + " is a recoil move. Attacker takes " + recoiled + " damage");
+
+    }
+
+    //ATTACK LOGS
+    public static void logAttackExecute(Move move,
+                                        int remainingHp,
+                                        boolean flinched,
+                                        BattlePokemon defendingPokemon,
+                                        BattlePokemon attackingPokemon,
+                                        boolean applyStatusEffect,
+                                        StatusEffectCalculator sc,
+                                        HealingCalculator hc,
+                                        RecoilCalculator rc,
+                                        StageChangeCalculator stc) {
+
+        String TAG = Attack.class.getName();
+        int damageDone = 0;
+        if (move.isChargingMove()) {
+            Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
+        }
+
+        if (move.isRechargeMove()) {
+            Log.i(TAG, move.getName() + " is recharge move (for " + move.getRechargeTurns() + " turns)");
+        }
+
+        Log.i(TAG, "Total damage: " + damageDone);
+
+        if (remainingHp <= 0) {
+            Log.d(TAG, defendingPokemon.getOriginalPokemon().getName() + " fainted!");
+        }
+
+        Log.i(TAG, move.getName() + " caused flinch? " + flinched);
+
+        Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
+
+        if (applyStatusEffect) {
+            Log.i(TAG, "Effect: " + move.getStatusEffectString() + " applied for " + sc.getStatusEffectTurns(move.getStatusEffect()) + " turns");
+        }
+
+        if (move.isSelfHeal()) {
+            Log.i(TAG, move.getName() + " is self heal of type " + move.getSelfHealType());
+            Log.i(TAG, "Max HP: " + attackingPokemon.getOriginalPokemon().getHp() + "; HP to heal: " + hc.getHealAmount(attackingPokemon, move, damageDone));
+        }
+
+        if (move.isRecoil()) {
+            Log.i(TAG, move.getName() + " is recoil type");
+            Log.i(TAG, attackingPokemon.getOriginalPokemon().getName() + " takes " + rc.getRecoilAmount(attackingPokemon, move, damageDone) + " recoil damage");
+        }
+        Log.i(TAG, "Apply Stage change? " + stc.doesApplyStageChange(move));
+
+        if (stc.doesApplyStageChange(move)) {
+            Log.i(TAG, move.getStageChange() + " is the amount");
+            Log.i(TAG, move.getStageChangeStatType() + " is the stage type");
+        }
+    }
+
+    //BATTLEPHASE LOGS
+    public static void logQueueCommand(Command command) {
+        String TAG = BattlePhase.class.getName();
+        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
+    }
+
+
+    public static void logSetPlayerReady(BattlePokemonPlayer player, BattlePokemonPlayer player1) {
+        String TAG = BattlePhase.class.getName();
+        Log.i(TAG, "Setting player ready");
+        if(player.equals(player1)) {
+            Log.i(TAG, "Player 1 ready");
+        } else {
+            Log.i(TAG, "Player 2 ready");
+        }
+    }
+
+    //ATTACKRESULTS LOGS
+    public static void logAttackResult() {
+        String TAG = AttackResult.class.getName();
+        Log.i(TAG, "Building AttackResult");
+    }
+
+    public static void logIsPhaseReady(boolean ready) {
+        String TAG = AttackResult.class.getName();
+        Log.i(TAG, "Is phase ready (both players ready): " + ready);
+
+    }
+
+    //SWITCHRESULTS LOGS
+    public static void logSwitchResults() {
+        String TAG = SwitchResult.class.getName();
+        Log.i(TAG, "Building SwitchResult");
 
     }
 

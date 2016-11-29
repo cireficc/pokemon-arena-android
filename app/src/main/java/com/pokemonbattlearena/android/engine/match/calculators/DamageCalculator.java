@@ -19,9 +19,6 @@ import static com.pokemonbattlearena.android.engine.Logging.logGetTimesHit;
 
 public class DamageCalculator {
 
-    //Log flags
-    public static boolean logGetTimesHit = false;
-    public static boolean logCalculateDamage = false;
 
     private static DamageCalculator instance = null;
 
@@ -155,7 +152,6 @@ public class DamageCalculator {
         Pokemon originalAttacker = attacker.getOriginalPokemon();
         Pokemon originalTarget = target.getOriginalPokemon();
         final int POKEMON_LEVEL = 100;
-
 
         switch (move.getName()) {
             case "Night Shade":

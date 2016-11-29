@@ -1,13 +1,10 @@
 package com.pokemonbattlearena.android.engine.match;
 
-import android.util.Log;
-
-import com.pokemonbattlearena.android.engine.database.StatType;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
-public class AttackResult extends CommandResult {
+import static com.pokemonbattlearena.android.engine.Logging.logAttackResult;
 
-    private transient static final String TAG = AttackResult.class.getName();
+public class AttackResult extends CommandResult {
 
     private int moveUsedId;
 
@@ -254,7 +251,9 @@ public class AttackResult extends CommandResult {
 
         protected AttackResult build() {
 
-//            Log.i(TAG, "Building AttackResult");
+            if(logAttackResult) {
+                logAttackResult();
+            }
             return new AttackResult(this);
         }
     }

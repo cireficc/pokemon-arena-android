@@ -11,9 +11,10 @@ import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StageChangeCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
-public class Attack extends Command {
+import static com.pokemonbattlearena.android.engine.Logging.logAttackExecute;
+import static com.pokemonbattlearena.android.engine.Logging.logExecuteAttack;
 
-    private transient static final String TAG = Attack.class.getName();
+public class Attack extends Command {
 
     private Move move;
     private BattlePokemonPlayer attackingPlayer;
@@ -73,40 +74,33 @@ public class Attack extends Command {
         AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move.getId());
 
         if (move.isChargingMove()) {
-//            Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
             builder.setChargingTurns(move.getChargingTurns());
         }
 
         if (move.isRechargeMove()) {
-//            Log.i(TAG, move.getName() + " is recharge move (for " + move.getRechargeTurns() + " turns)");
             builder.setRechargingTurns(move.getRechargeTurns());
         }
 
         int damageDone = 0;
         for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
-//            Log.i(TAG, "Partial damage: " + partialDamage);
             damageDone += partialDamage;
         }
 
-//        Log.i(TAG, "Total damage: " + damageDone);
         builder.setDamageDone(damageDone);
 
         int remainingHp = defendingPokemon.getCurrentHp() - damageDone;
 
         // If the defender faints, we can return early and skip other calculations
         if (remainingHp <= 0) {
-//            Log.d(TAG, defendingPokemon.getOriginalPokemon().getName() + " fainted!");
             builder.setFainted(true);
             return builder.build();
         }
 
         boolean flinched = statusEffectCalculator.doesApplyFlinch(move);
-//        Log.i(TAG, move.getName() + " caused flinch? " + flinched);
         builder.setFlinched(flinched);
 
         boolean applyStatusEffect = statusEffectCalculator.doesApplyStatusEffect(move, defendingPokemon);
-//        Log.i(TAG, move.getName() + " applied status effect? " + applyStatusEffect);
 
         if (applyStatusEffect) {
             StatusEffect effect = move.getStatusEffect();
@@ -121,33 +115,25 @@ public class Attack extends Command {
                 builder.setStatusEffectTurns(turns);
             }
 
-//            Log.i(TAG, "Effect: " + effect + " applied for " + turns + " turns");
         }
 
         if (move.isSelfHeal()) {
-//            Log.i(TAG, move.getName() + " is self heal of type " + move.getSelfHealType());
 
             int toHeal = healingCalculator.getHealAmount(attackingPokemon, move, damageDone);
             builder.setHealingDone(toHeal);
 
-//            Log.i(TAG, "Max HP: " + attackingPokemon.getOriginalPokemon().getHp() + "; HP to heal: " + toHeal);
         }
 
         if (move.isRecoil()) {
-//            Log.i(TAG, move.getName() + " is recoil type");
             int recoilTaken = recoilCalculator.getRecoilAmount(attackingPokemon, move, damageDone);
-//            Log.i(TAG, attackingPokemon.getOriginalPokemon().getName() + " takes " + recoilTaken + " recoil damage");
             builder.setRecoilTaken(recoilTaken);
         }
 
         boolean doStageChange = stageChangeCalculator.doesApplyStageChange(move);
-//        Log.i(TAG, "Apply Stage change? " + doStageChange);
 
         if (doStageChange) {
             int stageChange = move.getStageChange();
             StatType stageChangeStatType = move.getStageChangeStatType();
-//            Log.i(TAG, stageChange + " is the amount");
-//            Log.i(TAG, stageChangeStatType + " is the stage type");
             switch (stageChangeStatType) {
                 case ATTACK:
                     builder.setAttackStageChange(stageChange);
@@ -174,6 +160,9 @@ public class Attack extends Command {
             builder.setIsHaze(true);
         }
 
+        if(logExecuteAttack) {
+            logAttackExecute(move, remainingHp, flinched, defendingPokemon, attackingPokemon, applyStatusEffect, statusEffectCalculator, healingCalculator, recoilCalculator, stageChangeCalculator);
+        }
         return builder.build();
     }
 

@@ -13,10 +13,6 @@ import static com.pokemonbattlearena.android.engine.Logging.logGetHealAmount;
 
 public class HealingCalculator {
 
-    //Logging flags
-    public static boolean logGetHealAmount = false;
-    public static boolean logDirectHealAmount = false;
-    public static boolean logAbsorbHealAmount = false;
 
     private static HealingCalculator instance = null;
 

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static android.content.ContentValues.TAG;
 import static com.pokemonbattlearena.android.engine.Logging.logApplyAttackResult;
 import static com.pokemonbattlearena.android.engine.Logging.logApplySwitchResult;
 import static com.pokemonbattlearena.android.engine.Logging.logComparator;
@@ -21,19 +22,6 @@ import static com.pokemonbattlearena.android.engine.Logging.logStartNewBattlePha
 import static com.pokemonbattlearena.android.engine.Logging.logStatusEffects;
 
 public class Battle {
-
-    //Logging Flags
-    public static boolean logStartNewBattlePhase = false;
-    public static boolean logComparator = false;
-    public static boolean logExecuteCommand = false;
-    public static boolean logExecuteCurrentBattlePhase = false;
-    public static boolean logApplyAttackResult = false;
-    public static boolean logStatusEffects = false;
-    public static boolean logHealing = false;
-    public static boolean logStages = false;
-    public static boolean logApplySwitchResult = false;
-
-    private transient static final String TAG = Battle.class.getName();
 
     // NOTE: self is always the host of the battle
     BattlePokemonPlayer self;
@@ -174,7 +162,6 @@ public class Battle {
         BattlePokemonPlayer defendingPlayer = getPlayerFromId(defendingPlayerId);
         BattlePokemon defendingPokemon = defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
 
-
         int damageDone = res.getDamageDone();
         StatusEffect statusEffectApplied = res.getStatusEffectApplied();
         int statusEffectTurns = res.getStatusEffectTurns();
@@ -187,7 +174,6 @@ public class Battle {
         int recoilTaken = res.getRecoilTaken();
 
         defendingPokemon.setCurrentHp(defendingPokemon.getCurrentHp() - damageDone);
-
 
         // If the Pokemon doesn't already have a StatusEffect, we can apply one
         if (defendingPokemon.getStatusEffect() == null && statusEffectApplied != null) {

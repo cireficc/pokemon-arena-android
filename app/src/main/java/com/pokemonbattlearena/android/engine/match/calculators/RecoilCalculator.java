@@ -11,8 +11,6 @@ import static com.pokemonbattlearena.android.engine.Logging.logGetRecoilAmount;
 
 public class RecoilCalculator {
 
-    //Logging flags
-    public static boolean logGetRecoilAmount = false;
 
     private static RecoilCalculator instance = null;
 
