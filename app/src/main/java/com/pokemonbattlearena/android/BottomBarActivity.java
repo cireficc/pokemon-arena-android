@@ -15,7 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -34,11 +33,11 @@ import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
+import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import com.pokemonbattlearena.android.activity.*;
-import com.pokemonbattlearena.android.activity.SplashActivity;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -62,10 +61,8 @@ import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
-import com.stephentuso.welcome.TitlePage;
 import com.stephentuso.welcome.WelcomeHelper;
 
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -669,7 +666,6 @@ public class BottomBarActivity extends BaseActivity implements
         displaySavedTeam(true);
 
         for (CommandResult commandResult : result.getCommandResults()) {
-            //mActiveBattle.applyCommandResult(commandResult);
             updateUI();
             Log.d(TAG, commandResult.getTargetInfo().toString());
 
@@ -1036,11 +1032,11 @@ public class BottomBarActivity extends BaseActivity implements
 
             // Attempt to resolve the connection failure using BaseGameUtils.
 
-        //     if (!BaseGameUtils.resolveConnectionFailure(this,
-        //            mApplication.getGoogleApiClient(), connectionResult,
-        //            RC_SIGN_IN, getString(R.string.signin_other_error))) {
-        //        mResolvingConnectionFailure = false;
-        //    }
+             if (!BaseGameUtils.resolveConnectionFailure(this,
+                    mApplication.getGoogleApiClient(), connectionResult,
+                    RC_SIGN_IN, getString(R.string.signin_other_error))) {
+                mResolvingConnectionFailure = false;
+            }
         }
     }
     //endregion
