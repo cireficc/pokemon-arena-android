@@ -136,9 +136,12 @@ public class BottomBarActivity extends BaseActivity implements
 
     //TODO Temporary integer used for AI switching. Need 2 kill. Need 4 Speed.
     private int ind = 0;
+<<<<<<< HEAD
 
     //SAVED TEAMS
     private String newestAddedPokemonTeamName;
+=======
+>>>>>>> master-dev
 
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
@@ -172,7 +175,10 @@ public class BottomBarActivity extends BaseActivity implements
         mWelcomeHelper.show(savedInstanceState);
 
         mPreferences = getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
+<<<<<<< HEAD
         newestAddedPokemonTeamName = "";
+=======
+>>>>>>> master-dev
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
@@ -346,6 +352,7 @@ public class BottomBarActivity extends BaseActivity implements
                     Log.e(TAG, "Error signing in " + requestCode);
                 }
             case WelcomeHelper.DEFAULT_WELCOME_SCREEN_REQUEST:
+<<<<<<< HEAD
                 // The key of the welcome screen is in the Intent
 
                 if (resultCode == RESULT_OK) {
@@ -356,6 +363,18 @@ public class BottomBarActivity extends BaseActivity implements
                 } else {
                     finish();
                 }
+=======
+                    // The key of the welcome screen is in the Intent
+
+                    if (resultCode == RESULT_OK) {
+                        // Code here will run if the welcome screen was completed
+                        String name = mPreferences.getString("default_name", "default");
+                        Toast.makeText(mApplication, name, Toast.LENGTH_SHORT).show();
+                        displaySavedTeam(true);
+                    } else {
+                        finish();
+                    }
+>>>>>>> master-dev
         }
         super.onActivityResult(requestCode, resultCode, intent);
     }
@@ -736,7 +755,11 @@ public class BottomBarActivity extends BaseActivity implements
         mCurrentPokemonPlayer = new PokemonPlayer(mMyId);
         mCurrentPokemonPlayer.setPokemonTeam(team);
         String json = new Gson().toJson(team, PokemonTeam.class);
+<<<<<<< HEAD
         setCurrentTeam(json);
+=======
+        setSavedTeam(json);
+>>>>>>> master-dev
         if (mBattleHomeFragment != null) {
             mBattleHomeFragment.setPlayerTeam(team);
         }
@@ -836,9 +859,14 @@ public class BottomBarActivity extends BaseActivity implements
 
         //add temp Arraylist to sharedpreferences for team order
         SharedPreferences.Editor editor = mPreferences.edit();
+<<<<<<< HEAD
         String orderedTeamJSON = new Gson().toJson(teamOrder);
         Log.d(TAG, "Setting saved team order: " + orderedTeamJSON);
         editor.putString("orderedTeamJSON", orderedTeamJSON).apply();
+=======
+        Log.d(TAG, "Setting team: " + pokemonJSON);
+        editor.putString("pokemon_team", pokemonJSON).apply();
+>>>>>>> master-dev
         editor.commit();
 
         //add first team as your active team
@@ -846,6 +874,7 @@ public class BottomBarActivity extends BaseActivity implements
         setCurrentTeam(pokemonJSON);
     }
 
+<<<<<<< HEAD
     public ArrayList<String> retrieveTeamOrder(){
         String orderedTeamJSON = mPreferences.getString("orderedTeamJSON", "mew");
         if (!orderedTeamJSON.equals("mew")) {
@@ -862,6 +891,8 @@ public class BottomBarActivity extends BaseActivity implements
         editor.commit();
     }
 
+=======
+>>>>>>> master-dev
     private void refreshBattleFragment() {
         if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
             if (mFragmentManager != null && mMainMenuFragment.isAdded()) {
@@ -930,6 +961,7 @@ public class BottomBarActivity extends BaseActivity implements
         }
 
         if (mActiveBattle.isFinished()) {
+<<<<<<< HEAD
             //     for (int i = 0;i < 6; i ++) {
             //         BattlePokemon mBP = mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons().get(i);
             //         BattlePokemon oBP = mActiveBattle.getOpponent().getBattlePokemonTeam().getBattlePokemons().get(i);
@@ -941,6 +973,19 @@ public class BottomBarActivity extends BaseActivity implements
                 return;
             }
             //    }
+=======
+       //     for (int i = 0;i < 6; i ++) {
+       //         BattlePokemon mBP = mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons().get(i);
+       //         BattlePokemon oBP = mActiveBattle.getOpponent().getBattlePokemonTeam().getBattlePokemons().get(i);
+                if (mActiveBattle.selfPokemonFainted()) {
+                    Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
+                    return;
+                } else if (mActiveBattle.oppPokemonFainted()){
+                    Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
+                    return;
+                }
+        //    }
+>>>>>>> master-dev
         }
     }
     //endregion
@@ -1035,6 +1080,7 @@ public class BottomBarActivity extends BaseActivity implements
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
         if (mFragmentManager != null) {
+<<<<<<< HEAD
             PokemonTeam team = new Gson().fromJson(pokemonJSON, PokemonTeam.class);
             //add saved Team to Firebase
             newestAddedPokemonTeamName = team.getTeamName();
@@ -1061,6 +1107,11 @@ public class BottomBarActivity extends BaseActivity implements
             mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
             mFragmentManager.beginTransaction().add(R.id.container, mSavedTeamsFragment, "team").commit();
             mFragmentManager.executePendingTransactions();
+=======
+            mBottomBar.selectTabWithId(R.id.tab_battle);
+            setSavedTeam(pokemonJSON);
+            displaySavedTeam(true);
+>>>>>>> master-dev
         }
     }
     //endregion

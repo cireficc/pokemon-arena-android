@@ -22,6 +22,8 @@ public class BattleViewItem {
     TextView pokemonHPText;
     SeekBar pokemonHpProgress;
     Pokemon activePokemon;
+    //TODO: use battle pokemon player
+    //TODO: create a method to update the player when the battle changes
     PokemonPlayer activePlayer;
     boolean hasConfusion = false;
     ImageView confusedStatusImage;
