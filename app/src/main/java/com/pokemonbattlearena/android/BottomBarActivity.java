@@ -16,7 +16,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -37,6 +40,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
+import com.pokemonbattlearena.android.activity.*;
+import com.pokemonbattlearena.android.activity.SplashActivity;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -45,6 +50,7 @@ import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.AttackResult;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePhaseResult;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.Command;
 import com.pokemonbattlearena.android.engine.match.CommandResult;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
@@ -60,6 +66,10 @@ import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
+import com.stephentuso.welcome.TitlePage;
+import com.stephentuso.welcome.WelcomeHelper;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,11 +96,9 @@ public class BottomBarActivity extends BaseActivity implements
         SavedTeamsFragment.OnSavedTeamsFragmentTouchListener,
         BattleEndListener {
 
+    private static final String TAG = BottomBarActivity.class.getSimpleName();
     private static final int TEAM_SIZE_INT = 6;
     private static final int MIN_PLAYERS = 2;
-    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
-    private final static String TAG = BottomBarActivity.class.getSimpleName();
-
     // GOOGLE PLAY GAMES FIELDS
     private static final int RC_SIGN_IN = 9001;
     private String mRoomId = null;
@@ -98,6 +106,9 @@ public class BottomBarActivity extends BaseActivity implements
     private ArrayList<Participant> mParticipants = null;
     private String mHostId = null;
     private boolean mIsHost = false;
+    private int mBattleMatchFlag = 0;
+
+    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
     // GOOGLE PLAY SIGN IN FIELDS
     private boolean mResolvingConnectionFailure = false;
@@ -113,15 +124,18 @@ public class BottomBarActivity extends BaseActivity implements
     private ChatHomeFragment mChatHomeFragment;
     private ChatInGameFragment mChatInGameFragment;
 
+    // UI Elements
     private BottomBar mBottomBar;
     private SharedPreferences mPreferences;
 
+    // Battle Fields
     private PokemonPlayer mCurrentPokemonPlayer;
     private PokemonPlayer mOpponentPokemonPlayer;
-
     private Battle mActiveBattle = null;
+    private boolean isAiBattle = false;
 
-    private int mBattleMatchFlag = 0;
+    //TODO Temporary integer used for AI switching. Need 2 kill. Need 4 Speed.
+    private int ind = 0;
 
     //SAVED TEAMS
     private String newestAddedPokemonTeamName;
@@ -138,170 +152,28 @@ public class BottomBarActivity extends BaseActivity implements
 
     private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mCommandRuntimeTypeAdapter).create();
     private final Gson mCommandResultGson = new GsonBuilder().registerTypeAdapterFactory(mCommandResultRuntimeTypeAdapter).create();
-    private boolean isAiBattle = false;
 
     // BATTLE END
     private BattleEndListener battleEndListener = this;
 
-    //region Fragment callbacks
-    public void onTeamSelected(String pokemonJSON) {
-        Log.d(TAG, "Selected: " + pokemonJSON);
-        if (mFragmentManager != null) {
-            PokemonTeam team = new Gson().fromJson(pokemonJSON, PokemonTeam.class);
-            //add saved Team to Firebase
-            newestAddedPokemonTeamName = team.getTeamName();
-            addSavedTeam(newestAddedPokemonTeamName, pokemonJSON);
+    //Splash
+    private WelcomeHelper mWelcomeHelper;
 
-
-            setCurrentPokemonPlayerTeam(team);
-            toggleAddTeamFragment();
-        }
-
-    }
-
-    public String getNewestPokemonTeamName() {
-        return newestAddedPokemonTeamName;
-    }
-
-    @Override
-    public void toggleAddTeamFragment() {
-        if (mFragmentManager != null && mSavedTeamsFragment.isAdded()) {
-            mFragmentManager.beginTransaction().remove(mSavedTeamsFragment).commit();
-            mFragmentManager.beginTransaction().add(R.id.container, mTeamsHomeFragment, "team").commit();
-            mFragmentManager.executePendingTransactions();
-        } else if (mFragmentManager != null && mTeamsHomeFragment.isAdded()) {
-            mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
-            mFragmentManager.beginTransaction().add(R.id.container, mSavedTeamsFragment, "team").commit();
-            mFragmentManager.executePendingTransactions();
-        }
-    }
-
-    @Override
-    public void onCancelBattle() {
-        leaveRoom();
-    }
-
-    @Override
-    public void onBattleNowClicked() {
-        // showing the progress dialog also creates it if its null
-        mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
-        refreshBattleFragment();
-        startMatchMaking();
-        showProgressDialog();
-        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                if (mBattleHomeFragment.isVisible() ) {
-                    Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
-                    leaveRoom();
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onSwitchPokemon(int position) {
-        Switch s = new Switch(mActiveBattle.getSelf(), position);
-        if (mIsHost) {
-            sendHostMessage(s);
-        } else {
-            sendClientMessage(s);
-        }
-    }
-
-    private void sendHostMessage(Command c) {
-        boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(c);
-        mBattleHomeFragment.enableButtonActions(movesReady);
-        if (movesReady) {
-            handleBattleResult();
-        }
-    }
-
-    private void sendClientMessage(Command c) {
-        String gson = mCommandGson.toJson(c, Command.class);
-        sendMessage(gson);
-        mBattleHomeFragment.enableButtonActions(false);
-    }
-
-
-    @Override
-    public void onAiBattleClicked() {
-        isAiBattle = true;
-        startAiBattle();
-    }
-
-    @Override
-    //TODO Break the AI stuff out into methods i.e. use handleBattleResult
-    public void onMoveClicked(Move move) {
-        if (!isAiBattle) {
-            if (mBattleHomeFragment != null) {
-                mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
-                Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
-                if(mIsHost) {
-                    Log.d(TAG, "Host: queuing move: " + move.getName());
-                    sendHostMessage(attack);
-                } else {
-                    Log.d(TAG, "Client: sending move: " + move.getName());
-                    sendClientMessage(attack);
-                }
-            }
-        } else {
-            if (mBattleHomeFragment != null) {
-                mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
-                if (mActiveBattle.getCurrentBattlePhase() == null) {
-                    mActiveBattle.startNewBattlePhase();
-                }
-                if (mActiveBattle instanceof AiBattle) {
-                    Move tmp = ((AiBattle) mActiveBattle).showIntelligence();
-                    mBattleHomeFragment.appendMoveHistory("AI", tmp);
-                    Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
-                    boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(attack);
-                    //mBattleHomeFragment.showMoveUI(movesReady);
-                    Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
-                    mActiveBattle.getCurrentBattlePhase().queueCommand(aiAttack);
-                    mActiveBattle.executeCurrentBattlePhase();
-
-                    for (CommandResult cmdR: mActiveBattle.getCurrentBattlePhase().getBattlePhaseResult().getCommandResults())
-                    {
-                        if (mActiveBattle.selfPokemonFainted() || mActiveBattle.oppPokemonFainted()) {
-                            if(mActiveBattle.isFinished()) {
-                                battleEndListener.onBattleEnd();
-                                break;
-                            }
-                            //TODO somehow handle the knocking out of a Pokemon mid-Phase
-                            break;
-                        }
-                        mActiveBattle.applyCommandResult(cmdR);
-                        updateUI();
-                    }
-                    updateUI();
-                    if(!mActiveBattle.isFinished()) {
-                        mActiveBattle.startNewBattlePhase();
-                    }
-                    else {
-                        battleEndListener.onBattleEnd();
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onChatLoaded() {
-        hideProgressDialog();
-    }
-
-    //endregion
-
+    /********************************************************************************************
+     * ACTIVITY
+     *******************************************************************************************/
     //region Activity hooks
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
 
-        mPreferences = getPreferences(Context.MODE_PRIVATE);
+        mWelcomeHelper = new WelcomeHelper(this, com.pokemonbattlearena.android.activity.SplashActivity.class);
+        mWelcomeHelper.show(savedInstanceState);
+
+        mPreferences = getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
         newestAddedPokemonTeamName = "";
+
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
         setSupportActionBar(toolbar);
@@ -331,6 +203,8 @@ public class BottomBarActivity extends BaseActivity implements
                 .add(R.id.container, mMainMenuFragment, "main")
                 .commit();
 
+
+
         // Listens for a tab touch (Only first touch of new tab)
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
@@ -340,6 +214,7 @@ public class BottomBarActivity extends BaseActivity implements
                 }
                 switch (tabId) {
                     case R.id.tab_teams:
+                        hideKeyboard();
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
                             if (mTeamsHomeFragment != null && !mSavedTeamsFragment.isAdded()) {
                                 displaySavedTeam(false);
@@ -358,6 +233,7 @@ public class BottomBarActivity extends BaseActivity implements
                         }
                         break;
                     case R.id.tab_battle:
+                        hideKeyboard();
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
                             if (mMainMenuFragment != null && !mMainMenuFragment.isAdded()) {
                                 mFragmentManager.beginTransaction()
@@ -378,6 +254,7 @@ public class BottomBarActivity extends BaseActivity implements
                                 mFragmentManager.beginTransaction()
                                         .replace(R.id.container, mBattleHomeFragment, "battle")
                                         .commit();
+                                updateUI();
                             }
                             if (mMainMenuFragment != null && mMainMenuFragment.isAdded()) {
                                 mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
@@ -433,6 +310,12 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mWelcomeHelper.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onStart() {
         if (mApplication.getGoogleApiClient() != null && mApplication.getGoogleApiClient().isConnected()) {
             Log.w(TAG, "GameHelper: client was already connected on onStart()");
@@ -441,56 +324,6 @@ public class BottomBarActivity extends BaseActivity implements
             mApplication.getGoogleApiClient().connect();
         }
         super.onStart();
-    }
-    //endregion
-
-    //region Google API Client
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (bundle != null) {
-
-            Invitation inv = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
-
-            // check to see if we have an invite
-            if (inv != null) {
-                // accept invitation
-                RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
-                roomConfigBuilder.setInvitationIdToAccept(inv.getInvitationId());
-                Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
-
-                // prevent screen from sleeping during handshake
-                keepScreenOn();
-            }
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        mApplication.getGoogleApiClient().connect();
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
-        if (mResolvingConnectionFailure) {
-            // Already resolving
-            return;
-        }
-        // If the sign in button was clicked or if auto sign-in is enabled,
-        // launch the sign-in flow
-        if (mSignInClicked || mAutoStartSignInFlow) {
-            mAutoStartSignInFlow = false;
-            mSignInClicked = false;
-            mResolvingConnectionFailure = true;
-
-            // Attempt to resolve the connection failure using BaseGameUtils.
-            if (!BaseGameUtils.resolveConnectionFailure(this,
-                    mApplication.getGoogleApiClient(), connectionResult,
-                    RC_SIGN_IN, getString(R.string.signin_other_error))) {
-                mResolvingConnectionFailure = false;
-            }
-        }
     }
     //endregion
 
@@ -512,11 +345,25 @@ public class BottomBarActivity extends BaseActivity implements
                             requestCode, resultCode, R.string.signin_other_error);
                     Log.e(TAG, "Error signing in " + requestCode);
                 }
+            case WelcomeHelper.DEFAULT_WELCOME_SCREEN_REQUEST:
+                // The key of the welcome screen is in the Intent
+
+                if (resultCode == RESULT_OK) {
+                    // Code here will run if the welcome screen was completed
+                    String name = mPreferences.getString("default_name", "default");
+                    Toast.makeText(mApplication, name, Toast.LENGTH_SHORT).show();
+                    displaySavedTeam(true);
+                } else {
+                    finish();
+                }
         }
         super.onActivityResult(requestCode, resultCode, intent);
     }
     //endregion
 
+    /********************************************************************************************
+     * ROOM UPDATES
+     ********************************************************************************************/
     //region RoomUpdateListener Callbacks
     @Override
     public void onRoomCreated(int statusCode, Room room) {
@@ -563,13 +410,40 @@ public class BottomBarActivity extends BaseActivity implements
             sendMessage(player);
         }
     }
+    // create a RoomConfigBuilder that's appropriate for your implementation
+    private RoomConfig.Builder makeBasicRoomConfigBuilder() {
+        return RoomConfig.builder(this)
+                .setRoomStatusUpdateListener(this)
+                .setMessageReceivedListener(this);
+    }
+
+    private void startMatchMaking() {
+        // auto-match criteria to invite one random automatch opponent.
+        // You can also specify more opponents (up to 3).
+        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, mBattleMatchFlag);
+
+        // build the room config:
+        RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+        roomConfigBuilder.setAutoMatchCriteria(am);
+        RoomConfig roomConfig = roomConfigBuilder.build();
+
+        // create room:
+        if (mApplication.getGoogleApiClient().isConnected()) {
+            Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), roomConfig);
+        } else {
+            showGameError();
+            Log.e(TAG, "Not connected to Google Play Games");
+        }
+
+        // prevent screen from sleeping during handshake
+        keepScreenOn();
+    }
     //endregion
 
+    /********************************************************************************************
+     * ROOM STATUS
+     *******************************************************************************************/
     //region RoomStatusUpdateListener Callbacks
-    // We treat most of the room update callbacks in the same way: we update our list of
-    // participants and update the display. In a real game we would also have to check if that
-    // change requires some action like removing the corresponding player avatar from the screen,
-    // etc.
     @Override
     public void onPeerDeclined(Room room, List<String> arg1) {
         leaveRoom();
@@ -630,8 +504,52 @@ public class BottomBarActivity extends BaseActivity implements
     public void onPeersDisconnected(Room room, List<String> peers) {
         leaveRoom();
     }
+
+    @Override
+    public String getHostId() {
+        return mHostId;
+    }
+
+    private void setHost(ArrayList<String> sortedIds) {
+        for (Participant mParticipant : mParticipants) {
+            sortedIds.add(mParticipant.getParticipantId());
+        }
+        Collections.sort(sortedIds);
+        mHostId = sortedIds.get(0);
+        mIsHost = mHostId.equalsIgnoreCase(mMyId);
+    }
+
+    private void updateRoom(Room room) {
+        if (room != null) {
+            mParticipants = room.getParticipants();
+            mRoomId = room.getRoomId();
+            mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
+            ArrayList<String> sortedIds = new ArrayList<>();
+            setHost(sortedIds);
+        }
+    }
+
+    // Leave the room.
+    private void leaveRoom() {
+        stopKeepingScreenOn();
+        if (mRoomId != null) {
+            Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
+            mRoomId = null;
+            mActiveBattle = null;
+            mMyId = null;
+            mParticipants = null;
+            mIsHost = false;
+            mHostId = null;
+            Log.d(TAG, "Left room everything is null.");
+            mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
+            refreshBattleFragment();
+        }
+    }
     //endregion
 
+    /*******************************************************************************************
+     * MESSAGING
+     * *******************************************************************************************/
     //region RealTimeMessageListener Callbacks
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
@@ -665,37 +583,48 @@ public class BottomBarActivity extends BaseActivity implements
                     // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
                     mActiveBattle.applyCommandResult(commandResult);
                     Log.d(TAG, commandResult.getTargetInfo().toString());
+                    //TODO: check if battle ended
                     updateUI();
                 }
 
                 mBattleHomeFragment.enableButtonActions(true);
-                mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
+                if (mActiveBattle.selfPokemonFainted()) {
+                    Button force;
+                    force = (Button)findViewById(R.id.switch_button);
+                    force.performClick();
+                }
+                updateUI();
             }
         }
         hideProgressDialog();
     }
 
-    private void handleBattleResult() {
-        BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
+    //region Networking Helper methods
+    private void queueHostMessage(Command c) {
+        boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(c);
+        mBattleHomeFragment.enableButtonActions(movesReady);
+        if (movesReady) {
+            handleBattleResult();
+        }
+    }
 
-        for (CommandResult commandResult : result.getCommandResults()) {
-            mActiveBattle.applyCommandResult(commandResult);
-            updateUI();
-            Log.d(TAG, commandResult.getTargetInfo().toString());
+    private void sendClientMessage(Command c) {
+        String gson = mCommandGson.toJson(c, Command.class);
+        sendMessage(gson);
+        mBattleHomeFragment.enableButtonActions(false);
+    }
 
-            if (mActiveBattle.isFinished()) {
-                battleEndListener.onBattleEnd();
-                leaveRoom();
-                return;
+    private void sendMessage(String message) {
+        byte[] byteMessage = message.getBytes();
+        for (Participant p : mParticipants) {
+            if (!p.getParticipantId().equals(mMyId)) {
+                Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, byteMessage,
+                        mRoomId, p.getParticipantId());
+                Log.d(TAG, "Reliable message sent (sendMessage()) + " + message);
             }
         }
-        mBattleHomeFragment.enableButtonActions(true);
-        mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
-        String json = mCommandResultGson.toJson(result);
-        sendMessage(json);
-
-        mActiveBattle.startNewBattlePhase();
     }
+    //endregion
 
     @Override
     public void onRealTimeMessageSent(int statusCode, int tokenId, String recipientId) {
@@ -718,7 +647,72 @@ public class BottomBarActivity extends BaseActivity implements
     }
     //endregion
 
-    //region AI Battle
+    /***********************************************************************************************
+     * BATTLE
+     **********************************************************************************************/
+    //region Battle Helper Methods
+    //region AI Helper Methods
+    public void AIBattleTurn(Command cmd) {
+        if (mActiveBattle instanceof AiBattle) {
+            Move tmp = ((AiBattle) mActiveBattle).showIntelligence();
+            mBattleHomeFragment.appendMoveHistory("AI", tmp);
+            mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
+
+            if (mActiveBattle.oppPokemonFainted() && ind < 5) {
+                ind++;
+                BattlePokemon cur = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon();
+                Switch aiSw = new Switch(mActiveBattle.getOpponent(), ind);
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiSw);
+            } else {
+                Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiAttack);
+            }
+
+            handleBattleResult();
+        }
+    }
+
+    private void handleBattleResult() {
+        BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
+        PokemonTeam pokes = new PokemonTeam(6);
+        for (BattlePokemon bp : mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons()) {
+            pokes.addPokemon(bp.getOriginalPokemon());
+        }
+        setCurrentPokemonPlayerTeam(pokes);
+        displaySavedTeam(true);
+
+        for (CommandResult commandResult : result.getCommandResults()) {
+            //mActiveBattle.applyCommandResult(commandResult);
+            updateUI();
+            Log.d(TAG, commandResult.getTargetInfo().toString());
+
+            if (mActiveBattle.isFinished()) {
+                battleEndListener.onBattleEnd();
+                if (!isAiBattle) {
+                    //TODO: don't leave the room since
+                    leaveRoom();
+                }
+                return;
+            }
+        }
+        mBattleHomeFragment.enableButtonActions(true);
+        mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
+        updateUI();
+
+        if(!isAiBattle) {
+            String json = mCommandResultGson.toJson(result);
+            sendMessage(json);
+        }
+
+        mActiveBattle.startNewBattlePhase();
+
+        if (mActiveBattle.selfPokemonFainted()) {
+            Button force;
+            force = (Button)findViewById(R.id.switch_button);
+            force.performClick();
+        }
+    }
+    //endregion
     private void startAiBattle() {
         mRoomId="AI_BATTLE"; //mRoomId needs to be set or you can't exit the battle in leaveRoom() method
         mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
@@ -729,58 +723,42 @@ public class BottomBarActivity extends BaseActivity implements
         mActiveBattle = new AiBattle(mCurrentPokemonPlayer, (AiPlayer)mOpponentPokemonPlayer);
         setupBattleUI(mCurrentPokemonPlayer, mOpponentPokemonPlayer);
     }
-    //endregion
 
-    //region Private Helper Methods
+    private boolean shouldStartGame(Room room) {
+        int connectedPlayers = 0;
+        for (Participant p : room.getParticipants()) {
+            if (p.isConnectedToRoom()) ++connectedPlayers;
+        }
+        return connectedPlayers >= MIN_PLAYERS;
+    }
+
     private void setCurrentPokemonPlayerTeam(PokemonTeam team) {
         mCurrentPokemonPlayer = new PokemonPlayer(mMyId);
         mCurrentPokemonPlayer.setPokemonTeam(team);
-    }
-
-    // Show error message about game being cancelled and return to main screen.
-    private void showGameError() {
-        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
-    }
-
-    private void sendMessage(String message) {
-        byte[] byteMessage = message.getBytes();
-        for (Participant p : mParticipants) {
-            if (!p.getParticipantId().equals(mMyId)) {
-                Games.RealTimeMultiplayer.sendReliableMessage(mApplication.getGoogleApiClient(), null, byteMessage,
-                        mRoomId, p.getParticipantId());
-                Log.d(TAG, "Reliable message sent (sendMessage()) + " + message);
-            }
+        String json = new Gson().toJson(team, PokemonTeam.class);
+        setCurrentTeam(json);
+        if (mBattleHomeFragment != null) {
+            mBattleHomeFragment.setPlayerTeam(team);
         }
     }
 
-    // create a RoomConfigBuilder that's appropriate for your implementation
-    private RoomConfig.Builder makeBasicRoomConfigBuilder() {
-        return RoomConfig.builder(this)
-                .setRoomStatusUpdateListener(this)
-                .setMessageReceivedListener(this);
-    }
-
-    private void updateRoom(Room room) {
-        if (room != null) {
-            mParticipants = room.getParticipants();
-            mRoomId = room.getRoomId();
-            mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(mApplication.getGoogleApiClient()));
-            ArrayList<String> sortedIds = new ArrayList<>();
-            setHost(sortedIds);
+    private PokemonTeam getSavedTeam() {
+        String teamJSON = mPreferences.getString("pokemon_team", "mew");
+        if (!teamJSON.equals("mew")) {
+            Log.d(TAG, "Got saved team: " + teamJSON);
+            return new Gson().fromJson(teamJSON, PokemonTeam.class);
         }
+        return null;
     }
+    //endregion
 
-    private void setHost(ArrayList<String> sortedIds) {
-        for (Participant mParticipant : mParticipants) {
-            sortedIds.add(mParticipant.getParticipantId());
-        }
-        Collections.sort(sortedIds);
-        mHostId = sortedIds.get(0);
-        mIsHost = mHostId.equalsIgnoreCase(mMyId);
-    }
-
+    /*********************************************************************************************
+     * USER INTERFACE
+     **********************************************************************************************/
+    //region user interface
     private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
         if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+            //TODO: use updateUI to do this
             mBattleHomeFragment.setPlayer(mCurrentPokemonPlayer);
             mBattleHomeFragment.setOpponent(mOpponentPokemonPlayer);
             mBattleHomeFragment.setBattleVisible(true);
@@ -802,14 +780,17 @@ public class BottomBarActivity extends BaseActivity implements
             Log.d(TAG, name + ": " + currentHp);
 
             mBattleHomeFragment.updateHealthBars(health1, health2);
-//            mBattleHomeFragment.refreshActivePokemon(mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon(), mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon());
+            mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
         }
     }
 
     private boolean displaySavedTeam(boolean show) {
-        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
-        View savedView = (View) findViewById(R.id.saved_team_layout);
-
+        String teamJSON = mPreferences.getString("pokemon_team", "mew");
+        View savedView = findViewById(R.id.saved_team_layout);
+        TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
+        String builder = mPreferences.getString(NameFragment.profile_name_key, "User") +
+                getString(R.string.append_profile_text);
+        savedText.setText(builder);
         if (!teamJSON.equals("mew") && show) {
             savedView.setVisibility(View.VISIBLE);
             PokemonTeam pokemonTeam = new Gson().fromJson(teamJSON, PokemonTeam.class);
@@ -881,23 +862,6 @@ public class BottomBarActivity extends BaseActivity implements
         editor.commit();
     }
 
-    // Leave the room.
-    private void leaveRoom() {
-        stopKeepingScreenOn();
-        if (mRoomId != null) {
-            Games.RealTimeMultiplayer.leave(mApplication.getGoogleApiClient(), this, mRoomId);
-            mRoomId = null;
-            mActiveBattle = null;
-            mMyId = null;
-            mParticipants = null;
-            mIsHost = false;
-            mHostId = null;
-            Log.d(TAG, "Left room everything is null.");
-            mApplication.setApplicationPhase(ApplicationPhase.INACTIVE_BATTLE);
-            refreshBattleFragment();
-        }
-    }
-
     private void refreshBattleFragment() {
         if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
             if (mFragmentManager != null && mMainMenuFragment.isAdded()) {
@@ -923,58 +887,10 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
-    private void startMatchMaking() {
-        // auto-match criteria to invite one random automatch opponent.
-        // You can also specify more opponents (up to 3).
-        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, mBattleMatchFlag);
-
-        // build the room config:
-        RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
-        roomConfigBuilder.setAutoMatchCriteria(am);
-        RoomConfig roomConfig = roomConfigBuilder.build();
-
-        // create room:
-        if (mApplication.getGoogleApiClient().isConnected()) {
-            Games.RealTimeMultiplayer.create(mApplication.getGoogleApiClient(), roomConfig);
-        } else {
-            showGameError();
-            Log.e(TAG, "Not connected to Google Play Games");
-        }
-
-        // prevent screen from sleeping during handshake
-        keepScreenOn();
-    }
-
-    private PokemonTeam getSavedTeam() {
-        String teamJSON = mPreferences.getString("pokemonTeamJSON", "mew");
-        if (!teamJSON.equals("mew")) {
-            Log.d(TAG, "Got saved team: " + teamJSON);
-            return new Gson().fromJson(teamJSON, PokemonTeam.class);
-        }
-        return null;
-    }
-
     private Drawable getDrawableForPokemon(Context c, String name) {
         String key = "ic_pokemon_" + name.toLowerCase();
         int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
         return c.getDrawable(id);
-    }
-
-    private TeamsHomeFragment createTeamsHomeFragment() {
-        TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
-        // Set the team size
-        Bundle teamArgs = new Bundle();
-        teamArgs.putInt("teamSize", TEAM_SIZE_INT);
-        teamsHomeFragment.setArguments(teamArgs);
-        return teamsHomeFragment;
-    }
-
-    private boolean shouldStartGame(Room room) {
-        int connectedPlayers = 0;
-        for (Participant p : room.getParticipants()) {
-            if (p.isConnectedToRoom()) ++connectedPlayers;
-        }
-        return connectedPlayers >= MIN_PLAYERS;
     }
 
     private void keepScreenOn() {
@@ -985,12 +901,12 @@ public class BottomBarActivity extends BaseActivity implements
     private void stopKeepingScreenOn() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
-    //endregion
 
-    @Override
-    public String getHostId() {
-        return mHostId;
+    // Show error message about game being cancelled and return to main screen.
+    private void showGameError() {
+        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
     }
+    //endregion
 
     //region Battle End Listener
     //TODO pass in some useful parameters for different tasks
@@ -1003,6 +919,7 @@ public class BottomBarActivity extends BaseActivity implements
         }
 
         if (isAiBattle) {
+            ind = 0;
             if (mActiveBattle.selfPokemonFainted()) {
                 Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();
             } else if (mActiveBattle.oppPokemonFainted()) {
@@ -1011,19 +928,198 @@ public class BottomBarActivity extends BaseActivity implements
             }
             return;
         }
-        //TODO Change this to reflect entire Pokemon team instead of just the first Pokemon
-        if (mActiveBattle.selfPokemonFainted()) {
-            for (Participant p: mParticipants) {
-                if (p.getParticipantId().equals(mOpponentPokemonPlayer.getPlayerId())) {
-                    Toast.makeText(mApplication, p.getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+
+        if (mActiveBattle.isFinished()) {
+            //     for (int i = 0;i < 6; i ++) {
+            //         BattlePokemon mBP = mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons().get(i);
+            //         BattlePokemon oBP = mActiveBattle.getOpponent().getBattlePokemonTeam().getBattlePokemons().get(i);
+            if (mActiveBattle.selfPokemonFainted()) {
+                Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
+                return;
+            } else if (mActiveBattle.oppPokemonFainted()){
+                Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
+                return;
+            }
+            //    }
+        }
+    }
+    //endregion
+
+    /********************************************************************************************
+     * FRAGMENTS
+     *******************************************************************************************/
+
+    private TeamsHomeFragment createTeamsHomeFragment() {
+        TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
+        // Set the team size
+        Bundle teamArgs = new Bundle();
+        teamArgs.putInt("teamSize", TEAM_SIZE_INT);
+        teamsHomeFragment.setArguments(teamArgs);
+        return teamsHomeFragment;
+    }
+
+    //region Battle Fragment callbacks
+    @Override
+    public void onCancelBattle() {
+        leaveRoom();
+    }
+
+    @Override
+    public void onSwitchPokemon(int position) {
+        Switch s = new Switch(mActiveBattle.getSelf(), position);
+        if (!isAiBattle) {
+            if (mIsHost) {
+                queueHostMessage(s);
+            } else {
+                sendClientMessage(s);
+            }
+        } else {
+            AIBattleTurn(s);
+        }
+    }
+
+    @Override
+    public void onMoveClicked(Move move) {
+        if (!isAiBattle) {
+            if (mBattleHomeFragment != null) {
+                mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+                Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                if(mIsHost) {
+                    Log.d(TAG, "Host: queuing move: " + move.getName());
+                    queueHostMessage(attack);
+                } else {
+                    Log.d(TAG, "Client: sending move: " + move.getName());
+                    sendClientMessage(attack);
                 }
             }
-
-        } else if (mActiveBattle.oppPokemonFainted()){
-            for (Participant p: mParticipants) {
-                if (p.getParticipantId().equals(mCurrentPokemonPlayer.getPlayerId())) {
-                    Toast.makeText(mApplication, p.getDisplayName() + " has won the battle", Toast.LENGTH_LONG).show();
+        } else {
+            if (mBattleHomeFragment != null) {
+                mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+                if (mActiveBattle.getCurrentBattlePhase() == null) {
+                    mActiveBattle.startNewBattlePhase();
                 }
+                Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
+                AIBattleTurn(attack);
+            }
+        }
+    }
+    //endregion Battle Fragment callbacks
+
+    //region Main Menu Fragment callbacks
+    @Override
+    public void onBattleNowClicked() {
+        // showing the progress dialog also creates it if its null
+        mApplication.setApplicationPhase(ApplicationPhase.ACTIVE_BATTLE);
+        refreshBattleFragment();
+        startMatchMaking();
+        showProgressDialog();
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (mBattleHomeFragment.isVisible() ) {
+                    Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
+                    leaveRoom();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onAiBattleClicked() {
+        isAiBattle = true;
+        startAiBattle();
+    }
+    //endregion
+
+    //region Team Fragment callbacks
+    public void onTeamSelected(String pokemonJSON) {
+        Log.d(TAG, "Selected: " + pokemonJSON);
+        if (mFragmentManager != null) {
+            PokemonTeam team = new Gson().fromJson(pokemonJSON, PokemonTeam.class);
+            //add saved Team to Firebase
+            newestAddedPokemonTeamName = team.getTeamName();
+            addSavedTeam(newestAddedPokemonTeamName, pokemonJSON);
+
+
+            setCurrentPokemonPlayerTeam(team);
+            toggleAddTeamFragment();
+        }
+
+    }
+
+    public String getNewestPokemonTeamName() {
+        return newestAddedPokemonTeamName;
+    }
+
+    @Override
+    public void toggleAddTeamFragment() {
+        if (mFragmentManager != null && mSavedTeamsFragment.isAdded()) {
+            mFragmentManager.beginTransaction().remove(mSavedTeamsFragment).commit();
+            mFragmentManager.beginTransaction().add(R.id.container, mTeamsHomeFragment, "team").commit();
+            mFragmentManager.executePendingTransactions();
+        } else if (mFragmentManager != null && mTeamsHomeFragment.isAdded()) {
+            mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
+            mFragmentManager.beginTransaction().add(R.id.container, mSavedTeamsFragment, "team").commit();
+            mFragmentManager.executePendingTransactions();
+        }
+    }
+    //endregion
+
+    //region Chat Fragment callbacks
+    @Override
+    public void onChatLoaded() {
+        hideProgressDialog();
+    }
+    //endregion
+
+    /********************************************************************************************
+     * GOOGLE API CLIENT
+     *******************************************************************************************/
+    //region Google API Client
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (bundle != null) {
+
+            Invitation inv = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
+
+            // check to see if we have an invite
+            if (inv != null) {
+                // accept invitation
+                RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
+                roomConfigBuilder.setInvitationIdToAccept(inv.getInvitationId());
+                Games.RealTimeMultiplayer.join(mApplication.getGoogleApiClient(), roomConfigBuilder.build());
+
+                // prevent screen from sleeping during handshake
+                keepScreenOn();
+            }
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mApplication.getGoogleApiClient().connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
+        // be available.
+        if (mResolvingConnectionFailure) {
+            // Already resolving
+            return;
+        }
+        // If the sign in button was clicked or if auto sign-in is enabled,
+        // launch the sign-in flow
+        if (mSignInClicked || mAutoStartSignInFlow) {
+            mAutoStartSignInFlow = false;
+            mSignInClicked = false;
+            mResolvingConnectionFailure = true;
+
+            // Attempt to resolve the connection failure using BaseGameUtils.
+            if (!BaseGameUtils.resolveConnectionFailure(this,
+                    mApplication.getGoogleApiClient(), connectionResult,
+                    RC_SIGN_IN, getString(R.string.signin_other_error))) {
+                mResolvingConnectionFailure = false;
             }
         }
     }
