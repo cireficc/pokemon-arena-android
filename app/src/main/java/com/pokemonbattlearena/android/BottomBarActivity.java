@@ -329,7 +329,7 @@ public class BottomBarActivity extends BaseActivity implements
 
         //Sets up and plays theme music
         startMusic(R.raw.music_menu);
-        setMusicCompletionListener(R.raw.music_menu);
+        setMusicCompletionListener(R.raw.music_menu_cont);
 
 
         super.onStart();
@@ -928,7 +928,7 @@ public class BottomBarActivity extends BaseActivity implements
             }
             //set up battle music
             startMusic(R.raw.music_battle);
-            setMusicCompletionListener(R.raw.music_battle);
+            setMusicCompletionListener(R.raw.music_battle_cont);
         } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
             //deletes in-game chat from Firebase
             mChatInGameFragment.deleteChatRoom();
@@ -945,7 +945,7 @@ public class BottomBarActivity extends BaseActivity implements
 
             //set up menu music
             startMusic(R.raw.music_menu);
-            setMusicCompletionListener(R.raw.music_menu);
+            setMusicCompletionListener(R.raw.music_menu_cont);
         }
     }
 
