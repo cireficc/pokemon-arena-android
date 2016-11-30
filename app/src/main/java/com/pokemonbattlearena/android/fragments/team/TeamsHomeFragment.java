@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -106,7 +107,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                     //prompts team name and completes the team setup / save
                     promptTeamName();
                 } else {
-                    Toast.makeText(mApplication, "You must have" +mTeamSize+" Pokemon in your team", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mApplication, "You must have " +mTeamSize+" Pokemon in your team", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -143,6 +144,8 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                     for (Pokemon pokemon : selectedTeamArrayList) {
                         pokemonTeam.addPokemon(pokemon);
                     }
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(mTeamName.getWindowToken(), 0);
                     mCallback.onTeamSelected(new Gson().toJson(pokemonTeam));
                 }
             }
