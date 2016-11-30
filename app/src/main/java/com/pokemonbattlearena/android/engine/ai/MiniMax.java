@@ -27,10 +27,12 @@ public class MiniMax {
     protected int maxAIHP;
     protected int maxHuHP;
 
+    protected Command playerCommand;
 
-    protected int depth = 1;
 
-    MiniMax(BattlePokemonPlayer aiPlayer, BattlePokemonPlayer humanPlayer, int maxAIHp, int maxHuHp) {
+    protected int depth = 2;
+
+    MiniMax(BattlePokemonPlayer aiPlayer, BattlePokemonPlayer humanPlayer, int maxAIHp, int maxHuHp, Command playerMove) {
         this.gamePossibilities = new GameTree();
 
         this.ai = aiPlayer;
@@ -44,6 +46,8 @@ public class MiniMax {
 
         this.maxAIHP = maxAIHp;
         this.maxHuHP = maxHuHp;
+
+        this.playerCommand = playerMove;
 
 
         gamePossibilities.setRoot(buildTree(depth, new Node(aiTeam, huTeam, null)));
@@ -65,8 +69,44 @@ public class MiniMax {
             Log.e(TAG, "buildTree: Hit the depth" );
             return n;
         }
-        for (int j = 0; j < 4; j++) {
-            for (int k = 0; k < 4; k++) {
+
+        if (d == depth) {
+            for (int i = 0; i < 4; i++) {
+
+                    BattlePokemonTeam aiTeam = new BattlePokemonTeam(n.aiTeam);
+                    BattlePokemonTeam huTeam = new BattlePokemonTeam(n.huTeam);
+
+                    BattlePokemonPlayer aiPlayer = new BattlePokemonPlayer(ai.getId(), aiTeam);
+                    BattlePokemonPlayer huPlayer = new BattlePokemonPlayer(human.getId(), huTeam);
+
+                    Battle childState = new Battle(huPlayer, aiPlayer);
+
+                    Command huCommand = playerCommand;
+
+                    Command aiCommand = new Attack(aiPlayer, huPlayer, aiTeam.getCurrentPokemon().getMoveSet().get(i));
+
+                    childState.getCurrentBattlePhase().queueCommand(aiCommand);
+                    childState.getCurrentBattlePhase().queueCommand(huCommand);
+
+                    Log.e(TAG, "buildTree: New child");
+                    BattlePhaseResult res = childState.executeCurrentBattlePhase();
+
+                    Node ne = new Node(aiTeam, huTeam, aiCommand);
+
+
+                    double humanMaxDamageReceived = hFunction(maxHuHP, calculateTeamHP(ne.huTeam));
+                    double aiMinDamageReceived = hFunction(maxAIHP, calculateTeamHP(ne.aiTeam));
+                    double curValue = humanMaxDamageReceived - aiMinDamageReceived;
+                    ne.setHValue(curValue);
+
+
+                    Node child = buildTree(d - 1, ne);
+                    n.addChild(child);
+                    n.numDominating += child.numDominating;
+                }
+        } else {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
 
                 BattlePokemonTeam aiTeam = new BattlePokemonTeam(n.aiTeam);
                 BattlePokemonTeam huTeam = new BattlePokemonTeam(n.huTeam);
@@ -75,20 +115,30 @@ public class MiniMax {
                 BattlePokemonPlayer huPlayer = new BattlePokemonPlayer(human.getId(), huTeam);
 
                 Battle childState = new Battle(huPlayer, aiPlayer);
-                Command aiCommand = new Attack(aiPlayer, huPlayer, aiTeam.getCurrentPokemon().getMoveSet().get(j));
-                Command huCommand = new Attack(huPlayer, aiPlayer, huTeam.getCurrentPokemon().getMoveSet().get(k));
+
+                Command huCommand = new Attack(huPlayer, aiPlayer, huTeam.getCurrentPokemon().getMoveSet().get(j));
+
+                Command aiCommand = new Attack(aiPlayer, huPlayer, aiTeam.getCurrentPokemon().getMoveSet().get(i));
 
                 childState.getCurrentBattlePhase().queueCommand(aiCommand);
                 childState.getCurrentBattlePhase().queueCommand(huCommand);
 
                 Log.e(TAG, "buildTree: New child");
                 BattlePhaseResult res = childState.executeCurrentBattlePhase();
-                //for (CommandResult cmd : res.getCommandResults()) {}
+
+
 
                 Node ne = new Node(aiTeam, huTeam, aiCommand);
-                Node child = buildTree(d-1, ne);
+
+                double humanMaxDamageReceived = hFunction(maxHuHP, calculateTeamHP(ne.huTeam));
+                double aiMinDamageReceived = hFunction(maxAIHP, calculateTeamHP(ne.aiTeam));
+                double curValue = humanMaxDamageReceived - aiMinDamageReceived;
+                ne.setHValue(curValue);
+
+                Node child = buildTree(d - 1, ne);
                 n.addChild(child);
                 n.numDominating += child.numDominating;
+                }
             }
         }
         return n;
@@ -101,15 +151,14 @@ public class MiniMax {
     public Node choose() {
         Node choice = chooseBestMove(gamePossibilities.getRoot()).getBestChild();
         gamePossibilities.getRoot().printTree();
+        Log.e(TAG, "CHOSEN MOVE: " + gamePossibilities.getRoot().getBestChild().getCommandName());
+        Log.e(TAG, "HUMAN MOVE: " + playerCommand);
         return choice;
     }
 
     public Node chooseBestMove(Node n) {
 
-        double humanMaxDamageReceived = hFunction(maxHuHP, calculateTeamHP(n.huTeam));
-        double aiMinDamageReceived = hFunction(maxAIHP, calculateTeamHP(n.aiTeam));
-        double curValue = humanMaxDamageReceived - aiMinDamageReceived;
-        n.setHValue(curValue);
+        double curValue = n.getHValue();
 
         for (Node child : n.children) {
             double childValue = chooseBestMove(child).getHValue();

@@ -31,7 +31,7 @@ public class Attack extends Command {
         this.move = move;
     }
 
-    protected Move getMove() {
+    public Move getMove() {
         return move;
     }
 

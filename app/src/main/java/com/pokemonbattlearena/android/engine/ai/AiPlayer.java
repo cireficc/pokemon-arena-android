@@ -52,8 +52,8 @@ public class AiPlayer extends PokemonPlayer {
             Pokemon org = aiBattler.getBattlePokemonTeam().getBattlePokemons().get(i).getOriginalPokemon();
             List<Move> moves = new ArrayList<>(4);
             for (int j = 0; j < 4; j++) {
-                int rnd = new Random().nextInt(db.getMovesForPokemon(org).size());
-                moves.add(db.getMovesForPokemon(org).get(rnd));
+              //  int rnd = new Random().nextInt(db.getMovesForPokemon(org).size());
+                moves.add(db.getMovesForPokemon(org).get(j));
             }
             //aiBattler.getBattlePokemonTeam().getBattlePokemons().get(i).setMoveSet(moves);
             org.setActiveMoveList(moves);

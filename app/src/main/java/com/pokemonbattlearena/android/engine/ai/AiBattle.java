@@ -23,7 +23,7 @@ public class AiBattle extends Battle {
     }
 
     public void buildIntelligence() {
-        this.intelligence = new MiniMax(this.getOpponent(), this.getSelf(), maxAIHP, maxHuHP);
+        this.intelligence = new MiniMax(this.getOpponent(), this.getSelf(), maxAIHP, maxHuHP, this.getCurrentBattlePhase().getCommands().get(0));
     }
 
     public Command showIntelligence() {
