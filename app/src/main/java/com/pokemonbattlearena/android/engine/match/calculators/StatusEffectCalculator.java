@@ -13,6 +13,7 @@ public class StatusEffectCalculator {
     private static final String TAG = StatusEffectCalculator.class.getName();
 
     private static final int MAX_CHANCE = 100;
+    private static final int HURT_SELF_IN_CONFUSION_CHANCE = 50;
 
     protected StatusEffectCalculator() {
     }
@@ -82,5 +83,32 @@ public class StatusEffectCalculator {
         }
 
         return turns;
+    }
+
+    public boolean isHurtByConfusion() {
+
+        return ThreadLocalRandom.current().nextInt(MAX_CHANCE) >= HURT_SELF_IN_CONFUSION_CHANCE;
+    }
+
+    public int getConfusionDamage(BattlePokemon attackingPokemon) {
+
+        double attack = attackingPokemon.getOriginalPokemon().getAttack();
+        double defense = attackingPokemon.getOriginalPokemon().getDefense();
+        final double POKEMON_LEVEL = 100;
+
+        // Formula: https://www.math.miami.edu/~jam/azure/attacks/comp/confuse.htm
+        double damage = ((((((2 * POKEMON_LEVEL) / 5.0) + 2) * attack * 40.0) / defense) / 50.0) + 2;
+
+        return (int) Math.round(damage);
+    }
+
+    public int getBurnDamage(BattlePokemon attackingPokemon) {
+
+        return (int) Math.round(attackingPokemon.getOriginalPokemon().getHp() / 8.0);
+    }
+
+    public int getPoisonDamage(BattlePokemon attackingPokemon) {
+
+        return (int) Math.round(attackingPokemon.getOriginalPokemon().getHp() / 8.0);
     }
 }

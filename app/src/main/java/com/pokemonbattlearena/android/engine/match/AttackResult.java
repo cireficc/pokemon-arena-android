@@ -13,6 +13,7 @@ public class AttackResult extends CommandResult {
     private int statusEffectTurns;
     private boolean confused;
     private int confusedTurns;
+    private int confusionDamageTaken;
     private boolean flinched;
     private int chargingTurns;
     private int rechargingTurns;
@@ -39,6 +40,7 @@ public class AttackResult extends CommandResult {
         this.statusEffectTurns = builder.statusEffectTurns;
         this.confused = builder.confused;
         this.confusedTurns = builder.confusedTurns;
+        this.confusionDamageTaken = builder.confusionDamageTaken;
         this.flinched = builder.flinched;
         this.chargingTurns = builder.chargingTurns;
         this.rechargingTurns = builder.rechargingTurns;
@@ -72,6 +74,10 @@ public class AttackResult extends CommandResult {
 
     public int getConfusedTurns() {
         return confusedTurns;
+    }
+
+    public int getConfusionDamageTaken() {
+        return confusionDamageTaken;
     }
 
     public boolean isFlinched() {
@@ -140,6 +146,7 @@ public class AttackResult extends CommandResult {
         private int statusEffectTurns;
         private boolean confused;
         private int confusedTurns;
+        private int confusionDamageTaken;
         private boolean flinched;
         private int chargingTurns;
         private int rechargingTurns;
@@ -181,6 +188,11 @@ public class AttackResult extends CommandResult {
 
         protected Builder setConfusedTurns(int confusedTurns) {
             this.confusedTurns = confusedTurns;
+            return this;
+        }
+
+        protected Builder setConfusionDamageTaken(int confusionDamageTaken) {
+            this.confusionDamageTaken = confusionDamageTaken;
             return this;
         }
 

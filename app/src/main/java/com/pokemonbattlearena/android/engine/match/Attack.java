@@ -81,6 +81,14 @@ public class Attack extends Command {
             builder.setRechargingTurns(move.getRechargeTurns());
         }
 
+        // If a Pokemon is confused, see if it hurts itself and finish the attack
+        if (attackingPokemon.isConfused()) {
+            if (statusEffectCalculator.isHurtByConfusion()) {
+                builder.setConfusionDamageTaken(statusEffectCalculator.getConfusionDamage(attackingPokemon));
+                return builder.build();
+            }
+        }
+
         int damageDone = 0;
         for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
