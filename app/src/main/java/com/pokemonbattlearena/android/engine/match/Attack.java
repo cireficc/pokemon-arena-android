@@ -81,6 +81,11 @@ public class Attack extends Command {
             builder.setRechargingTurns(move.getRechargeTurns());
         }
 
+        // If a Pokemon is affected by a status effect, finish the attack
+        boolean frozen = statusEffectCalculator.isAffectedByFreeze(attackingPokemon);
+        boolean paralyzed = statusEffectCalculator.isAffectedByParalysis(attackingPokemon);
+        boolean sleeping = statusEffectCalculator.isAffectedBySleep(attackingPokemon);
+        
         // If a Pokemon is confused, see if it hurts itself and finish the attack
         if (attackingPokemon.isConfused()) {
             if (statusEffectCalculator.isHurtByConfusion()) {

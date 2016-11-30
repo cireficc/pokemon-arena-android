@@ -85,6 +85,33 @@ public class StatusEffectCalculator {
         return turns;
     }
 
+    public boolean isAffectedByFreeze(BattlePokemon attackingPokemon) {
+
+        if (attackingPokemon.getStatusEffect() != StatusEffect.FREEZE) return false;
+
+        int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
+        // There is an 80% chance to be affected by freeze
+        final int FROZEN_THRESHOLD = 80;
+
+        return (rolled <= FROZEN_THRESHOLD);
+    }
+
+    public boolean isAffectedByParalysis(BattlePokemon attackingPokemon) {
+
+        if (attackingPokemon.getStatusEffect() != StatusEffect.PARALYZE) return false;
+
+        int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
+        // There is a 75% chance to be affected by paralysis
+        final int PARALYSIS_THRESHOLD = 75;
+
+        return (rolled <= PARALYSIS_THRESHOLD);
+    }
+
+    public boolean isAffectedBySleep(BattlePokemon attackingPokemon) {
+
+        return (attackingPokemon.getStatusEffect() == StatusEffect.SLEEP && attackingPokemon.getStatusEffectTurns() > 0);
+    }
+
     public boolean isHurtByConfusion() {
 
         return ThreadLocalRandom.current().nextInt(MAX_CHANCE) >= HURT_SELF_IN_CONFUSION_CHANCE;
