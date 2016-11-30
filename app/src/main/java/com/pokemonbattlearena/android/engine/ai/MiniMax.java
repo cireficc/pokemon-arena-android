@@ -30,7 +30,7 @@ public class MiniMax {
 
     protected int depth = 1;
 
-    MiniMax(BattlePokemonPlayer aiPlayer, BattlePokemonPlayer humanPlayer) {
+    MiniMax(BattlePokemonPlayer aiPlayer, BattlePokemonPlayer humanPlayer, int maxAIHp, int maxHuHp) {
         this.gamePossibilities = new GameTree();
 
         this.ai = aiPlayer;
@@ -42,19 +42,18 @@ public class MiniMax {
         this.aiCurrent = aiTeam.getCurrentPokemon();
         this.huCurrent = huTeam.getCurrentPokemon();
 
-        maxAIHP = calculateTeamHP(aiTeam);
-        maxHuHP = calculateTeamHP(huTeam);
+        this.maxAIHP = maxAIHp;
+        this.maxHuHP = maxHuHp;
 
 
         gamePossibilities.setRoot(buildTree(depth, new Node(aiTeam, huTeam, null)));
         Log.e(TAG, "----------------------------------------------------");
         Log.e(TAG, "Total size: " + gamePossibilities.getRoot().numDominating);
-        gamePossibilities.getRoot().printTree();
     }
 
-    public static int calculateTeamHP(BattlePokemonTeam team) {
+    public static int calculateTeamHP(StatePokemon[] team) {
         int totalHP = 0;
-        for (BattlePokemon bp : team.getBattlePokemons()) {
+        for (StatePokemon bp : team) {
             totalHP += bp.getCurrentHp();
         }
         return totalHP;
@@ -84,7 +83,7 @@ public class MiniMax {
 
                 Log.e(TAG, "buildTree: New child");
                 BattlePhaseResult res = childState.executeCurrentBattlePhase();
-                // for (CommandResult cmd : res.getCommandResults()) {}
+                //for (CommandResult cmd : res.getCommandResults()) {}
 
                 Node ne = new Node(aiTeam, huTeam, aiCommand);
                 Node child = buildTree(d-1, ne);
@@ -100,13 +99,15 @@ public class MiniMax {
     }
 
     public Node choose() {
-        return chooseBestMove(gamePossibilities.getRoot()).getBestChild();
+        Node choice = chooseBestMove(gamePossibilities.getRoot()).getBestChild();
+        gamePossibilities.getRoot().printTree();
+        return choice;
     }
 
     public Node chooseBestMove(Node n) {
 
-        double humanMaxDamageReceived = hFunction(maxHuHP, calculateTeamHP(new BattlePokemonTeam(n.huTeam)));
-        double aiMinDamageReceived = hFunction(maxAIHP, calculateTeamHP(new BattlePokemonTeam(n.aiTeam)));
+        double humanMaxDamageReceived = hFunction(maxHuHP, calculateTeamHP(n.huTeam));
+        double aiMinDamageReceived = hFunction(maxAIHP, calculateTeamHP(n.aiTeam));
         double curValue = humanMaxDamageReceived - aiMinDamageReceived;
         n.setHValue(curValue);
 

@@ -648,6 +648,7 @@ public class BottomBarActivity extends BaseActivity implements
     //region AI Helper Methods
     public void AIBattleTurn(Command cmd) {
         if (mActiveBattle instanceof AiBattle) {
+            ((AiBattle) mActiveBattle).buildIntelligence();
             Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
             //mBattleHomeFragment.appendMoveHistory("AI", tmp);
             mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);

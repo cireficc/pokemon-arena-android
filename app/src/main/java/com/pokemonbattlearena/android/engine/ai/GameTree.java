@@ -29,19 +29,5 @@ public final class GameTree {
         return root == null;
     }
 
-    public void insertNode (Node prev, Node cur){
-        if (prev != null) {
-         //   prev.setChild(cur);
-        }
-    }
-
-    protected void pretrav(Node t){
-        if(t == null)
-            return;
-        System.out.println(t.toString()+" \n");
-        for(int i=0; i<t.numberOfChildren(); i++)
-            pretrav(t.getChild(i));
-    }
-
 
 }
