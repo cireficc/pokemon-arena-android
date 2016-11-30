@@ -11,6 +11,7 @@ public class AttackResult extends CommandResult {
     private int damageDone;
     private StatusEffect statusEffectApplied;
     private int statusEffectTurns;
+    private boolean succumbedToStatusEffect;
     private boolean confused;
     private int confusedTurns;
     private int confusionDamageTaken;
@@ -38,6 +39,7 @@ public class AttackResult extends CommandResult {
         this.damageDone = builder.damageDone;
         this.statusEffectApplied = builder.statusEffectApplied;
         this.statusEffectTurns = builder.statusEffectTurns;
+        this.succumbedToStatusEffect = builder.succumbedToStatusEffect;
         this.confused = builder.confused;
         this.confusedTurns = builder.confusedTurns;
         this.confusionDamageTaken = builder.confusionDamageTaken;
@@ -66,6 +68,10 @@ public class AttackResult extends CommandResult {
 
     public StatusEffect getStatusEffectApplied() {
         return statusEffectApplied;
+    }
+
+    public boolean isSuccumbedToStatusEffect() {
+        return succumbedToStatusEffect;
     }
 
     public boolean isConfused() {
@@ -144,6 +150,7 @@ public class AttackResult extends CommandResult {
         private int damageDone;
         private StatusEffect statusEffectApplied;
         private int statusEffectTurns;
+        private boolean succumbedToStatusEffect;
         private boolean confused;
         private int confusedTurns;
         private int confusionDamageTaken;
@@ -178,6 +185,11 @@ public class AttackResult extends CommandResult {
 
         protected Builder setStatusEffectTurns(int statusEffectTurns) {
             this.statusEffectTurns = statusEffectTurns;
+            return this;
+        }
+
+        protected Builder setSuccumbedToStatusEffect(boolean succumbedToStatusEffect) {
+            this.succumbedToStatusEffect = succumbedToStatusEffect;
             return this;
         }
 

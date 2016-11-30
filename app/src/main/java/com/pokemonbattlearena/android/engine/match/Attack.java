@@ -86,6 +86,11 @@ public class Attack extends Command {
         boolean paralyzed = statusEffectCalculator.isAffectedByParalysis(attackingPokemon);
         boolean sleeping = statusEffectCalculator.isAffectedBySleep(attackingPokemon);
         
+        if (attackingPokemon.isFlinched() || frozen || paralyzed || sleeping) {
+            builder.setSuccumbedToStatusEffect(true);
+            return builder.build();
+        }
+
         // If a Pokemon is confused, see if it hurts itself and finish the attack
         if (attackingPokemon.isConfused()) {
             if (statusEffectCalculator.isHurtByConfusion()) {
