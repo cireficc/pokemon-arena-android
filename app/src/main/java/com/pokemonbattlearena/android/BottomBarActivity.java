@@ -327,9 +327,13 @@ public class BottomBarActivity extends BaseActivity implements
             mApplication.getGoogleApiClient().connect();
         }
 
-        //Sets up and plays theme music
-        startMusic(R.raw.music_menu);
-        setMusicCompletionListener(R.raw.music_menu_cont);
+        if(mMusic == null) {
+            //Sets up and plays theme music
+            startMusic(R.raw.music_menu);
+            setMusicCompletionListener(R.raw.music_menu_cont);
+        } else {
+            mMusic.start();
+        }
 
 
         super.onStart();
@@ -369,7 +373,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     @Override
     public void onStop() {
-        mMusic.stop();
+        mMusic.pause();
         super.onStop();
     }
 
@@ -389,6 +393,7 @@ public class BottomBarActivity extends BaseActivity implements
     protected void onDestroy() {
         mMusic.stop();
         mMusic.release();
+        mMusic = null;
         super.onDestroy();
     }
 
