@@ -7,14 +7,10 @@ import com.pokemonbattlearena.android.engine.database.SelfHealAmount;
 import com.pokemonbattlearena.android.engine.database.SelfHealType;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
-import static com.pokemonbattlearena.android.engine.Logging.logAbsorbHealAmount;
-import static com.pokemonbattlearena.android.engine.Logging.logDirectHealAmount;
-import static com.pokemonbattlearena.android.engine.Logging.logGetHealAmount;
-
 public class HealingCalculator {
 
-
     private static HealingCalculator instance = null;
+    private static final String TAG = HealingCalculator.class.getName();
 
     protected HealingCalculator() {
     }
@@ -35,15 +31,14 @@ public class HealingCalculator {
 
         if (healType == SelfHealType.DIRECT) {
             healed = getDirectHealAmount(attacker, move);
+            Log.i(TAG, move.getName() + " is a direct heal. Healing for " + healed + " HP");
         }
 
         if (healType == SelfHealType.ABSORB) {
             healed = getAbsorbHealAmount(move, damageDone);
+            Log.i(TAG, move.getName() + " is an absorb heal. Healing for " + healed + " HP");
         }
 
-        if(logGetHealAmount) {
-            logGetHealAmount(healType, healed, move.getName());
-        }
         return healed;
     }
 
@@ -52,12 +47,10 @@ public class HealingCalculator {
         SelfHealAmount healAmount = move.getSelfHealAmount();
 
         if (healAmount == SelfHealAmount.HALF) {
+            Log.i(TAG, "Direct heal is 50% of user's max HP");
             return Math.round(attacker.getOriginalPokemon().getHp() / 2);
         }
 
-        if(logDirectHealAmount) {
-            logDirectHealAmount(healAmount);
-        }
         return 0;
     }
 
@@ -66,12 +59,10 @@ public class HealingCalculator {
         SelfHealAmount healAmount = move.getSelfHealAmount();
 
         if (healAmount == SelfHealAmount.HALF) {
+            Log.i(TAG, "Absorb heal is 50% of damage done");
             return Math.round(damageDone / 2);
         }
 
-        if(logAbsorbHealAmount) {
-            logAbsorbHealAmount(healAmount);
-        }
         return 0;
     }
 }

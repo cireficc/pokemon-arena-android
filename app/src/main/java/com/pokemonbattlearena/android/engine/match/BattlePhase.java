@@ -9,11 +9,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.pokemonbattlearena.android.engine.Logging.logIsPhaseReady;
-import static com.pokemonbattlearena.android.engine.Logging.logQueueCommand;
-import static com.pokemonbattlearena.android.engine.Logging.logSetPlayerReady;
-
 public class BattlePhase {
+
+    private transient static final String TAG = BattlePhase.class.getName();
 
     private transient BattlePokemonPlayer player1;
     private transient BattlePokemonPlayer player2;
@@ -46,6 +44,7 @@ public class BattlePhase {
 
     public boolean queueCommand(Command command) {
 
+        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
         this.commands.add(command);
 
         if (command instanceof Switch) {
@@ -56,32 +55,26 @@ public class BattlePhase {
             setPlayerReady(a.getAttackingPlayer());
         }
 
-        if (logQueueCommand) {
-            logQueueCommand(command);
-        }
         return isPhaseReady();
     }
 
     private void setPlayerReady(BattlePokemonPlayer player) {
 
+        Log.i(TAG, "Setting player ready");
+
         if(player.equals(player1)) {
+            Log.i(TAG, "Player 1 ready");
             player1Ready = true;
         } else {
+            Log.i(TAG, "Player 2 ready");
             player2Ready = true;
-        }
-
-        if (logSetPlayerReady) {
-            logSetPlayerReady(player, player1);
         }
     }
 
     private boolean isPhaseReady() {
 
         boolean ready = (player1Ready && player2Ready);
-
-        if(logIsPhaseReady) {
-            logIsPhaseReady(ready);
-        }
+        Log.i(TAG, "Is phase ready (both players ready): " + ready);
 
         return ready;
     }
