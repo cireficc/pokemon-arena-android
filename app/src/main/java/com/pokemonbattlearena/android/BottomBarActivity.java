@@ -374,6 +374,18 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     @Override
+    protected void onPause() {
+        mMusic.pause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mMusic.start();
+        super.onResume();
+    }
+
+    @Override
     protected void onDestroy() {
         mMusic.stop();
         mMusic.release();
