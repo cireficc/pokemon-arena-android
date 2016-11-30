@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -34,6 +35,7 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
@@ -57,6 +59,7 @@ import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatInGameFragment;
+import com.pokemonbattlearena.android.fragments.team.SavedTeamsFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
 import com.roughike.bottombar.BottomBar;
@@ -66,7 +69,9 @@ import com.stephentuso.welcome.WelcomeHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_REAL_TIME_MESSAGE_SEND_FAILED;
@@ -84,6 +89,7 @@ public class BottomBarActivity extends BaseActivity implements
         MainMenuFragment.OnMenuFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener,
         ChatInGameFragment.OnGameChatLoadedListener,
+        SavedTeamsFragment.OnSavedTeamsFragmentTouchListener,
         BattleEndListener {
 
     private static final String TAG = BottomBarActivity.class.getSimpleName();
@@ -109,6 +115,7 @@ public class BottomBarActivity extends BaseActivity implements
     private FragmentManager mFragmentManager;
     private MainMenuFragment mMainMenuFragment;
     private BattleHomeFragment mBattleHomeFragment;
+    private SavedTeamsFragment mSavedTeamsFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
     private ChatInGameFragment mChatInGameFragment;
@@ -125,6 +132,9 @@ public class BottomBarActivity extends BaseActivity implements
 
     //TODO Temporary integer used for AI switching. Need 2 kill. Need 4 Speed.
     private int ind = 0;
+
+    //SAVED TEAMS
+    private String newestAddedPokemonTeamName;
 
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
@@ -151,7 +161,6 @@ public class BottomBarActivity extends BaseActivity implements
     //region Activity hooks
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bottombar);
 
@@ -159,6 +168,7 @@ public class BottomBarActivity extends BaseActivity implements
         mWelcomeHelper.show(savedInstanceState);
 
         mPreferences = getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
+        newestAddedPokemonTeamName = "";
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.BLACK);
@@ -180,6 +190,7 @@ public class BottomBarActivity extends BaseActivity implements
         mApplication.setGoogleApiClient(googleApiClient);
 
         mMainMenuFragment = new MainMenuFragment();
+        mSavedTeamsFragment = new SavedTeamsFragment();
         mTeamsHomeFragment = createTeamsHomeFragment();
         mBattleHomeFragment = new BattleHomeFragment();
         mChatHomeFragment = new ChatHomeFragment();
@@ -187,8 +198,6 @@ public class BottomBarActivity extends BaseActivity implements
         mFragmentManager.beginTransaction()
                 .add(R.id.container, mMainMenuFragment, "main")
                 .commit();
-
-
 
         // Listens for a tab touch (Only first touch of new tab)
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
@@ -201,9 +210,10 @@ public class BottomBarActivity extends BaseActivity implements
                     case R.id.tab_teams:
                         hideKeyboard();
                         if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
-                            if (mTeamsHomeFragment != null && !mTeamsHomeFragment.isAdded()) {
+                            if (mTeamsHomeFragment != null && !mSavedTeamsFragment.isAdded()) {
+                                displaySavedTeam(false);
                                 mFragmentManager.beginTransaction()
-                                        .replace(R.id.container, mTeamsHomeFragment, "team")
+                                        .replace(R.id.container, mSavedTeamsFragment, "team")
                                         .commit();
                             }
                             if (mChatHomeFragment != null && mChatHomeFragment.isAdded()) {
@@ -330,16 +340,16 @@ public class BottomBarActivity extends BaseActivity implements
                     Log.e(TAG, "Error signing in " + requestCode);
                 }
             case WelcomeHelper.DEFAULT_WELCOME_SCREEN_REQUEST:
-                    // The key of the welcome screen is in the Intent
+                // The key of the welcome screen is in the Intent
 
-                    if (resultCode == RESULT_OK) {
-                        // Code here will run if the welcome screen was completed
-                        String name = mPreferences.getString("default_name", "default");
-                        Toast.makeText(mApplication, name, Toast.LENGTH_SHORT).show();
-                        displaySavedTeam(true);
-                    } else {
-                        finish();
-                    }
+                if (resultCode == RESULT_OK) {
+                    // Code here will run if the welcome screen was completed
+                    String name = mPreferences.getString("default_name", "default");
+                    Toast.makeText(mApplication, name, Toast.LENGTH_SHORT).show();
+                    displaySavedTeam(true);
+                } else {
+                    finish();
+                }
         }
         super.onActivityResult(requestCode, resultCode, intent);
     }
@@ -719,7 +729,7 @@ public class BottomBarActivity extends BaseActivity implements
         mCurrentPokemonPlayer = new PokemonPlayer(mMyId);
         mCurrentPokemonPlayer.setPokemonTeam(team);
         String json = new Gson().toJson(team, PokemonTeam.class);
-        setSavedTeam(json);
+        setCurrentTeam(json);
         if (mBattleHomeFragment != null) {
             mBattleHomeFragment.setPlayerTeam(team);
         }
@@ -795,9 +805,54 @@ public class BottomBarActivity extends BaseActivity implements
         }
     }
 
-    private void setSavedTeam(String pokemonJSON) {
+    private void addSavedTeam(String teamName, String pokemonJSON) {
+        DatabaseReference root = SavedTeamsFragment.root;
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(teamName, pokemonJSON);
+        root.updateChildren(map);
+    }
+
+    public void deleteSavedTeam(String teamName) {
+        DatabaseReference root = SavedTeamsFragment.root;
+        root.child(teamName).removeValue();
+    }
+
+    public void updateTeamOrder(){
+        ArrayList<Pair<Long, PokemonTeam>> savedTeams;
+        ArrayList<String> teamOrder = new ArrayList<String>();
+        //put team order from drag listview into new Arraylist
+        savedTeams = mSavedTeamsFragment.getTeamOrder();
+        //populate temp ArrayList with all team names
+        for(Pair<Long, PokemonTeam> team : savedTeams){
+            teamOrder.add(team.second.getTeamName());
+        }
+
+        //add temp Arraylist to sharedpreferences for team order
         SharedPreferences.Editor editor = mPreferences.edit();
-        Log.d(TAG, "Setting team: " + pokemonJSON);
+        String orderedTeamJSON = new Gson().toJson(teamOrder);
+        Log.d(TAG, "Setting saved team order: " + orderedTeamJSON);
+        editor.putString("orderedTeamJSON", orderedTeamJSON).apply();
+        editor.commit();
+
+        //add first team as your active team
+        if(savedTeams.size() != 0) {
+            String pokemonJSON = new Gson().toJson(savedTeams.get(0).second);
+            setCurrentTeam(pokemonJSON);
+        }
+    }
+
+    public ArrayList<String> retrieveTeamOrder(){
+        String orderedTeamJSON = mPreferences.getString("orderedTeamJSON", "mew");
+        if (!orderedTeamJSON.equals("mew")) {
+            Log.d(TAG, "Got team order: " + orderedTeamJSON);
+            return new Gson().fromJson(orderedTeamJSON, ArrayList.class);
+        }
+        return new ArrayList<String>();
+    }
+
+    private void setCurrentTeam(String pokemonJSON){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        Log.d(TAG, "Setting current team: " + pokemonJSON);
         editor.putString("pokemon_team", pokemonJSON).apply();
         editor.commit();
     }
@@ -973,9 +1028,31 @@ public class BottomBarActivity extends BaseActivity implements
     public void onTeamSelected(String pokemonJSON) {
         Log.d(TAG, "Selected: " + pokemonJSON);
         if (mFragmentManager != null) {
-            mBottomBar.selectTabWithId(R.id.tab_battle);
-            setSavedTeam(pokemonJSON);
-            displaySavedTeam(true);
+            PokemonTeam team = new Gson().fromJson(pokemonJSON, PokemonTeam.class);
+            //add saved Team to Firebase
+            newestAddedPokemonTeamName = team.getTeamName();
+            addSavedTeam(newestAddedPokemonTeamName, pokemonJSON);
+
+            setCurrentPokemonPlayerTeam(team);
+            toggleAddTeamFragment();
+        }
+
+    }
+
+    public String getNewestPokemonTeamName() {
+        return newestAddedPokemonTeamName;
+    }
+
+    @Override
+    public void toggleAddTeamFragment() {
+        if (mFragmentManager != null && mSavedTeamsFragment.isAdded()) {
+            mFragmentManager.beginTransaction().remove(mSavedTeamsFragment).commit();
+            mFragmentManager.beginTransaction().add(R.id.container, mTeamsHomeFragment, "team").commit();
+            mFragmentManager.executePendingTransactions();
+        } else if (mFragmentManager != null && mTeamsHomeFragment.isAdded()) {
+            mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
+            mFragmentManager.beginTransaction().add(R.id.container, mSavedTeamsFragment, "team").commit();
+            mFragmentManager.executePendingTransactions();
         }
     }
     //endregion

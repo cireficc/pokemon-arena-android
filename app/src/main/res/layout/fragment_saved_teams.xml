@@ -4,18 +4,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".BottomBarActivity"
-    android:background="@color/color_charizard_light">
+    android:background="@drawable/background_saved_teams">
+
+    <TextView
+        android:text="Current Team"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/team_current_title"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="2dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
+        android:fontFamily="sans-serif-smallcaps"
+        android:textStyle="normal|bold"
+        android:textSize="22sp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/team_current_title">
+
+        <com.woxthebox.draglistview.DragListView
+            android:id="@+id/team_drag_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+        </com.woxthebox.draglistview.DragListView>
+    </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
         app:fabSize="mini"
-        app:srcCompat="@android:drawable/ic_input_add"
-        android:id="@+id/floatingActionButton"
-        android:layout_marginEnd="13dp"
-        android:layout_marginBottom="78dp"
+        android:id="@+id/team_add_new_button"
+        android:layout_marginEnd="19dp"
+        android:layout_marginBottom="25dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        app:srcCompat="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/color_charizard"
+        app:rippleColor="@android:color/white" />
 
 </RelativeLayout>
