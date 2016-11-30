@@ -12,6 +12,7 @@ public class AttackResult extends CommandResult {
     private StatusEffect statusEffectApplied;
     private int statusEffectTurns;
     private boolean succumbedToStatusEffect;
+    private boolean unfroze;
     private boolean confused;
     private int confusedTurns;
     private int confusionDamageTaken;
@@ -40,6 +41,7 @@ public class AttackResult extends CommandResult {
         this.statusEffectApplied = builder.statusEffectApplied;
         this.statusEffectTurns = builder.statusEffectTurns;
         this.succumbedToStatusEffect = builder.succumbedToStatusEffect;
+        this.unfroze = builder.unfroze;
         this.confused = builder.confused;
         this.confusedTurns = builder.confusedTurns;
         this.confusionDamageTaken = builder.confusionDamageTaken;
@@ -72,6 +74,10 @@ public class AttackResult extends CommandResult {
 
     public boolean isSuccumbedToStatusEffect() {
         return succumbedToStatusEffect;
+    }
+
+    public boolean isUnfroze() {
+        return unfroze;
     }
 
     public boolean isConfused() {
@@ -151,6 +157,7 @@ public class AttackResult extends CommandResult {
         private StatusEffect statusEffectApplied;
         private int statusEffectTurns;
         private boolean succumbedToStatusEffect;
+        private boolean unfroze;
         private boolean confused;
         private int confusedTurns;
         private int confusionDamageTaken;
@@ -190,6 +197,11 @@ public class AttackResult extends CommandResult {
 
         protected Builder setSuccumbedToStatusEffect(boolean succumbedToStatusEffect) {
             this.succumbedToStatusEffect = succumbedToStatusEffect;
+            return this;
+        }
+
+        protected Builder setUnfroze(boolean unfroze) {
+            this.unfroze = unfroze;
             return this;
         }
 
