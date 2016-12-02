@@ -28,21 +28,22 @@ public class BattlePokemon {
     private transient int speedStage = 0;
     private transient int critStage = 0;
     private transient List<Move> moveSet;
+    private transient boolean isCurrentPokemon = false;
+    private transient boolean isPokemonOnDeck = false;
 
     public BattlePokemon(Pokemon pokemon) {
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
-      //  this.confused = false;
-      //  this.flinched = false;
-      // this.fainted = false;
-      //  this.attackStage = 0;
-      //  this.defenseStage = 0;
-      //  this.spAttackStage = 0;
-      //  this.spDefenseStage = 0;
-      //  this.speedStage = 0;
-      //  this.critStage = 0;
         this.moveSet = pokemon.getActiveMoveList();
     }
+
+    public boolean isCurrentPokemon() { return isCurrentPokemon; }
+
+    public void setAsCurrentPokemon(boolean currentPokemon) { isCurrentPokemon = currentPokemon; }
+
+    public boolean isPokemonOnDeck() { return isPokemonOnDeck; }
+
+    public void setAsPokemonOnDeck(boolean pokemonOnDeck) { isPokemonOnDeck = pokemonOnDeck; }
 
     public Pokemon getOriginalPokemon() {
         return originalPokemon;
