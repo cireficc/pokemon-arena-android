@@ -31,12 +31,12 @@ public class HealingCalculator {
 
         if (healType == SelfHealType.DIRECT) {
             healed = getDirectHealAmount(attacker, move);
-            Log.i(TAG, move.getName() + " is a direct heal. Healing for " + healed + " HP");
+            //Log.i(TAG, move.getName() + " is a direct heal. Healing for " + healed + " HP");
         }
 
         if (healType == SelfHealType.ABSORB) {
             healed = getAbsorbHealAmount(move, damageDone);
-            Log.i(TAG, move.getName() + " is an absorb heal. Healing for " + healed + " HP");
+            //Log.i(TAG, move.getName() + " is an absorb heal. Healing for " + healed + " HP");
         }
 
         return healed;
@@ -47,7 +47,7 @@ public class HealingCalculator {
         SelfHealAmount healAmount = move.getSelfHealAmount();
 
         if (healAmount == SelfHealAmount.HALF) {
-            Log.i(TAG, "Direct heal is 50% of user's max HP");
+            //Log.i(TAG, "Direct heal is 50% of user's max HP");
             return Math.round(attacker.getOriginalPokemon().getHp() / 2);
         }
 
@@ -59,7 +59,7 @@ public class HealingCalculator {
         SelfHealAmount healAmount = move.getSelfHealAmount();
 
         if (healAmount == SelfHealAmount.HALF) {
-            Log.i(TAG, "Absorb heal is 50% of damage done");
+            //Log.i(TAG, "Absorb heal is 50% of damage done");
             return Math.round(damageDone / 2);
         }
 

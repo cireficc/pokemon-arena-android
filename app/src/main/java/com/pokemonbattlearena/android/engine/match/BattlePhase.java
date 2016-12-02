@@ -44,7 +44,7 @@ public class BattlePhase {
 
     public boolean queueCommand(Command command) {
 
-        Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
+        //Log.i(TAG, "Adding command of type " + command.getClass() + " to command list");
         this.commands.add(command);
 
         if (command instanceof Switch) {
@@ -60,13 +60,13 @@ public class BattlePhase {
 
     private void setPlayerReady(BattlePokemonPlayer player) {
 
-        Log.i(TAG, "Setting player ready");
+        //Log.i(TAG, "Setting player ready");
 
         if(player.equals(player1)) {
-            Log.i(TAG, "Player 1 ready");
+            //Log.i(TAG, "Player 1 ready");
             player1Ready = true;
         } else {
-            Log.i(TAG, "Player 2 ready");
+            //Log.i(TAG, "Player 2 ready");
             player2Ready = true;
         }
     }
@@ -74,8 +74,9 @@ public class BattlePhase {
     private boolean isPhaseReady() {
 
         boolean ready = (player1Ready && player2Ready);
-        Log.i(TAG, "Is phase ready (both players ready): " + ready);
+        //Log.i(TAG, "Is phase ready (both players ready): " + ready);
 
         return ready;
     }
+
 }

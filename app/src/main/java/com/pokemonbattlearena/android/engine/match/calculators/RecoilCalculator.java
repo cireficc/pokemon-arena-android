@@ -37,11 +37,11 @@ public class RecoilCalculator {
         }
         else {
             recoiled = getCrashAmount(attacker);
-            Log.i(TAG, move.getName() + " is a crash move. Attacker takes " + recoiled + " damage");
+            //Log.i(TAG, move.getName() + " is a crash move. Attacker takes " + recoiled + " damage");
             return recoiled;
         }
 
-        Log.i(TAG, move.getName() + " is a recoil move. Attacker takes " + recoiled + " damage");
+        //Log.i(TAG, move.getName() + " is a recoil move. Attacker takes " + recoiled + " damage");
         return recoiled;
     }
 

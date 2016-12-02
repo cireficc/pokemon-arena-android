@@ -6,6 +6,7 @@ import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Command;
+import com.pokemonbattlearena.android.engine.match.Switch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,8 +94,11 @@ public class Node {
     public String getCommandName() {
         if (command instanceof Attack) {
             return ((Attack) command).getMove().getName();
-        }
-        return "Swtich";
+        } else if (command instanceof Switch) {
+            return "Switching";
+        } else {
+            return "Root";
+            }
         }
 
     public int getNumDominating() {

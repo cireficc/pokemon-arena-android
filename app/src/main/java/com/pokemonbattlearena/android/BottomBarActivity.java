@@ -565,10 +565,11 @@ public class BottomBarActivity extends BaseActivity implements
             if (mIsHost) {
                 Command command = mCommandGson.fromJson(bufferString, Command.class);
                 Log.d(TAG, "We got a command from client of type: " + command.getClass());
-                boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueCommand(command);
-                if (phaseReady) {
-                    handleBattleResult();
-                }
+                //boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueCommand(command);
+                queueHostMessage(command, true);
+               // if (phaseReady) {
+               //     handleBattleResult();
+               // }
             } else {
                 BattlePhaseResult resultFromJson = mCommandResultGson.fromJson(bufferString, BattlePhaseResult.class);
                 Log.d(TAG, "We got a battle phase result: " + resultFromJson.toString());
@@ -594,10 +595,10 @@ public class BottomBarActivity extends BaseActivity implements
     }
 
     //region Networking Helper methods
-    private void queueHostMessage(Command c) {
-        boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(c);
+    private void queueHostMessage(Command c, boolean movesReady) {
+        boolean phaseReady = mActiveBattle.getCurrentBattlePhase().queueCommand(c);
         mBattleHomeFragment.enableButtonActions(movesReady);
-        if (movesReady) {
+        if (phaseReady) {
             handleBattleResult();
         }
     }
@@ -648,6 +649,8 @@ public class BottomBarActivity extends BaseActivity implements
     //region AI Helper Methods
     public void AIBattleTurn(Command cmd) {
         if (mActiveBattle instanceof AiBattle) {
+            mBattleHomeFragment.enableButtonActions(false);
+            updateUI();
             mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
             ((AiBattle) mActiveBattle).buildIntelligence();
             Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
@@ -670,6 +673,7 @@ public class BottomBarActivity extends BaseActivity implements
     private void handleBattleResult() {
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
         PokemonTeam pokes = new PokemonTeam(6);
+        boolean skipFaintedPokemonAttack = false;
         for (BattlePokemon bp : mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons()) {
             pokes.addPokemon(bp.getOriginalPokemon());
         }
@@ -680,12 +684,17 @@ public class BottomBarActivity extends BaseActivity implements
             updateUI();
             Log.d(TAG, commandResult.getTargetInfo().toString());
 
+            if (!skipFaintedPokemonAttack) {
+                mActiveBattle.applyCommandResult(commandResult);
+            }
+            if (commandResult instanceof AttackResult) {
+                skipFaintedPokemonAttack = ((AttackResult) commandResult).isFainted();
+            }
+
+
             if (mActiveBattle.isFinished()) {
                 battleEndListener.onBattleEnd();
-                if (!isAiBattle) {
-                    //TODO: don't leave the room since
-                    leaveRoom();
-                }
+                leaveRoom();
                 return;
             }
         }
@@ -965,7 +974,7 @@ public class BottomBarActivity extends BaseActivity implements
         Switch s = new Switch(mActiveBattle.getSelf(), position);
         if (!isAiBattle) {
             if (mIsHost) {
-                queueHostMessage(s);
+                queueHostMessage(s, false);
             } else {
                 sendClientMessage(s);
             }
@@ -982,7 +991,7 @@ public class BottomBarActivity extends BaseActivity implements
                 Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
-                    queueHostMessage(attack);
+                    queueHostMessage(attack, false);
                 } else {
                     Log.d(TAG, "Client: sending move: " + move.getName());
                     sendClientMessage(attack);
@@ -991,7 +1000,7 @@ public class BottomBarActivity extends BaseActivity implements
         } else {
             if (mBattleHomeFragment != null) {
                 mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
-                mActiveBattle.startNewBattlePhase();
+                //mActiveBattle.startNewBattlePhase();
                 Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                 AIBattleTurn(attack);
             }
