@@ -1,9 +1,11 @@
-package com.pokemonbattlearena.android;
+package com.pokemonbattlearena.android.activity;
 
 import android.app.ProgressDialog;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
+
+import com.pokemonbattlearena.android.R;
 
 /**
  * Created by droidowl on 9/25/16.

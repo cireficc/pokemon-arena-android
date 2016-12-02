@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.TypeModel;
@@ -27,7 +26,6 @@ import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.team.PokemonGridAdapter;
@@ -45,8 +43,8 @@ import java.util.Map;
  * Created by droidowl on 9/25/16.
  */
 
-public class BattleHomeFragment extends Fragment implements View.OnClickListener {
-    private final static String TAG = BattleHomeFragment.class.getSimpleName();
+public class BattleFragment extends Fragment implements View.OnClickListener {
+    private final static String TAG = BattleFragment.class.getSimpleName();
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private static int[] moveButtonIds = {R.id.move_button_0, R.id.move_button_1, R.id.move_button_2, R.id.move_button_3};
 
@@ -70,7 +68,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     private final static int typePokemon = 0;
     private final static int typeStatus = 1;
 
-    public BattleHomeFragment() {
+    public BattleFragment() {
         super();
         mTypeModel = new TypeModel();
     }
@@ -175,7 +173,7 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            mCallback = (BattleHomeFragment.OnBattleFragmentTouchListener) context;
+            mCallback = (BattleFragment.OnBattleFragmentTouchListener) context;
         } catch (ClassCastException e) {
             Log.e(TAG, e.getMessage());
             throw new ClassCastException(context.toString() + "must implement listener");

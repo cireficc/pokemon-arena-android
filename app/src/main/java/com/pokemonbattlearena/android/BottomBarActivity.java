@@ -55,7 +55,7 @@ import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Switch;
 import com.pokemonbattlearena.android.engine.match.SwitchResult;
-import com.pokemonbattlearena.android.fragments.battle.BattleHomeFragment;
+import com.pokemonbattlearena.android.fragments.battle.BattleFragment;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragments.chat.ChatInGameFragment;
@@ -85,7 +85,7 @@ public class BottomBarActivity extends BaseActivity implements
         RoomStatusUpdateListener,
         RealTimeMultiplayer.ReliableMessageSentCallback,
         OnPokemonTeamSelectedListener,
-        BattleHomeFragment.OnBattleFragmentTouchListener,
+        BattleFragment.OnBattleFragmentTouchListener,
         MainMenuFragment.OnMenuFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener,
         ChatInGameFragment.OnGameChatLoadedListener,
@@ -114,7 +114,7 @@ public class BottomBarActivity extends BaseActivity implements
     // FRAGMENTS
     private FragmentManager mFragmentManager;
     private MainMenuFragment mMainMenuFragment;
-    private BattleHomeFragment mBattleHomeFragment;
+    private BattleFragment mBattleFragment;
     private SavedTeamsFragment mSavedTeamsFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
@@ -192,7 +192,7 @@ public class BottomBarActivity extends BaseActivity implements
         mMainMenuFragment = new MainMenuFragment();
         mSavedTeamsFragment = new SavedTeamsFragment();
         mTeamsHomeFragment = createTeamsHomeFragment();
-        mBattleHomeFragment = new BattleHomeFragment();
+        mBattleFragment = new BattleFragment();
         mChatHomeFragment = new ChatHomeFragment();
         mChatInGameFragment = new ChatInGameFragment();
         mFragmentManager.beginTransaction()
@@ -234,8 +234,8 @@ public class BottomBarActivity extends BaseActivity implements
                                         .replace(R.id.container, mMainMenuFragment, "main")
                                         .commit();
                             }
-                            if (mBattleHomeFragment != null && mTeamsHomeFragment.isAdded()) {
-                                mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+                            if (mBattleFragment != null && mTeamsHomeFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mBattleFragment).commit();
                             }
                             if (mTeamsHomeFragment != null && mTeamsHomeFragment.isAdded()) {
                                 mFragmentManager.beginTransaction().remove(mTeamsHomeFragment).commit();
@@ -244,9 +244,9 @@ public class BottomBarActivity extends BaseActivity implements
                                 mFragmentManager.beginTransaction().remove(mChatHomeFragment).commit();
                             }
                         } else if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
-                            if (mBattleHomeFragment != null && !mBattleHomeFragment.isAdded()) {
+                            if (mBattleFragment != null && !mBattleFragment.isAdded()) {
                                 mFragmentManager.beginTransaction()
-                                        .replace(R.id.container, mBattleHomeFragment, "battle")
+                                        .replace(R.id.container, mBattleFragment, "battle")
                                         .commit();
                                 updateUI();
                             }
@@ -290,8 +290,8 @@ public class BottomBarActivity extends BaseActivity implements
                                 }
                                 showProgressDialog();
                             }
-                            if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
-                                mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+                            if (mBattleFragment != null && mBattleFragment.isAdded()) {
+                                mFragmentManager.beginTransaction().remove(mBattleFragment).commit();
                             }
                         }
                         break;
@@ -581,7 +581,7 @@ public class BottomBarActivity extends BaseActivity implements
                     updateUI();
                 }
 
-                mBattleHomeFragment.enableButtonActions(true);
+                mBattleFragment.enableButtonActions(true);
                 if (mActiveBattle.selfPokemonFainted()) {
                     Button force;
                     force = (Button)findViewById(R.id.switch_button);
@@ -596,7 +596,7 @@ public class BottomBarActivity extends BaseActivity implements
     //region Networking Helper methods
     private void queueHostMessage(Command c) {
         boolean movesReady = mActiveBattle.getCurrentBattlePhase().queueCommand(c);
-        mBattleHomeFragment.enableButtonActions(movesReady);
+        mBattleFragment.enableButtonActions(movesReady);
         if (movesReady) {
             handleBattleResult();
         }
@@ -605,7 +605,7 @@ public class BottomBarActivity extends BaseActivity implements
     private void sendClientMessage(Command c) {
         String gson = mCommandGson.toJson(c, Command.class);
         sendMessage(gson);
-        mBattleHomeFragment.enableButtonActions(false);
+        mBattleFragment.enableButtonActions(false);
     }
 
     private void sendMessage(String message) {
@@ -648,7 +648,7 @@ public class BottomBarActivity extends BaseActivity implements
     //region AI Helper Methods
     public void AIBattleTurn(Command cmd) {
         if (mActiveBattle instanceof AiBattle) {
-            mBattleHomeFragment.enableButtonActions(false);
+            mBattleFragment.enableButtonActions(false);
             updateUI();
             mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
             ((AiBattle) mActiveBattle).buildIntelligence();
@@ -687,8 +687,8 @@ public class BottomBarActivity extends BaseActivity implements
                 return;
             }
         }
-        mBattleHomeFragment.enableButtonActions(true);
-        mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
+        mBattleFragment.enableButtonActions(true);
+        mBattleFragment.refreshActivePokemon(mActiveBattle);
         updateUI();
 
         if(!isAiBattle) {
@@ -729,8 +729,8 @@ public class BottomBarActivity extends BaseActivity implements
         mCurrentPokemonPlayer.setPokemonTeam(team);
         String json = new Gson().toJson(team, PokemonTeam.class);
         setCurrentTeam(json);
-        if (mBattleHomeFragment != null) {
-            mBattleHomeFragment.setPlayerTeam(team);
+        if (mBattleFragment != null) {
+            mBattleFragment.setPlayerTeam(team);
         }
     }
 
@@ -749,16 +749,16 @@ public class BottomBarActivity extends BaseActivity implements
      **********************************************************************************************/
     //region user interface
     private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
-        if (mBattleHomeFragment != null && mBattleHomeFragment.isAdded()) {
+        if (mBattleFragment != null && mBattleFragment.isAdded()) {
             //TODO: use updateUI to do this
-            mBattleHomeFragment.setPlayer(mCurrentPokemonPlayer);
-            mBattleHomeFragment.setOpponent(mOpponentPokemonPlayer);
-            mBattleHomeFragment.setBattleVisible(true);
+            mBattleFragment.setPlayer(mCurrentPokemonPlayer);
+            mBattleFragment.setOpponent(mOpponentPokemonPlayer);
+            mBattleFragment.setBattleVisible(true);
         }
     }
 
     private void updateUI() {
-        if (mBattleHomeFragment != null) {
+        if (mBattleFragment != null) {
             int health1 = mActiveBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
             int health2 = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
 
@@ -771,8 +771,8 @@ public class BottomBarActivity extends BaseActivity implements
 
             Log.d(TAG, name + ": " + currentHp);
 
-            mBattleHomeFragment.updateHealthBars(health1, health2);
-            mBattleHomeFragment.refreshActivePokemon(mActiveBattle);
+            mBattleFragment.updateHealthBars(health1, health2);
+            mBattleFragment.refreshActivePokemon(mActiveBattle);
         }
     }
 
@@ -860,15 +860,15 @@ public class BottomBarActivity extends BaseActivity implements
         if(mApplication.getApplicationPhase() == ApplicationPhase.ACTIVE_BATTLE) {
             if (mFragmentManager != null && mMainMenuFragment.isAdded()) {
                 mFragmentManager.beginTransaction().remove(mMainMenuFragment).commit();
-                mBattleHomeFragment = new BattleHomeFragment();
-                mFragmentManager.beginTransaction().add(R.id.container, mBattleHomeFragment, "battle").commit();
+                mBattleFragment = new BattleFragment();
+                mFragmentManager.beginTransaction().add(R.id.container, mBattleFragment, "battle").commit();
                 mFragmentManager.executePendingTransactions();
             }
         } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
             //deletes in-game chat from Firebase
             mChatInGameFragment.deleteChatRoom();
-            if (mFragmentManager != null && mBattleHomeFragment.isAdded()) {
-                mFragmentManager.beginTransaction().remove(mBattleHomeFragment).commit();
+            if (mFragmentManager != null && mBattleFragment.isAdded()) {
+                mFragmentManager.beginTransaction().remove(mBattleFragment).commit();
                 mFragmentManager.beginTransaction().add(R.id.container, mMainMenuFragment, "main").commit();
                 mFragmentManager.executePendingTransactions();
             }
@@ -975,8 +975,8 @@ public class BottomBarActivity extends BaseActivity implements
     @Override
     public void onMoveClicked(Move move) {
         if (!isAiBattle) {
-            if (mBattleHomeFragment != null) {
-                mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+            if (mBattleFragment != null) {
+                mBattleFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
                 Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                 if(mIsHost) {
                     Log.d(TAG, "Host: queuing move: " + move.getName());
@@ -987,8 +987,8 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         } else {
-            if (mBattleHomeFragment != null) {
-                mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
+            if (mBattleFragment != null) {
+                mBattleFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
                 Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                 AIBattleTurn(attack);
             }
@@ -1007,7 +1007,7 @@ public class BottomBarActivity extends BaseActivity implements
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
-                if (mBattleHomeFragment.isVisible() ) {
+                if (mBattleFragment.isVisible() ) {
                     Toast.makeText(mApplication, "Canceled search", Toast.LENGTH_SHORT).show();
                     leaveRoom();
                 }
