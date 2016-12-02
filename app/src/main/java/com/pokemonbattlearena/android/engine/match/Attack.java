@@ -31,9 +31,7 @@ public class Attack extends Command {
         this.move = move;
     }
 
-    protected Move getMove() {
-        return move;
-    }
+    public Move getMove() { return move; }
 
     public BattlePokemonPlayer getAttackingPlayer() {
         return attackingPlayer;
@@ -59,9 +57,8 @@ public class Attack extends Command {
 
     protected BattlePokemon getDefendingPokemon(Battle battle) {
 
-        return battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
+        return battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getPokemonOnDeck();
     }
-
 
     @Override
     public AttackResult execute(Battle battle) {
@@ -86,7 +83,7 @@ public class Attack extends Command {
         boolean frozen = statusEffectCalculator.isAffectedByFreeze(attackingPokemon);
         boolean paralyzed = statusEffectCalculator.isAffectedByParalysis(attackingPokemon);
         boolean sleeping = statusEffectCalculator.isAffectedBySleep(attackingPokemon);
-        
+
         // If the Pokemon is not affected by the freeze, it means it unfroze
         if (!frozen) {
             builder.setUnfroze(true);
