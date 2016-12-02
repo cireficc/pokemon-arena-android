@@ -254,7 +254,7 @@ public class Battle {
         }
 
         Log.i(TAG, "Applying recoil taken: " + recoilTaken);
-        attackingPokemon.setCurrentHp(currentHp - recoilTaken);
+        attackingPokemon.setCurrentHp(attackingPokemon.getCurrentHp() - recoilTaken);
 
         int attackStage = res.getAttackStageChange();
         int defenseStage = res.getDefenseStageChange();
