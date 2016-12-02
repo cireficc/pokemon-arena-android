@@ -669,6 +669,7 @@ public class BottomBarActivity extends BaseActivity implements
 
     private void handleBattleResult() {
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
+        boolean skipFaintedPokemonAttack = false;
         PokemonTeam pokes = new PokemonTeam(6);
         for (BattlePokemon bp : mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons()) {
             pokes.addPokemon(bp.getOriginalPokemon());
@@ -678,14 +679,19 @@ public class BottomBarActivity extends BaseActivity implements
 
         for (CommandResult commandResult : result.getCommandResults()) {
             updateUI();
-            Log.d(TAG, commandResult.getTargetInfo().toString());
 
+            if (!skipFaintedPokemonAttack) {
+                mActiveBattle.applyCommandResult(commandResult);
+            }
+
+            if(commandResult instanceof AttackResult) {
+                skipFaintedPokemonAttack = ((AttackResult) commandResult).isFainted();
+            }
+
+            mActiveBattle.setFinished();
             if (mActiveBattle.isFinished()) {
                 battleEndListener.onBattleEnd();
-                if (!isAiBattle) {
-                    //TODO: don't leave the room since
-                    leaveRoom();
-                }
+                leaveRoom();
                 return;
             }
         }

@@ -67,7 +67,7 @@ public class Battle {
         return isFinished;
     }
 
-    private void setFinished() {
+    public void setFinished() {
         isFinished = self.getBattlePokemonTeam().allFainted() || opponent.getBattlePokemonTeam().allFainted();
     }
 
@@ -133,7 +133,7 @@ public class Battle {
                 battlePhaseResult.addCommandResult(commandResult);
 
                 Log.i(TAG, "Checking if battle is finished");
-                setFinished();
+                //setFinished();
             }
         }
 
