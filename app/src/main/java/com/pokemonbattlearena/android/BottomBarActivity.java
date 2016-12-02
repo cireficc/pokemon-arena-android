@@ -991,7 +991,6 @@ public class BottomBarActivity extends BaseActivity implements
         } else {
             if (mBattleHomeFragment != null) {
                 mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
-                mActiveBattle.startNewBattlePhase();
                 Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                 AIBattleTurn(attack);
             }
