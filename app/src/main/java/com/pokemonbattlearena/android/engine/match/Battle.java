@@ -67,7 +67,7 @@ public class Battle {
         return isFinished;
     }
 
-    public void setFinished() {
+    private void setFinished() {
         isFinished = self.getBattlePokemonTeam().allFainted() || opponent.getBattlePokemonTeam().allFainted();
     }
 
@@ -117,6 +117,7 @@ public class Battle {
         Collections.sort(currentBattlePhase.getCommands(), commandComparator);
         BattlePhaseResult battlePhaseResult = new BattlePhaseResult();
         CommandResult commandResult;
+        boolean skipFaintedPokemon = false;
 
         verifySwitchAttack();
 
@@ -129,11 +130,22 @@ public class Battle {
                     commandResult = command.execute(this);
                 }
 
-                Log.i(TAG, "Adding command result to battle phase result");
-                battlePhaseResult.addCommandResult(commandResult);
+                if (commandResult instanceof AttackResult) {
+                    if (skipFaintedPokemon) {
+                        Log.i(TAG, "Attacking Pokemon is fainted, do not add its attack");
+                    } else if (((AttackResult) commandResult).isFainted() && !skipFaintedPokemon) {
+                        skipFaintedPokemon = true;
+                        Log.i(TAG, "Adding command result to battle phase result");
+                        battlePhaseResult.addCommandResult(commandResult);
+                    } else {
+                        battlePhaseResult.addCommandResult(commandResult);
+                    }
+                } else {
+                    battlePhaseResult.addCommandResult(commandResult);
+                }
 
                 Log.i(TAG, "Checking if battle is finished");
-                //setFinished();
+                setFinished();
             }
         }
 
