@@ -85,16 +85,20 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
     }
 
     private void configureButtonsWithMoves(List<Move> moves) {
-        mMoveButtonMap = new HashMap<>(4);
-        for (int i = 0; i < moveButtonIds.length; i++) {
+        mMoveButtonMap = new HashMap<>(moves.size());
+
+        // Hide all buttons before selectively showing them
+        for (Button b : mMoveButtons) {
+            b.setVisibility(View.GONE);
+        }
+
+        for (int i = 0; i < moves.size(); i++) {
             Button b = mMoveButtons[i];
             Move move = moves.get(i);
             b.setOnClickListener(this);
-            if (move != null) {
-                b.setText(move.getName());
-                b.setBackgroundColor(mApplication.getColor(mTypeModel.getColorForType(move.getType1())));
-                b.setVisibility(View.VISIBLE);
-            }
+            b.setText(move.getName());
+            b.setBackgroundColor(mApplication.getColor(mTypeModel.getColorForType(move.getType1())));
+            b.setVisibility(View.VISIBLE);
             mMoveButtonMap.put(b, move);
         }
     }
