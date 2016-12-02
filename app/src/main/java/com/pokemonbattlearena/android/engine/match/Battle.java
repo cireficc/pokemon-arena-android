@@ -91,8 +91,11 @@ public class Battle {
         public int compare(Command c1, Command c2) {
 
             // Pokemon switching always happens first
-            if (c1 instanceof Switch || c2 instanceof Switch) {
+            if (c1 instanceof Switch ) {
                 return Integer.MIN_VALUE;
+            }
+            else if (c2 instanceof Switch) {
+                return Integer.MAX_VALUE;
             }
 
             Attack a1 = (Attack) c1;
@@ -113,32 +116,44 @@ public class Battle {
         Log.i(TAG, "Sorting commands by priority");
         Collections.sort(currentBattlePhase.getCommands(), commandComparator);
         BattlePhaseResult battlePhaseResult = new BattlePhaseResult();
+        CommandResult commandResult;
 
-    for (Command command : currentBattlePhase.getCommands()) {
-            Log.i(TAG, "Executing command of type: " + command.getClass());
+        verifySwitchAttack();
 
-            CommandResult commandResult = command.execute(this);
+        for (Command command : currentBattlePhase.getCommands()) {
+            if (!isFinished()) {
+                Log.i(TAG, "Executing command of type: " + command.getClass());
+                if (command instanceof Switch) {
+                    commandResult = command.execute(this);
+                } else {
+                    commandResult = command.execute(this);
+                }
 
+                Log.i(TAG, "Adding command result to battle phase result");
+                battlePhaseResult.addCommandResult(commandResult);
 
-            if (commandResult instanceof AttackResult && (selfPokemonFainted() || oppPokemonFainted())) {
-
-            } else {
-                //if (!isFinished()) {
-                    applyCommandResult(commandResult);
-                    Log.i(TAG, "Adding command result to battle phase result");
-                    battlePhaseResult.addCommandResult(commandResult);
-                //}
+                Log.i(TAG, "Checking if battle is finished");
+                setFinished();
             }
-            setFinished();
         }
 
         Log.i(TAG, "Setting battle phase result on current battle phase");
         currentBattlePhase.setBattlePhaseResult(battlePhaseResult);
 
-        Log.i(TAG, "Setting finished");
         Log.i(TAG, "Battle finished? " + isFinished);
 
         return battlePhaseResult;
+    }
+
+    private void verifySwitchAttack() {
+        if (currentBattlePhase.getCommands().get(0) instanceof Switch) {
+            if (!(currentBattlePhase.getCommands().get(1) instanceof Switch)) {
+                Switch switchAction = (Switch)currentBattlePhase.getCommands().get(0);
+                Log.i(TAG, "Pokemon on Deck: " + switchAction.pokemonSwitchingTo(this));
+                int indexOfDefender = switchAction.getPositionToSwitchTo();
+                switchAction.getAttackingBattlePlayer(this).getBattlePokemonTeam().setPokemonOnDeck(indexOfDefender);
+            }
+        }
     }
 
     public void applyCommandResult(CommandResult commandResult) {
