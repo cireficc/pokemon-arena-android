@@ -33,28 +33,33 @@ public class StatePokemon {
     private byte finiteStatus = 0;
     private final Pokemon originalPokemon;
 
+    private final boolean isCurrentPokemon;
+    private final boolean isPokemonOnDeck;
+
     public StatePokemon(BattlePokemon bp) {
-       this(
-               bp.getCurrentHp(),
-               bp.getStatusEffect(),
-               (byte)bp.getStatusEffectTurns(),
-               bp.isConfused(),
-               (byte)bp.getConfusedTurns(),
-               bp.isFlinched(),
-               (byte)bp.getChargingForTurns(),
-               (byte)bp.getRechargingForTurns(),
-               bp.isFainted(),
-               (short)bp.getAttackStage(),
-               (short)bp.getDefenseStage(),
-               (short)bp.getSpAttackStage(),
-               (short)bp.getSpDefenseStage(),
-              (short)bp.getSpeedStage(),
-               (short)bp.getCritStage(),
-               bp.getOriginalPokemon()
-       );
+        this(
+                bp.getCurrentHp(),
+                bp.getStatusEffect(),
+                (byte)bp.getStatusEffectTurns(),
+                bp.isConfused(),
+                (byte)bp.getConfusedTurns(),
+                bp.isFlinched(),
+                (byte)bp.getChargingForTurns(),
+                (byte)bp.getRechargingForTurns(),
+                bp.isFainted(),
+                (short)bp.getAttackStage(),
+                (short)bp.getDefenseStage(),
+                (short)bp.getSpAttackStage(),
+                (short)bp.getSpDefenseStage(),
+                (short)bp.getSpeedStage(),
+                (short)bp.getCritStage(),
+                bp.getOriginalPokemon(),
+                bp.isCurrentPokemon(),
+                bp.isPokemonOnDeck()
+        );
     }
 
-    public StatePokemon(int currentHp, StatusEffect statusEffect, byte statusEffectTurns, boolean confused, byte confusedTurns, boolean flinched, byte chargingForTurns, byte rechargingForTurns, boolean fainted, short attackStage, short defenseStage, short spAttackStage, short spDefenseStage, short speedStage, short critStage, Pokemon originalPokemon) {
+    public StatePokemon(int currentHp, StatusEffect statusEffect, byte statusEffectTurns, boolean confused, byte confusedTurns, boolean flinched, byte chargingForTurns, byte rechargingForTurns, boolean fainted, short attackStage, short defenseStage, short spAttackStage, short spDefenseStage, short speedStage, short critStage, Pokemon originalPokemon, boolean isCurrentPokemon, boolean isPokemonOnDeck) {
         this.currentHp = currentHp;
         this.statusEffect = statusEffect;
         this.statusEffectTurns = statusEffectTurns;
@@ -68,6 +73,8 @@ public class StatePokemon {
         this.speedStage = speedStage;
         this.critStage = critStage;
         this.originalPokemon = originalPokemon;
+        this.isCurrentPokemon = isCurrentPokemon;
+        this.isPokemonOnDeck = isPokemonOnDeck;
 
         if(confused) {
             this.finiteStatus |=  CONFUSED;
@@ -139,6 +146,10 @@ public class StatePokemon {
     public short getCritStage() {
         return critStage;
     }
+
+    public boolean isCurrentPokemon() { return isCurrentPokemon; }
+
+    public boolean isPokemonOnDeck() { return  isPokemonOnDeck; }
 
     public BattlePokemon toBattle() {
         return new BattlePokemon(originalPokemon);

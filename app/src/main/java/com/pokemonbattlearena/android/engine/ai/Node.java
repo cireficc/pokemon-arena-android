@@ -2,9 +2,11 @@ package com.pokemonbattlearena.android.engine.ai;
 
 import android.util.Log;
 
+import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Command;
+import com.pokemonbattlearena.android.engine.match.Switch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +37,7 @@ public class Node {
         int i = 0;
         for (BattlePokemon bp: currentAI.getBattlePokemons()) {
             aiTeam[i] = new StatePokemon(bp);
-           i++;
+            i++;
         }
         i = 0;
         for (BattlePokemon bp: currentHu.getBattlePokemons()) {
@@ -80,7 +82,7 @@ public class Node {
     }
 
     public void setHValue(double h) {
-       this.hValue = h;
+        this.hValue = h;
     }
 
     public void setCommand(Command command) {
@@ -88,6 +90,16 @@ public class Node {
     }
 
     public Command getCommand() { return command; }
+
+    public String getCommandName() {
+        if (command instanceof Attack) {
+            return ((Attack) command).getMove().getName();
+        } else if (command instanceof Switch) {
+            return "Switching";
+        } else {
+            return "Root";
+        }
+    }
 
     public int getNumDominating() {
         return numDominating;
@@ -107,7 +119,7 @@ public class Node {
         for (int j = 0; j < i; j++) {
             sb.append("  ");
         }
-        sb.append("Node: hValue - " + node.hValue + " Command - " + node.command);
+        sb.append("Node: hValue - " + node.hValue + " Command - " + node.getCommandName());
         sb.append("\n");
         Log.d(TAG, sb.toString());
         for (Node child: node.getChildren()) {
