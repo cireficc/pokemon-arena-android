@@ -1,18 +1,24 @@
 package com.pokemonbattlearena.android.engine.match;
 
+import android.util.Log;
+
+import com.pokemonbattlearena.android.engine.database.StatType;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
-import static com.pokemonbattlearena.android.engine.Logging.logAttackResult;
-
 public class AttackResult extends CommandResult {
+
+    private transient static final String TAG = AttackResult.class.getName();
 
     private int moveUsedId;
 
     private int damageDone;
     private StatusEffect statusEffectApplied;
     private int statusEffectTurns;
+    private boolean succumbedToStatusEffect;
+    private boolean unfroze;
     private boolean confused;
     private int confusedTurns;
+    private int confusionDamageTaken;
     private boolean flinched;
     private int chargingTurns;
     private int rechargingTurns;
@@ -37,8 +43,11 @@ public class AttackResult extends CommandResult {
         this.damageDone = builder.damageDone;
         this.statusEffectApplied = builder.statusEffectApplied;
         this.statusEffectTurns = builder.statusEffectTurns;
+        this.succumbedToStatusEffect = builder.succumbedToStatusEffect;
+        this.unfroze = builder.unfroze;
         this.confused = builder.confused;
         this.confusedTurns = builder.confusedTurns;
+        this.confusionDamageTaken = builder.confusionDamageTaken;
         this.flinched = builder.flinched;
         this.chargingTurns = builder.chargingTurns;
         this.rechargingTurns = builder.rechargingTurns;
@@ -66,12 +75,24 @@ public class AttackResult extends CommandResult {
         return statusEffectApplied;
     }
 
+    public boolean isSuccumbedToStatusEffect() {
+        return succumbedToStatusEffect;
+    }
+
+    public boolean isUnfroze() {
+        return unfroze;
+    }
+
     public boolean isConfused() {
         return confused;
     }
 
     public int getConfusedTurns() {
         return confusedTurns;
+    }
+
+    public int getConfusionDamageTaken() {
+        return confusionDamageTaken;
     }
 
     public boolean isFlinched() {
@@ -138,8 +159,11 @@ public class AttackResult extends CommandResult {
         private int damageDone;
         private StatusEffect statusEffectApplied;
         private int statusEffectTurns;
+        private boolean succumbedToStatusEffect;
+        private boolean unfroze;
         private boolean confused;
         private int confusedTurns;
+        private int confusionDamageTaken;
         private boolean flinched;
         private int chargingTurns;
         private int rechargingTurns;
@@ -174,6 +198,16 @@ public class AttackResult extends CommandResult {
             return this;
         }
 
+        protected Builder setSuccumbedToStatusEffect(boolean succumbedToStatusEffect) {
+            this.succumbedToStatusEffect = succumbedToStatusEffect;
+            return this;
+        }
+
+        protected Builder setUnfroze(boolean unfroze) {
+            this.unfroze = unfroze;
+            return this;
+        }
+
         protected Builder setConfused(boolean confused) {
             this.confused = confused;
             return this;
@@ -181,6 +215,11 @@ public class AttackResult extends CommandResult {
 
         protected Builder setConfusedTurns(int confusedTurns) {
             this.confusedTurns = confusedTurns;
+            return this;
+        }
+
+        protected Builder setConfusionDamageTaken(int confusionDamageTaken) {
+            this.confusionDamageTaken = confusionDamageTaken;
             return this;
         }
 
@@ -251,9 +290,7 @@ public class AttackResult extends CommandResult {
 
         protected AttackResult build() {
 
-            if(logAttackResult) {
-                logAttackResult();
-            }
+            Log.i(TAG, "Building AttackResult");
             return new AttackResult(this);
         }
     }

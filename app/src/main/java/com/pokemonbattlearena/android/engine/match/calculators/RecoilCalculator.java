@@ -6,13 +6,11 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.RecoilAmount;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
-import static com.pokemonbattlearena.android.engine.Logging.logGetRecoilAmount;
-
 
 public class RecoilCalculator {
 
-
     private static RecoilCalculator instance = null;
+    private static final String TAG = RecoilCalculator.class.getName();
 
     protected RecoilCalculator() {
     }
@@ -39,12 +37,11 @@ public class RecoilCalculator {
         }
         else {
             recoiled = getCrashAmount(attacker);
+            Log.i(TAG, move.getName() + " is a crash move. Attacker takes " + recoiled + " damage");
             return recoiled;
         }
 
-        if(logGetRecoilAmount) {
-            logGetRecoilAmount(recoilAmount, move.getName(), recoiled);
-        }
+        Log.i(TAG, move.getName() + " is a recoil move. Attacker takes " + recoiled + " damage");
         return recoiled;
     }
 

@@ -2,11 +2,9 @@ package com.pokemonbattlearena.android.engine.match;
 
 import android.util.Log;
 
-import static com.pokemonbattlearena.android.engine.Logging.logSwitchResult;
-import static com.pokemonbattlearena.android.engine.Logging.logSwitchResults;
-
 public class SwitchResult extends CommandResult {
 
+    private transient static final String TAG = SwitchResult.class.getName();
 
     private int positionOfPokemon;
 
@@ -38,9 +36,7 @@ public class SwitchResult extends CommandResult {
 
         protected SwitchResult build() {
 
-            if (logSwitchResult) {
-                logSwitchResults();
-            }
+            Log.i(TAG, "Building SwitchResult");
             return new SwitchResult(this);
         }
     }

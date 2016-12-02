@@ -648,9 +648,11 @@ public class BottomBarActivity extends BaseActivity implements
     //region AI Helper Methods
     public void AIBattleTurn(Command cmd) {
         if (mActiveBattle instanceof AiBattle) {
-            Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
-            //mBattleHomeFragment.appendMoveHistory("AI", tmp);
+            mBattleHomeFragment.enableButtonActions(false);
+            updateUI();
             mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
+            ((AiBattle) mActiveBattle).buildIntelligence();
+            Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
 
             if (mActiveBattle.oppPokemonFainted() && ind < 5) {
                 ind++;
@@ -658,7 +660,6 @@ public class BottomBarActivity extends BaseActivity implements
                 Switch aiSw = new Switch(mActiveBattle.getOpponent(), ind);
                 mActiveBattle.getCurrentBattlePhase().queueCommand(aiSw);
             } else {
-              //  Attack aiAttack = new Attack(mActiveBattle.getOpponent(), mActiveBattle.getSelf(), tmp);
                 mActiveBattle.getCurrentBattlePhase().queueCommand(aiCommand);
             }
 
@@ -677,14 +678,12 @@ public class BottomBarActivity extends BaseActivity implements
 
         for (CommandResult commandResult : result.getCommandResults()) {
             updateUI();
-            Log.d(TAG, commandResult.getTargetInfo().toString());
+
+            mActiveBattle.applyCommandResult(commandResult);
 
             if (mActiveBattle.isFinished()) {
                 battleEndListener.onBattleEnd();
-                if (!isAiBattle) {
-                    //TODO: don't leave the room since
-                    leaveRoom();
-                }
+                leaveRoom();
                 return;
             }
         }
@@ -990,7 +989,6 @@ public class BottomBarActivity extends BaseActivity implements
         } else {
             if (mBattleHomeFragment != null) {
                 mBattleHomeFragment.appendMoveHistory(mCurrentPokemonPlayer.getPokemonTeam().getPokemons().get(0).getName(), move);
-                mActiveBattle.startNewBattlePhase();
                 Attack attack = new Attack(mActiveBattle.getSelf(), mActiveBattle.getOpponent(), move);
                 AIBattleTurn(attack);
             }
