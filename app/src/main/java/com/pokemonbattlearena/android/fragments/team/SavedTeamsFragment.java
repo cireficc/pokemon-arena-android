@@ -60,7 +60,6 @@ public class SavedTeamsFragment extends Fragment {
     private FloatingActionButton addTeamButton;
 
     private View.OnClickListener deleteListener;
-    private View.OnClickListener editListener;
     private OnSavedTeamsFragmentTouchListener mCallback;
 
     public SavedTeamsFragment() {
@@ -158,12 +157,6 @@ public class SavedTeamsFragment extends Fragment {
                     }
                 });
                 builder.show();
-            }
-        };
-        editListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
             }
         };
 
@@ -266,7 +259,7 @@ public class SavedTeamsFragment extends Fragment {
     }
 
     private void setAdapter() {
-        ItemAdapter listAdapter = new ItemAdapter(mSavedTeams, R.layout.saved_team_full_item, R.id.saved_team_cardView, false, deleteListener, editListener);
+        ItemAdapter listAdapter = new ItemAdapter(mSavedTeams, R.layout.saved_team_full_item, R.id.saved_team_cardView, false, deleteListener);
         mDragListView.setAdapter(listAdapter, true);
     }
 
