@@ -44,6 +44,10 @@
             android:name=".activity.BattleActivity"
             android:label="@string/title_activity_battle"
             android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="om.pokemonbattlearena.android.battle.START"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
     </application>
 

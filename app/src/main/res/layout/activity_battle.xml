@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"/>
 
     <com.roughike.bottombar.BottomBar
-        android:id="@+id/bottomBar"
+        android:id="@+id/battle_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="90dp"
         android:layout_alignParentBottom="true"

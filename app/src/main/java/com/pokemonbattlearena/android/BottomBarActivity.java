@@ -86,7 +86,7 @@ public class BottomBarActivity extends BaseActivity implements
         RealTimeMultiplayer.ReliableMessageSentCallback,
         OnPokemonTeamSelectedListener,
         BattleFragment.OnBattleFragmentTouchListener,
-        MainMenuFragment.OnMenuFragmentTouchListener,
+        MainMenuFragment.OnHomeFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener,
         ChatInGameFragment.OnGameChatLoadedListener,
         SavedTeamsFragment.OnSavedTeamsFragmentTouchListener,

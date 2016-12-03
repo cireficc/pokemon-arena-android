@@ -85,7 +85,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mCommandRuntimeTypeAdapter).create();
     private final Gson mCommandResultGson = new GsonBuilder().registerTypeAdapterFactory(mCommandResultRuntimeTypeAdapter).create();
-    private WelcomeHelper mWelcomeHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,9 +93,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mWelcomeHelper = new WelcomeHelper(this, com.pokemonbattlearena.android.activity.SplashActivity.class);
-        mWelcomeHelper.show(savedInstanceState);
-        mBottomBar = (BottomBar) findViewById(R.id.bottomBar);
+        mBottomBar = (BottomBar) findViewById(R.id.battle_bottom_bar);
         mBottomBar.setDefaultTab(R.id.tab_battle);
         mFragmentManager = getFragmentManager();
 
@@ -137,12 +134,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             Log.d(TAG, "Already connected to Google");
         }
         super.onStart();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mWelcomeHelper.onSaveInstanceState(outState);
     }
 
     @Override

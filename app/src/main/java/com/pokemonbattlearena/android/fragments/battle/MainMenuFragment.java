@@ -1,7 +1,6 @@
 package com.pokemonbattlearena.android.fragments.battle;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
@@ -11,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.pokemonbattlearena.android.ApplicationPhase;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 
@@ -27,13 +25,13 @@ public class MainMenuFragment extends Fragment {
     private Button mBattleFriendButton;
     private Button mBattleAIButton;
 
-    private OnMenuFragmentTouchListener mCallback;
+    private OnHomeFragmentTouchListener mCallback;
 
     public MainMenuFragment() {
         // Required empty public constructor
     }
 
-    public interface OnMenuFragmentTouchListener {
+    public interface OnHomeFragmentTouchListener {
         void onBattleNowClicked();
         void onAiBattleClicked();
     }
@@ -120,7 +118,7 @@ public class MainMenuFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            mCallback = (MainMenuFragment.OnMenuFragmentTouchListener) context;
+            mCallback = (OnHomeFragmentTouchListener) context;
         } catch (ClassCastException e) {
             Log.e(TAG, e.getMessage());
             throw new ClassCastException(context.toString() + "must implement listener");
