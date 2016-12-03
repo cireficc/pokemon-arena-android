@@ -1,5 +1,7 @@
 package com.pokemonbattlearena.android.engine.match.calculators;
 
+import android.util.Log;
+
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
@@ -90,6 +92,7 @@ public class StatusEffectCalculator {
         if (attackingPokemon.getStatusEffect() != StatusEffect.FREEZE) return false;
 
         int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
+        Log.i(TAG, "Freeze roll (need > 80 to be able to attack): " + rolled);
         // There is an 80% chance to be affected by freeze
         final int FROZEN_THRESHOLD = 80;
 
@@ -101,6 +104,7 @@ public class StatusEffectCalculator {
         if (attackingPokemon.getStatusEffect() != StatusEffect.PARALYZE) return false;
 
         int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
+        Log.i(TAG, "Paralysis roll (need > 75 to be able to attack): " + rolled);
         // There is a 75% chance to be affected by paralysis
         final int PARALYSIS_THRESHOLD = 75;
 
@@ -114,7 +118,10 @@ public class StatusEffectCalculator {
 
     public boolean isHurtByConfusion() {
 
-        return ThreadLocalRandom.current().nextInt(MAX_CHANCE) >= HURT_SELF_IN_CONFUSION_CHANCE;
+        int rolled = ThreadLocalRandom.current().nextInt(MAX_CHANCE);
+        Log.i(TAG, "Confusion self hurt roll (> 50 = hurt self): " + rolled);
+
+        return rolled >= HURT_SELF_IN_CONFUSION_CHANCE;
     }
 
     public int getConfusionDamage(BattlePokemon attackingPokemon) {
