@@ -77,10 +77,10 @@ public class StatusEffectCalculator {
                 turns = Integer.MAX_VALUE;
                 break;
             case SLEEP:
-                turns = ThreadLocalRandom.current().nextInt(MIN_TURNS, MAX_TURNS_SLEEP + 1);
+                turns = ThreadLocalRandom.current().nextInt(MIN_TURNS, MAX_TURNS_SLEEP + 1) + 1;
                 break;
             case CONFUSION:
-                turns = ThreadLocalRandom.current().nextInt(MIN_TURNS, MAX_TURNS_CONFUSION + 1);
+                turns = ThreadLocalRandom.current().nextInt(MIN_TURNS, MAX_TURNS_CONFUSION + 1) + 1;
                 break;
         }
 
