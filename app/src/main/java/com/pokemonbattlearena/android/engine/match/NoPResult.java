@@ -24,7 +24,7 @@ public class NoPResult extends CommandResult {
 
         protected NoPResult build() {
 
-            Log.i(TAG, "Building SwitchResult");
+            Log.i(TAG, "Building NoPResult");
             return new NoPResult(this);
         }
     }
