@@ -108,6 +108,9 @@ public class Attack extends Command {
             builder.setPoisonDamageTaken(statusEffectCalculator.getPoisonDamage(attackingPokemon));
         }
 
+        // Set whether or not the move hit
+        builder.setMoveHit(damageCalculator.moveHit(move));
+
         int damageDone = 0;
         for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);

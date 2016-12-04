@@ -11,6 +11,7 @@ public class AttackResult extends CommandResult {
 
     private int moveUsedId;
 
+    private boolean moveHit;
     private int damageDone;
     private StatusEffect statusEffectApplied;
     private int statusEffectTurns;
@@ -42,6 +43,7 @@ public class AttackResult extends CommandResult {
         this.targetInfo = builder.targetInfo;
         this.moveUsedId = builder.moveUsedId;
 
+        this.moveHit = builder.moveHit;
         this.damageDone = builder.damageDone;
         this.statusEffectApplied = builder.statusEffectApplied;
         this.statusEffectTurns = builder.statusEffectTurns;
@@ -69,6 +71,10 @@ public class AttackResult extends CommandResult {
 
     public int getMoveUsedId() {
         return moveUsedId;
+    }
+
+    public boolean isMoveHit() {
+        return moveHit;
     }
 
     public int getDamageDone() {
@@ -168,6 +174,7 @@ public class AttackResult extends CommandResult {
         private TargetInfo targetInfo;
         private int moveUsedId;
 
+        private boolean moveHit;
         private int damageDone;
         private StatusEffect statusEffectApplied;
         private int statusEffectTurns;
@@ -195,6 +202,10 @@ public class AttackResult extends CommandResult {
         protected Builder(TargetInfo targetInfo, int moveUsedId) {
             this.targetInfo = targetInfo;
             this.moveUsedId = moveUsedId;
+        }
+
+        public void setMoveHit(boolean moveHit) {
+            this.moveHit = moveHit;
         }
 
         protected Builder setDamageDone(int damageDone) {

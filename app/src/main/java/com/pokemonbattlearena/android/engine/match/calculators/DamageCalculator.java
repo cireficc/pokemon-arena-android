@@ -103,7 +103,7 @@ public class DamageCalculator {
         return getType1Effectiveness(move, target) * getType2Effectiveness(move, target);
     }
 
-    public boolean moveHit(Move move, BattlePokemon target) {
+    public boolean moveHit(Move move) {
 
         // TODO: Add support for accuracy stages
 
