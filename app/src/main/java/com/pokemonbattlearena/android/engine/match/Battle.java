@@ -340,12 +340,7 @@ public class Battle {
             defendingPokemon.setCritStage(defendingPokemon.getCritStage() + (defendingPokemon.getCritStage() * (-1)));
         }
 
-        boolean attackerFainted = attackingPokemon.getCurrentHp() <= 0;
-        boolean defenderFainted = defendingPokemon.getCurrentHp() <= 0;
 
-        Log.i(TAG, "Applying fainted status. Attacker fainted? " + attackerFainted + " || defender fainted? " + defenderFainted);
-        attackingPokemon.setFainted(attackerFainted);
-        defendingPokemon.setFainted(defenderFainted);
     }
 
     private void applySwitchResult(SwitchResult res) {
