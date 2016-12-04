@@ -355,6 +355,23 @@ public class Battle {
         }
     }
 
+    private void applyStatusEffectDamage(BattlePokemon pokemon, AttackResult result) {
+
+        int burnDamage = result.getBurnDamageTaken();
+        int poisonDamage = result.getPoisonDamageTaken();
+
+        if (pokemon.getStatusEffect() == StatusEffect.BURN) {
+            Log.i(TAG, "Pokemon " + pokemon.getOriginalPokemon().getName() + " took " + burnDamage + " burn damage");
+            pokemon.setCurrentHp(pokemon.getCurrentHp() - burnDamage);
+        }
+
+        if (pokemon.getStatusEffect() == StatusEffect.POISON) {
+            Log.i(TAG, "Pokemon " + pokemon.getOriginalPokemon().getName() + " took " + poisonDamage + " poison damage");
+
+            pokemon.setCurrentHp(pokemon.getCurrentHp() - poisonDamage);
+        }
+    }
+
     private void applySwitchResult(SwitchResult res) {
 
         TargetInfo targetInfo = res.getTargetInfo();
