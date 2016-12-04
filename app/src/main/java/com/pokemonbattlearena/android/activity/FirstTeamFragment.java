@@ -22,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
+import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
@@ -188,7 +189,7 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
                     edit.apply();
                     edit.commit();
                     //Add Team to Firebase
-                    String username = mPreferences.getString(NameFragment.profile_name_key, "example");
+                    String username = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
                     DatabaseReference root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);;
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put(pokemonTeam.getTeamName(), json);

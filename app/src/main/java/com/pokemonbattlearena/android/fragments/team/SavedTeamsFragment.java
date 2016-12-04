@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
+import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.activity.NameFragment;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
@@ -84,7 +85,7 @@ public class SavedTeamsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         //connect to this user's saved teams on Firebase
         mPreferences = getActivity().getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
-        username = mPreferences.getString(NameFragment.profile_name_key, "User");
+        username = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "User");
         root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);
         //listener for populating saved teams page
         mChildListener = new ChildEventListener() {
