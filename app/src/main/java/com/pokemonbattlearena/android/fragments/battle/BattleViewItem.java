@@ -10,6 +10,8 @@ import android.widget.TextView;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
 /**
@@ -21,17 +23,21 @@ public class BattleViewItem {
     TextView pokemonName;
     TextView pokemonHPText;
     SeekBar pokemonHpProgress;
-    Pokemon activePokemon;
+    BattlePokemon activePokemon;
     //TODO: use battle pokemon player
     //TODO: create a method to update the player when the battle changes
-    PokemonPlayer activePlayer;
+    BattlePokemonPlayer battlePokemonPlayer;
     boolean hasConfusion = false;
     ImageView confusedStatusImage;
     ImageView extraStatusImage;
 
     private final static String TAG = BattleViewItem.class.getSimpleName();
 
-    public BattleViewItem(View playerView, boolean isSelf) {
+    public BattleViewItem() {
+
+    }
+
+    public void setPlayerView(View playerView) {
         this.pokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
         this.pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
         this.pokemonHpProgress = (SeekBar) playerView.findViewById(R.id.hp_imageview);
@@ -42,21 +48,21 @@ public class BattleViewItem {
         this.extraStatusImage.setVisibility(View.GONE);
     }
 
-    public PokemonPlayer getActivePlayer() {
-        return activePlayer;
+    public BattlePokemonPlayer getActivePlayer() {
+        return battlePokemonPlayer;
     }
 
-    public void setActivePlayer(PokemonPlayer player) {
-        this.activePlayer = player;
+    public void setActivePlayer(BattlePokemonPlayer player) {
+        this.battlePokemonPlayer = player;
     }
 
-    public void setActivePokemon(Pokemon activePokemon, Drawable d) {
+    public void setActivePokemon(BattlePokemon activePokemon, Drawable d) {
         this.activePokemon = activePokemon;
-        this.pokemonHpProgress.setMax(activePokemon.getHp());
-        this.pokemonName.setText(activePokemon.getName());
+        this.pokemonHpProgress.setMax(activePokemon.getOriginalPokemon().getHp());
+        this.pokemonName.setText(activePokemon.getOriginalPokemon().getName());
         this.pokemonImage.setImageDrawable(d);
 
-        setHPBar(activePokemon.getHp());
+        setHPBar(activePokemon.getOriginalPokemon().getHp());
     }
 
     public void setVisibility(boolean visibility) {

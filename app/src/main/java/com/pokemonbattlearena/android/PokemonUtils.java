@@ -7,5 +7,4 @@ package com.pokemonbattlearena.android;
 public class PokemonUtils {
     public static final int BATTLE_REQUEST = 42247;
     public static final String PROFILE_NAME_KEY = "profile_name";
-
 }

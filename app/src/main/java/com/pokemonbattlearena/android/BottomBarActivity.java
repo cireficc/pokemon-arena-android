@@ -751,8 +751,8 @@ public class BottomBarActivity extends BaseActivity implements
     private void setupBattleUI(PokemonPlayer player, PokemonPlayer opponent) {
         if (mBattleFragment != null && mBattleFragment.isAdded()) {
             //TODO: use updateUI to do this
-            mBattleFragment.setPlayer(mCurrentPokemonPlayer);
-            mBattleFragment.setOpponent(mOpponentPokemonPlayer);
+//            mBattleFragment.setPlayer(mCurrentPokemonPlayer);
+//            mBattleFragment.setOpponent(mOpponentPokemonPlayer);
             mBattleFragment.setBattleVisible(true);
         }
     }

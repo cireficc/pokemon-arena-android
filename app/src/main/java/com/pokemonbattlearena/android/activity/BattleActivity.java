@@ -1,14 +1,12 @@
 package com.pokemonbattlearena.android.activity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.WindowManager;
@@ -24,21 +22,19 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
-import com.pokemonbattlearena.android.ApplicationPhase;
-import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.AttackResult;
 import com.pokemonbattlearena.android.engine.match.Battle;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.Command;
 import com.pokemonbattlearena.android.engine.match.CommandResult;
 import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
@@ -48,7 +44,6 @@ import com.pokemonbattlearena.android.engine.match.SwitchResult;
 import com.pokemonbattlearena.android.fragments.battle.BattleFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
-import com.stephentuso.welcome.WelcomeHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +51,7 @@ import java.util.List;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 
-public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener {
+public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener{
     private static final String TAG = BattleActivity.class.getSimpleName();
     private static DatabaseReference mRootFirebase;
     private GoogleApiClient mGoogleApiClient;
@@ -71,7 +66,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     private static final int RC_SIGN_IN = 9001;
     private String mRoomId = null;
     private String mMyId = null;
-    private String mOpponentId = null;
     private ArrayList<Participant> mParticipants = null;
     private String mHostId = null;
     private boolean mIsHost = false;
@@ -79,6 +73,9 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
+
+    private String mOpponentUsername = null;
+    private String mUsername = null;
 
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
@@ -105,7 +102,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         mBottomBar = (BottomBar) findViewById(R.id.battle_bottom_bar);
         mBottomBar.setDefaultTab(R.id.tab_battle);
         mFragmentManager = getFragmentManager();
-
+        mUsername = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
         // Button listeners
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -115,11 +112,9 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
         mGoogleApiClient.connect();
 
-        mBattleFragment = new BattleFragment();
-
         showProgressDialog();
 
-        mRootFirebase = FirebaseDatabase.getInstance().getReference().child("playerid");
+        mRootFirebase = FirebaseDatabase.getInstance().getReference().child(PokemonUtils.PROFILE_NAME_KEY);
         mBottomBar.setOnTabSelectListener(this);
     }
 
@@ -131,6 +126,12 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mGoogleApiClient.connect();
         }
         super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        leaveRoom();
+        super.onStop();
     }
 
     @Override
@@ -223,11 +224,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         }
     }
 
-    private String getOpponentFromRoom(Room room) {
-        room.getParticipantIds().remove(mMyId);
-        return room.getParticipantIds().get(0);
-    }
-
     // create a RoomConfigBuilder that's appropriate for your implementation
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder(this)
@@ -283,6 +279,58 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         byte[] buf = realTimeMessage.getMessageData();
         String bufferString = new String(buf);
         Log.d(TAG, "In Game Message Received: " + bufferString);
+        if (mOpponentUsername == null) {
+            mOpponentUsername = bufferString.trim();
+            setupBattleWithOpponent();
+            return;
+        }
+
+    }
+
+    private void setupBattleWithOpponent() {
+        BattlePokemonPlayer opponent = getPlayerForTeam(mOpponentUsername, getSavedTeam());
+        BattlePokemonPlayer self = getPlayerForTeam(mUsername, getSavedTeam());
+        mBattle = new Battle(self, opponent);
+        mBattleFragment = new BattleFragment();
+        mBattleFragment.setPlayer(self);
+        mBattleFragment.setOpponent(opponent);
+        mFragmentManager.beginTransaction()
+                .add(R.id.battle_container, mBattleFragment, "battle")
+                .commit();
+        updateUI();
+    }
+
+    private void updateUI() {
+        if (mBattleFragment != null) {
+
+            int selfHP = mBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
+            int opponentHP = mBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
+            mBattleFragment.updateHealthBars(selfHP, opponentHP);
+            mBattleFragment.refreshActivePokemon(mBattle);
+        }
+    }
+
+
+    private BattlePokemonPlayer getPlayerForTeam(String name, PokemonTeam team) {
+        PokemonPlayer opponentPlayer = new PokemonPlayer(name);
+        opponentPlayer.setPokemonTeam(team);
+        BattlePokemonPlayer opponent = new BattlePokemonPlayer(opponentPlayer);
+        return opponent;
+    }
+
+    private PokemonTeam getOpponentTeamFromFirebase() {
+        //TODO: Use this method to get the opponents team from firebase using 'mOpponentUsername' for the player_name field
+
+        return null;
+    }
+
+    private PokemonTeam getSavedTeam() {
+        String teamJSON = mPreferences.getString("pokemon_team", "mew");
+        if (!teamJSON.equals("mew")) {
+            Log.d(TAG, "Got saved team: " + teamJSON);
+            return new Gson().fromJson(teamJSON, PokemonTeam.class);
+        }
+        return null;
     }
 
     private boolean shouldStartGame(Room room) {
@@ -380,6 +428,22 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onP2PDisconnected(String s) {
+
+    }
+
+    @Override
+    public void onCancelBattle() {
+        leaveRoom();
+        finish();
+    }
+
+    @Override
+    public void onMoveClicked(Move move) {
+
+    }
+
+    @Override
+    public void onSwitchPokemon(int position) {
 
     }
     //endregion

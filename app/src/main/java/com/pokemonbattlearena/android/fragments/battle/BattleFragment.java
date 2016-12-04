@@ -26,7 +26,7 @@ import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
-import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
+import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.team.PokemonGridAdapter;
 import com.pokemonbattlearena.android.fragments.team.PokemonGridViewItem;
@@ -70,6 +70,8 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
 
     public BattleFragment() {
         super();
+        mPlayerBattleView = new BattleViewItem();
+        mOpponentBattleView = new BattleViewItem();
         mTypeModel = new TypeModel();
     }
 
@@ -101,8 +103,8 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         if (activeBattle != null) {
             BattlePokemon self = activeBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon();
             BattlePokemon opponent = activeBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon();
-            mPlayerBattleView.setActivePokemon(self.getOriginalPokemon(), getDrawableForPokemon(self.getOriginalPokemon().getName(), typePokemon));
-            mOpponentBattleView.setActivePokemon(opponent.getOriginalPokemon(), getDrawableForPokemon(opponent.getOriginalPokemon().getName(), typePokemon));
+            mPlayerBattleView.setActivePokemon(self, getDrawableForPokemon(self.getOriginalPokemon().getName(), typePokemon));
+            mOpponentBattleView.setActivePokemon(opponent, getDrawableForPokemon(opponent.getOriginalPokemon().getName(), typePokemon));
 
             updatePokemonImages(self, opponent);
             configureButtonsWithMoves(self.getMoveSet());
@@ -112,8 +114,8 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
     }
 
     private void updatePokemonImages(BattlePokemon self, BattlePokemon opponent) {
-        mPlayerBattleView.setActivePokemon(self.getOriginalPokemon(), getDrawableForPokemon(self.getOriginalPokemon().getName(),typePokemon));
-        mOpponentBattleView.setActivePokemon(opponent.getOriginalPokemon(), getDrawableForPokemon(opponent.getOriginalPokemon().getName(), typePokemon));
+        mPlayerBattleView.setActivePokemon(self, getDrawableForPokemon(self.getOriginalPokemon().getName(),typePokemon));
+        mOpponentBattleView.setActivePokemon(opponent, getDrawableForPokemon(opponent.getOriginalPokemon().getName(), typePokemon));
     }
 
     private void updateStatusEffects(StatusEffect playerEffect, StatusEffect opponentEffect) {
@@ -132,9 +134,10 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
     }
 
     public void setPlayerTeam(PokemonTeam playerTeam) {
-        if (mPlayerBattleView != null && mPlayerBattleView.getActivePlayer() != null) {
-            mPlayerBattleView.getActivePlayer().setPokemonTeam(playerTeam);
-        }
+        //TODO: Don't use this method
+//        if (mPlayerBattleView != null && mPlayerBattleView.getActivePlayer() != null) {
+//            mPlayerBattleView.getActivePlayer().getBattlePokemonTeam();
+//        }
     }
 
     public interface OnBattleFragmentTouchListener {
@@ -146,20 +149,19 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_battlehome, container, false);
+        View view = inflater.inflate(R.layout.fragment_battle, container, false);
         Button mCancelBattleButton = (Button) view.findViewById(R.id.cancel_battle_button);
         mCancelBattleButton.setOnClickListener(this);
         mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
         mMoveHistoryText.setMovementMethod( new ScrollingMovementMethod());
 
-
         View playerView = view.findViewById(R.id.player_1_ui);
         View opponentView = view.findViewById(R.id.player_2_ui);
 
-        mPlayerBattleView = new BattleViewItem(playerView, true);
+        mPlayerBattleView.setPlayerView(playerView);
         mPlayerBattleView.setVisibility(false);
 
-        mOpponentBattleView = new BattleViewItem(opponentView, false);
+        mOpponentBattleView.setPlayerView(opponentView);
         mOpponentBattleView.setVisibility(false);
 
         setupMoveButtons(view);
@@ -178,12 +180,6 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
             Log.e(TAG, e.getMessage());
             throw new ClassCastException(context.toString() + "must implement listener");
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        //TODO: Leave the Room
     }
 
     @Override
@@ -218,7 +214,10 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View switchView = inflater.inflate(R.layout.switch_layout, null, false);
 
-        ArrayList<Pokemon> pokemon = (ArrayList<Pokemon>) mPlayerBattleView.getActivePlayer().getPokemonTeam().getPokemons();
+        ArrayList<Pokemon> pokemon = new ArrayList<>();
+        for (BattlePokemon battlePokemon : mPlayerBattleView.getActivePlayer().getBattlePokemonTeam().getBattlePokemons()) {
+            pokemon.add(battlePokemon.getOriginalPokemon());
+        }
 
         PokemonGridAdapter adapter = new PokemonGridAdapter(getActivity(), pokemon, R.layout.switch_grid_item);
         // keep track of if we selected a pokemon and which one was selected
@@ -293,19 +292,19 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         return mApplication.getDrawable(id);
     }
 
-    public void setPlayer(PokemonPlayer player) {
+    public void setPlayer(BattlePokemonPlayer player) {
         mPlayerBattleView.setActivePlayer(player);
-        Pokemon activePokemon = player.getPokemonTeam().getPokemons().get(0);
-        mPlayerBattleView.setActivePokemon(activePokemon, getDrawableForPokemon(activePokemon.getName(), typePokemon));
-        List<Move> moves = activePokemon.getActiveMoveList();
+        BattlePokemon activePokemon = player.getBattlePokemonTeam().getCurrentPokemon();
+        mPlayerBattleView.setActivePokemon(activePokemon, getDrawableForPokemon(activePokemon.getOriginalPokemon().getName(), typePokemon));
+        List<Move> moves = activePokemon.getMoveSet();
         configureButtonsWithMoves(moves);
         mSwitchButton.setVisibility(View.VISIBLE);
     }
 
-    public void setOpponent(PokemonPlayer opponent) {
+    public void setOpponent(BattlePokemonPlayer opponent) {
         mOpponentBattleView.setActivePlayer(opponent);
-        Pokemon activePokemon = opponent.getPokemonTeam().getPokemons().get(0);
-        mOpponentBattleView.setActivePokemon(activePokemon, getDrawableForPokemon(activePokemon.getName(), typePokemon));
+        BattlePokemon activePokemon = opponent.getBattlePokemonTeam().getCurrentPokemon();
+        mOpponentBattleView.setActivePokemon(activePokemon, getDrawableForPokemon(activePokemon.getOriginalPokemon().getName(), typePokemon));
     }
 
     public void setBattleVisible(boolean visible) {
