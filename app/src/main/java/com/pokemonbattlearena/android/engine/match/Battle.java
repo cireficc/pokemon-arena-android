@@ -197,6 +197,11 @@ public class Battle {
         Log.i(TAG, "Defending player ID: " + defendingPlayer.getId() + "Defending ID: " + defendingPlayerId);
         Log.i(TAG, "Defending player pkmn: " + defendingPokemon.getOriginalPokemon().getName());
 
+        if (res.isSuccumbedToStatusEffect()) {
+            Log.i(TAG, attackingPokemon.getOriginalPokemon().getName() + " succumbed to " + attackingPokemon.getStatusEffect());
+            return;
+        }
+
         int damageDone = res.getDamageDone();
         StatusEffect statusEffectApplied = res.getStatusEffectApplied();
         int statusEffectTurns = res.getStatusEffectTurns();

@@ -91,7 +91,6 @@ public class Attack extends Command {
 
         if (attackingPokemon.isFlinched() || frozen || paralyzed || sleeping) {
             builder.setSuccumbedToStatusEffect(true);
-            return builder.build();
         }
 
         // If a Pokemon is confused, see if it hurts itself and finish the attack
