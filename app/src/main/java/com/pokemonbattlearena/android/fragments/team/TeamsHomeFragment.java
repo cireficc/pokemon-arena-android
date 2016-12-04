@@ -202,7 +202,11 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                     public void onClick(DialogInterface dialog, int which) {
                         List<Move> moves = mApplication.getBattleDatabase().getMovesForPokemon(selectedPokemon);
                         Collections.shuffle(moves);
-                        selectedPokemon.setActiveMoveList(moves.subList(0,4));
+                        if (moves.size() < 4) {
+                            selectedPokemon.setActiveMoveList(moves);
+                        } else {
+                            selectedPokemon.setActiveMoveList(moves.subList(0, 4));
+                        }
                         selectedTeamArrayList.add(selectedPokemon);
                         item.mCheckbox.setChecked(true);
                     }
