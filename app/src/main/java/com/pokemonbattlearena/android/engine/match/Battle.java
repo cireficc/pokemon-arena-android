@@ -340,6 +340,14 @@ public class Battle {
             defendingPokemon.setCritStage(defendingPokemon.getCritStage() + (defendingPokemon.getCritStage() * (-1)));
         }
 
+        decrementStatusEffectTurns(attackingPokemon);
+        decrementStatusEffectTurns(defendingPokemon);
+        applyStatusEffectDamage(attackingPokemon, res);
+        applyStatusEffectDamage(defendingPokemon, res);
+        applyFainting(attackingPokemon);
+        applyFainting(defendingPokemon);
+    }
+
     private void decrementStatusEffectTurns(BattlePokemon pokemon) {
 
         Log.i(TAG, "Decrementing status effect and confusion turns and resolving those states for: " + pokemon.getOriginalPokemon().getName());
