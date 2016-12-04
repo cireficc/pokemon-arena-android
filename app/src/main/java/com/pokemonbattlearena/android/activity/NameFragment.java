@@ -14,13 +14,15 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 
 /**
  * Created by Spencer Amann on 11/22/16.
  */
 public class NameFragment extends Fragment {
-    public static String profile_name_key = "profile_name";
+
     private EditText mNameEditText;
     private String mName;
     private Button mSaveButton;
@@ -58,7 +60,7 @@ public class NameFragment extends Fragment {
         if (!mName.isEmpty()) {
             SharedPreferences.Editor edit = mPreferences.edit();
 
-            edit.putString(profile_name_key, mName);
+            edit.putString(PokemonUtils.PROFILE_NAME_KEY, mName);
             edit.apply();
             edit.commit();
         }
@@ -69,7 +71,7 @@ public class NameFragment extends Fragment {
     private String getProfileNameFromPrefs() {
         String s = null;
         if (mPreferences != null) {
-            s = mPreferences.getString(profile_name_key, "example");
+            s = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
         }
         return s;
     }

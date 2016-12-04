@@ -25,14 +25,8 @@
             android:label="Welcome"
             android:theme="@style/WelcomeScreenTheme" />
         <activity
-            android:name=".BottomBarActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity
             android:name=".activity.HomeActivity"
-            android:label="@string/title_activity_home"
+            android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

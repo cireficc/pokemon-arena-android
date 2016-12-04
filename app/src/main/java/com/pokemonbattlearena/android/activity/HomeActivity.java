@@ -17,6 +17,8 @@ import android.widget.Button;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
+import com.google.example.games.basegameutils.BaseGameUtils;
+import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
@@ -24,12 +26,17 @@ import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 import com.stephentuso.welcome.WelcomeHelper;
 
-public class HomeActivity extends BaseActivity implements OnTabSelectListener, MainMenuFragment.OnHomeFragmentTouchListener {
+public class HomeActivity extends BaseActivity implements OnTabSelectListener, MainMenuFragment.OnHomeFragmentTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = HomeActivity.class.getSimpleName();
+    private static final int RC_SIGN_IN = 9001;
     private WelcomeHelper mWelcomeHelper;
     private GoogleApiClient mGoogleApiClient;
     private BottomBar mBottomBar;
     private FragmentManager mFragmentManager;
+    // GOOGLE PLAY SIGN IN FIELDS
+    private boolean mResolvingConnectionFailure = false;
+    private boolean mAutoStartSignInFlow = true;
+    private boolean mSignInClicked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,23 +57,8 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
 
         // Button listeners
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(@Nullable Bundle bundle) {
-
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-
-                    }
-                })
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-                    }
-                })
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .build();
 
@@ -75,11 +67,23 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
 
     @Override
     protected void onStart() {
-        if (mGoogleApiClient != null && !mGoogleApiClient.isConnected()) {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            Log.w(TAG, "GameHelper: client was already connected on onStart()");
+        } else {
+            Log.d(TAG, "Connecting client.");
             mGoogleApiClient.connect();
-            Log.d(TAG, "Already connected to Google");
         }
         super.onStart();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 9001 && resultCode == RESULT_OK) {
+
+        } else if (requestCode == WelcomeHelper.DEFAULT_WELCOME_SCREEN_REQUEST) {
+            mGoogleApiClient.connect();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -110,6 +114,36 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
 
     @Override
     public void onAiBattleClicked() {
+
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        if (mSignInClicked || mAutoStartSignInFlow) {
+            mAutoStartSignInFlow = false;
+            mSignInClicked = false;
+            mResolvingConnectionFailure = true;
+
+            // Attempt to resolve the connection failure using BaseGameUtils.
+            // The R.string.signin_other_error value should reference a generic
+            // error string in your strings.xml file, such as "There was
+            // an issue with sign in, please try again later."
+            if (!BaseGameUtils.resolveConnectionFailure(this,
+                    mGoogleApiClient, connectionResult,
+                    RC_SIGN_IN, getString(R.string.signin_other_error))) {
+                mResolvingConnectionFailure = false;
+            }
+        }
 
     }
 }

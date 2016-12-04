@@ -780,7 +780,7 @@ public class BottomBarActivity extends BaseActivity implements
         String teamJSON = mPreferences.getString("pokemon_team", "mew");
         View savedView = findViewById(R.id.saved_team_layout);
         TextView savedText = (TextView) findViewById(R.id.saved_team_textview);
-        String builder = mPreferences.getString(NameFragment.profile_name_key, "User") +
+        String builder = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "User") +
                 getString(R.string.append_profile_text);
         savedText.setText(builder);
         if (!teamJSON.equals("mew") && show) {
