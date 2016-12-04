@@ -85,7 +85,7 @@ public class Attack extends Command {
         boolean sleeping = statusEffectCalculator.isAffectedBySleep(attackingPokemon);
 
         // If the Pokemon is not affected by the freeze, it means it unfroze
-        if (!frozen) {
+        if (attackingPokemon.getStatusEffect() == StatusEffect.FREEZE && !frozen) {
             builder.setUnfroze(true);
         }
 
