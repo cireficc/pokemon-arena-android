@@ -13,6 +13,14 @@
         android:layout_height="wrap_content"
         android:id="@+id/cancel_battle_button" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Command Timer:"
+        android:layout_gravity="center"
+        android:id="@+id/command_timer"
+        />
+
     <include layout="@layout/fragment_battleui"/>
 
 </LinearLayout>

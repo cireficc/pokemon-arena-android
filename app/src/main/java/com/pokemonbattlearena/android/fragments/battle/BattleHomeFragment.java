@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.method.ScrollingMovementMethod;
@@ -157,6 +158,28 @@ public class BattleHomeFragment extends Fragment implements View.OnClickListener
 
         View playerView = view.findViewById(R.id.player_1_ui);
         View opponentView = view.findViewById(R.id.player_2_ui);
+
+        /* Count Down Timer Code BEGIN */
+        final TextView countDownTimer = (TextView) view.findViewById(R.id.command_timer);
+        new CountDownTimer(5000, 1000) {
+
+            //every tick (1 second), this runs
+            public void onTick(long millisUntilFinished) {
+                //visual for timer so player knows how long they have to select a command
+                countDownTimer.setText("Select a Command: " + millisUntilFinished / 1000);
+            }
+
+            //This runs when the countdowntimer finishes
+            //Selects the first move a pokemon has if a command has not been selected in the alotted time.
+            public void onFinish() {
+                countDownTimer.setText("Failed to select a Command!");
+                Button b = mMoveButtons[0];
+                Move move = mMoveButtonMap.get(b);
+                Log.i(TAG, "No command selected, random move: " + move.getName());
+                b.performClick();
+            }
+        }.start();
+        /* Count Down Timer Code END */
 
         mPlayerBattleView = new BattleViewItem(playerView, true);
         mPlayerBattleView.setVisibility(false);
