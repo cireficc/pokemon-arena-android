@@ -42,6 +42,8 @@ import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import com.pokemonbattlearena.android.activity.*;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
+import com.pokemonbattlearena.android.engine.match.NoP;
+import com.pokemonbattlearena.android.engine.match.NoPResult;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.Attack;
@@ -139,12 +141,14 @@ public class BottomBarActivity extends BaseActivity implements
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
             .registerSubtype(Attack.class)
-            .registerSubtype(Switch.class);
+            .registerSubtype(Switch.class)
+            .registerSubtype(NoP.class);
 
     private final RuntimeTypeAdapterFactory<CommandResult> mCommandResultRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(CommandResult.class, "type")
             .registerSubtype(AttackResult.class)
-            .registerSubtype(SwitchResult.class);
+            .registerSubtype(SwitchResult.class)
+            .registerSubtype(NoPResult.class);
 
     private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mCommandRuntimeTypeAdapter).create();
     private final Gson mCommandResultGson = new GsonBuilder().registerTypeAdapterFactory(mCommandResultRuntimeTypeAdapter).create();
@@ -570,22 +574,28 @@ public class BottomBarActivity extends BaseActivity implements
                     handleBattleResult();
                 }
             } else {
+                boolean nop = false;
                 BattlePhaseResult resultFromJson = mCommandResultGson.fromJson(bufferString, BattlePhaseResult.class);
                 Log.d(TAG, "We got a battle phase result: " + resultFromJson.toString());
                 for (CommandResult commandResult : resultFromJson.getCommandResults()) {
                     // Update the internal state of the battle (only host really needs to do this, but opponent can too)
                     // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
                     mActiveBattle.applyCommandResult(commandResult);
+                    if (mActiveBattle.oppPokemonFainted()) {
+                        nop = true;
+                    }
                     Log.d(TAG, commandResult.getTargetInfo().toString());
                     //TODO: check if battle ended
                     updateUI();
                 }
-
                 mBattleHomeFragment.enableButtonActions(true);
                 if (mActiveBattle.selfPokemonFainted()) {
                     Button force;
                     force = (Button)findViewById(R.id.switch_button);
                     force.performClick();
+                } else if(nop) {
+                    sendClientMessage(new NoP(mActiveBattle.getSelf()));
+                    mBattleHomeFragment.enableButtonActions(false);
                 }
                 updateUI();
             }
@@ -670,6 +680,7 @@ public class BottomBarActivity extends BaseActivity implements
     private void handleBattleResult() {
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
         PokemonTeam pokes = new PokemonTeam(6);
+        boolean nop = false;
         for (BattlePokemon bp : mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons()) {
             pokes.addPokemon(bp.getOriginalPokemon());
         }
@@ -685,6 +696,10 @@ public class BottomBarActivity extends BaseActivity implements
                 battleEndListener.onBattleEnd();
                 leaveRoom();
                 return;
+            }
+
+            if (mActiveBattle.oppPokemonFainted()) {
+                nop = true;
             }
         }
         mBattleHomeFragment.enableButtonActions(true);
@@ -702,6 +717,14 @@ public class BottomBarActivity extends BaseActivity implements
             Button force;
             force = (Button)findViewById(R.id.switch_button);
             force.performClick();
+            return;
+        } else if (nop) {
+            if (isAiBattle) {
+                AIBattleTurn(new NoP(mActiveBattle.getSelf()));
+            } else {
+                mActiveBattle.getCurrentBattlePhase().queueCommand(new NoP(mActiveBattle.getSelf()));
+                mBattleHomeFragment.enableButtonActions(false);
+            }
         }
     }
     //endregion

@@ -27,6 +27,14 @@ public class TargetInfo {
         this.attackingPlayer = attackingPlayer;
     }
 
+
+    /*
+     * This constructor is used in NoPResult.Builder.
+     */
+    protected TargetInfo() {
+    }
+
+
     public BattlePokemonPlayer getAttackingPlayer() {
         return attackingPlayer;
     }

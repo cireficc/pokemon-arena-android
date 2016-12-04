@@ -2,11 +2,7 @@ package com.pokemonbattlearena.android.engine.match;
 
 import android.util.Log;
 
-import com.pokemonbattlearena.android.engine.database.Move;
-
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class BattlePhase {
@@ -53,6 +49,9 @@ public class BattlePhase {
         } else if (command instanceof Attack) {
             Attack a = (Attack) command;
             setPlayerReady(a.getAttackingPlayer());
+        } else if (command instanceof NoP) {
+            NoP n = (NoP) command;
+            setPlayerReady(n.getAttackingPlayer());
         }
 
         return isPhaseReady();
