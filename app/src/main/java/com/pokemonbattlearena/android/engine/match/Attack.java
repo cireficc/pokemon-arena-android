@@ -101,6 +101,13 @@ public class Attack extends Command {
             }
         }
 
+        if (attackingPokemon.getStatusEffect() == StatusEffect.BURN) {
+            builder.setBurnDamageTaken(statusEffectCalculator.getBurnDamage(attackingPokemon));
+        }
+        if (attackingPokemon.getStatusEffect() == StatusEffect.POISON) {
+            builder.setPoisonDamageTaken(statusEffectCalculator.getPoisonDamage(attackingPokemon));
+        }
+
         int damageDone = 0;
         for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
