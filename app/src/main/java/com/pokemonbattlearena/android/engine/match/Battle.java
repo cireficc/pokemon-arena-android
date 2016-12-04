@@ -372,6 +372,14 @@ public class Battle {
         }
     }
 
+    private void applyFainting(BattlePokemon pokemon) {
+
+        boolean attackerFainted = pokemon.getCurrentHp() <= 0;
+
+        Log.i(TAG, "Applying fainted status. Pokemon fainted? " + attackerFainted);
+        pokemon.setFainted(attackerFainted);
+    }
+
     private void applySwitchResult(SwitchResult res) {
 
         TargetInfo targetInfo = res.getTargetInfo();
