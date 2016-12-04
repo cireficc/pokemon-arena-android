@@ -152,7 +152,25 @@ public class StatePokemon {
     public boolean isPokemonOnDeck() { return  isPokemonOnDeck; }
 
     public BattlePokemon toBattle() {
-        return new BattlePokemon(originalPokemon);
+        BattlePokemon toBattle = new BattlePokemon(originalPokemon);
+        toBattle.setCurrentHp(getCurrentHp());
+        toBattle.setStatusEffect(getStatusEffect());
+        toBattle.setStatusEffectTurns(getStatusEffectTurns());
+        toBattle.setConfusedTurns(getConfusedTurns());
+        toBattle.setChargingForTurns(getChargingForTurns());
+        toBattle.setRechargingForTurns(getRechargingForTurns());
+        toBattle.setAttackStage(getAttackStage());
+        toBattle.setDefenseStage(getDefenseStage());
+        toBattle.setSpAttackStage(getSpAttackStage());
+        toBattle.setSpDefenseStage(getSpDefenseStage());
+        toBattle.setSpeedStage(getSpeedStage());
+        toBattle.setCritStage(getCritStage());
+        toBattle.setAsCurrentPokemon(isCurrentPokemon());
+        toBattle.setAsPokemonOnDeck(isPokemonOnDeck());
+        toBattle.setConfused(isConfused());
+        toBattle.setFlinched(isFlinched());
+        toBattle.setFainted(isFainted());
+        return toBattle;
     }
 }
 

@@ -132,9 +132,6 @@ public class BottomBarActivity extends BaseActivity implements
     private Battle mActiveBattle = null;
     private boolean isAiBattle = false;
 
-    //TODO Temporary integer used for AI switching. Need 2 kill. Need 4 Speed.
-    private int ind = 0;
-
     //SAVED TEAMS
     private String newestAddedPokemonTeamName;
 
@@ -661,15 +658,19 @@ public class BottomBarActivity extends BaseActivity implements
             mBattleHomeFragment.enableButtonActions(false);
             updateUI();
             mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
-            ((AiBattle) mActiveBattle).buildIntelligence();
-            Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
 
-            if (mActiveBattle.oppPokemonFainted() && ind < 5) {
-                ind++;
-                BattlePokemon cur = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon();
-                Switch aiSw = new Switch(mActiveBattle.getOpponent(), ind);
-                mActiveBattle.getCurrentBattlePhase().queueCommand(aiSw);
-            } else {
+            if (mActiveBattle.oppPokemonFainted()) {
+
+                ((AiBattle) mActiveBattle).buildIntelligence(mActiveBattle, true);
+                Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiCommand);
+
+            } else if (mActiveBattle.selfPokemonFainted()) {
+                Command aiCommand = new NoP(mActiveBattle.getOpponent());
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiCommand);
+            } else{
+                ((AiBattle) mActiveBattle).buildIntelligence(mActiveBattle, false);
+                Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
                 mActiveBattle.getCurrentBattlePhase().queueCommand(aiCommand);
             }
 
@@ -936,7 +937,6 @@ public class BottomBarActivity extends BaseActivity implements
         }
 
         if (isAiBattle) {
-            ind = 0;
             if (mActiveBattle.selfPokemonFainted()) {
                 Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();
             } else if (mActiveBattle.oppPokemonFainted()) {
