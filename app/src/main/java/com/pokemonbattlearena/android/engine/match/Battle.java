@@ -216,6 +216,13 @@ public class Battle {
             attackingPokemon.setStatusEffectTurns(0);
         }
 
+        Log.i(TAG, "Move hit: " + res.isMoveHit());
+
+        if (!res.isMoveHit()) {
+            Log.i(TAG, "Move missed!");
+             return;
+        }
+
         int damageDone = res.getDamageDone();
         StatusEffect statusEffectApplied = res.getStatusEffectApplied();
         int statusEffectTurns = res.getStatusEffectTurns();
