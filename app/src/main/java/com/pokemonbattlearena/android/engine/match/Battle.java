@@ -96,6 +96,8 @@ public class Battle {
             }
             else if (c2 instanceof Switch) {
                 return Integer.MAX_VALUE;
+            } else if (c1 instanceof NoP|| c2 instanceof NoP) {
+                return Integer.MAX_VALUE;
             }
 
             Attack a1 = (Attack) c1;
@@ -124,6 +126,9 @@ public class Battle {
         for (Command command : currentBattlePhase.getCommands()) {
             if (!isFinished()) {
                 Log.i(TAG, "Executing command of type: " + command.getClass());
+                if (command instanceof NoP) {
+                    commandResult = command.execute(this);
+                }
                 if (command instanceof Switch) {
                     commandResult = command.execute(this);
                 } else {
@@ -170,6 +175,9 @@ public class Battle {
 
     public void applyCommandResult(CommandResult commandResult) {
 
+        if (commandResult instanceof NoPResult) {
+            return;
+        }
         if (commandResult instanceof AttackResult) {
             Log.i(TAG, "Applying command result of type AttackResult");
             applyAttackResult((AttackResult) commandResult);
