@@ -19,6 +19,8 @@ public class AttackResult extends CommandResult {
     private boolean confused;
     private int confusedTurns;
     private int confusionDamageTaken;
+    private int burnDamageTaken;
+    private int poisonDamageTaken;
     private boolean flinched;
     private int chargingTurns;
     private int rechargingTurns;
@@ -48,6 +50,8 @@ public class AttackResult extends CommandResult {
         this.confused = builder.confused;
         this.confusedTurns = builder.confusedTurns;
         this.confusionDamageTaken = builder.confusionDamageTaken;
+        this.burnDamageTaken = builder.burnDamageTaken;
+        this.poisonDamageTaken = builder.poisonDamageTaken;
         this.flinched = builder.flinched;
         this.chargingTurns = builder.chargingTurns;
         this.rechargingTurns = builder.rechargingTurns;
@@ -93,6 +97,14 @@ public class AttackResult extends CommandResult {
 
     public int getConfusionDamageTaken() {
         return confusionDamageTaken;
+    }
+
+    public int getBurnDamageTaken() {
+        return burnDamageTaken;
+    }
+
+    public int getPoisonDamageTaken() {
+        return poisonDamageTaken;
     }
 
     public boolean isFlinched() {
@@ -164,6 +176,8 @@ public class AttackResult extends CommandResult {
         private boolean confused;
         private int confusedTurns;
         private int confusionDamageTaken;
+        private int burnDamageTaken;
+        private int poisonDamageTaken;
         private boolean flinched;
         private int chargingTurns;
         private int rechargingTurns;
@@ -221,6 +235,22 @@ public class AttackResult extends CommandResult {
         protected Builder setConfusionDamageTaken(int confusionDamageTaken) {
             this.confusionDamageTaken = confusionDamageTaken;
             return this;
+        }
+
+        public int getBurnDamageTaken() {
+            return burnDamageTaken;
+        }
+
+        public void setBurnDamageTaken(int burnDamageTaken) {
+            this.burnDamageTaken = burnDamageTaken;
+        }
+
+        public int getPoisonDamageTaken() {
+            return poisonDamageTaken;
+        }
+
+        public void setPoisonDamageTaken(int poisonDamageTaken) {
+            this.poisonDamageTaken = poisonDamageTaken;
         }
 
         protected Builder setFlinched(boolean flinched) {

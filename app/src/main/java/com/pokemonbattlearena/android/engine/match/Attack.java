@@ -85,13 +85,12 @@ public class Attack extends Command {
         boolean sleeping = statusEffectCalculator.isAffectedBySleep(attackingPokemon);
 
         // If the Pokemon is not affected by the freeze, it means it unfroze
-        if (!frozen) {
+        if (attackingPokemon.getStatusEffect() == StatusEffect.FREEZE && !frozen) {
             builder.setUnfroze(true);
         }
 
         if (attackingPokemon.isFlinched() || frozen || paralyzed || sleeping) {
             builder.setSuccumbedToStatusEffect(true);
-            return builder.build();
         }
 
         // If a Pokemon is confused, see if it hurts itself and finish the attack
@@ -100,6 +99,13 @@ public class Attack extends Command {
                 builder.setConfusionDamageTaken(statusEffectCalculator.getConfusionDamage(attackingPokemon));
                 return builder.build();
             }
+        }
+
+        if (attackingPokemon.getStatusEffect() == StatusEffect.BURN) {
+            builder.setBurnDamageTaken(statusEffectCalculator.getBurnDamage(attackingPokemon));
+        }
+        if (attackingPokemon.getStatusEffect() == StatusEffect.POISON) {
+            builder.setPoisonDamageTaken(statusEffectCalculator.getPoisonDamage(attackingPokemon));
         }
 
         int damageDone = 0;
