@@ -6,6 +6,7 @@ import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Command;
+import com.pokemonbattlearena.android.engine.match.NoP;
 import com.pokemonbattlearena.android.engine.match.Switch;
 
 import java.util.ArrayList;
@@ -96,8 +97,10 @@ public class Node {
             return ((Attack) command).getMove().getName();
         } else if (command instanceof Switch) {
             return "Switching";
+        } else if (command instanceof NoP){
+            return "NoP - Attempt to switch to Pokemon that is fainted or current";
         } else {
-            return "Root";
+            return "Root node";
         }
     }
 

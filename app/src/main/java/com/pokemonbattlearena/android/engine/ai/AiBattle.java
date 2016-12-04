@@ -22,8 +22,15 @@ public class AiBattle extends Battle {
         maxHuHP = calculateTeamHP(playerPokemon);
     }
 
-    public void buildIntelligence() {
-        this.intelligence = new MiniMax(this.getOpponent(), this.getSelf(), maxAIHP, maxHuHP, this.getCurrentBattlePhase().getCommands().get(0));
+    public void buildIntelligence(Battle battle, boolean haveToSwitch) {
+        this.intelligence = new MiniMax(
+                this.getOpponent(),
+                this.getSelf(),
+                maxAIHP,
+                maxHuHP,
+                this.getCurrentBattlePhase().getCommands().get(0),
+                battle,
+                haveToSwitch);
     }
 
     public Command showIntelligence() {
