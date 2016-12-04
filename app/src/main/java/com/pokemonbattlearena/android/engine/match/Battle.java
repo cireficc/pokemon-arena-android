@@ -340,7 +340,19 @@ public class Battle {
             defendingPokemon.setCritStage(defendingPokemon.getCritStage() + (defendingPokemon.getCritStage() * (-1)));
         }
 
+    private void decrementStatusEffectTurns(BattlePokemon pokemon) {
 
+        Log.i(TAG, "Decrementing status effect and confusion turns and resolving those states for: " + pokemon.getOriginalPokemon().getName());
+
+        pokemon.setStatusEffectTurns(pokemon.getStatusEffectTurns() - 1);
+        pokemon.setConfusedTurns(pokemon.getConfusedTurns() - 1);
+
+        if (pokemon.getStatusEffectTurns() <= 0) {
+            pokemon.setStatusEffect(null);
+        }
+        if (pokemon.getConfusedTurns() <= 0) {
+            pokemon.setConfused(false);
+        }
     }
 
     private void applySwitchResult(SwitchResult res) {
