@@ -210,6 +210,12 @@ public class Battle {
             return;
         }
 
+        if (res.isUnfroze()) {
+            Log.i(TAG, attackingPokemon.getOriginalPokemon().getName() + " unfroze!");
+            attackingPokemon.setStatusEffect(null);
+            attackingPokemon.setStatusEffectTurns(0);
+        }
+
         int damageDone = res.getDamageDone();
         StatusEffect statusEffectApplied = res.getStatusEffectApplied();
         int statusEffectTurns = res.getStatusEffectTurns();
