@@ -207,6 +207,7 @@ public class Battle {
         int statusEffectTurns = res.getStatusEffectTurns();
         boolean confused = res.isConfused();
         int confusedTurns = res.getConfusedTurns();
+        int confusionDamageTaken = res.getConfusionDamageTaken();
         boolean flinched = res.isFlinched();
         int chargingTurns = res.getChargingTurns();
         int rechargingTurns = res.getRechargingTurns();
@@ -230,6 +231,9 @@ public class Battle {
             defendingPokemon.setConfused(confused);
             defendingPokemon.setConfusedTurns(confusedTurns);
         }
+
+        Log.i(TAG, "Pokemon hurt itself in confusion? Damage taken: " + confusionDamageTaken);
+        attackingPokemon.setCurrentHp(attackingPokemon.getCurrentHp() - confusionDamageTaken);
 
         Log.i(TAG, "Applying flinch: " + flinched);
         defendingPokemon.setFlinched(flinched);
