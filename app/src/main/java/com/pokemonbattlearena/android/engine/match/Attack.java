@@ -67,7 +67,7 @@ public class Attack extends Command {
         BattlePokemon defendingPokemon = getDefendingPokemon(battle);
         TargetInfo targetInfo =
                 new TargetInfo(attackingPlayer, defendingPlayer, attackingPokemon, defendingPokemon);
-        AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move.getId());
+        AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move);
 
         if (move.isChargingMove()) {
             Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
