@@ -92,7 +92,7 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
             }
             saveTeam(pokemonTeam);
         } else {
-            Toast.makeText(mApplication, "You must have" +mTeamSize+" Pokemon in your team", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mApplication, "You must have " +mTeamSize+" Pokemon in your team", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -5,8 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -69,6 +72,8 @@ import com.roughike.bottombar.OnTabSelectListener;
 import com.stephentuso.welcome.WelcomeHelper;
 
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -134,6 +139,9 @@ public class BottomBarActivity extends BaseActivity implements
 
     //SAVED TEAMS
     private String newestAddedPokemonTeamName;
+
+    //MUSIC
+    private MediaPlayer mMusic;
 
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
@@ -302,6 +310,7 @@ public class BottomBarActivity extends BaseActivity implements
                 }
             }
         });
+
     }
 
     @Override
@@ -318,8 +327,77 @@ public class BottomBarActivity extends BaseActivity implements
             Log.d(TAG, "Connecting client.");
             mApplication.getGoogleApiClient().connect();
         }
+
+        if(mMusic == null) {
+            //Sets up and plays theme music
+            startMusic(R.raw.music_menu);
+            setMusicCompletionListener(R.raw.music_menu_cont);
+        } else {
+            mMusic.start();
+        }
+
+
         super.onStart();
     }
+
+    public void startMusic(int id){
+        if(mMusic != null && mMusic.isPlaying()){
+            mMusic.stop();
+            mMusic.release();
+        }
+        Uri ins = Uri.parse("android.resource://com.pokemonbattlearena.android/"+id);
+        try {
+            mMusic = new MediaPlayer();
+            mMusic.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mMusic.start();
+                }
+            });
+            mMusic.setDataSource(this, ins);
+        } catch (IOException e) {
+            Log.e(TAG, "Could not set DataSource for MediaPlayer");
+        }
+        mMusic.prepareAsync();
+    }
+
+    public void setMusicCompletionListener(int id){
+        final int ID = id;
+        mMusic.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                startMusic(ID);
+                mMusic.setLooping(true);
+            }
+        });
+    }
+
+    @Override
+    public void onStop() {
+        mMusic.pause();
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        mMusic.pause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mMusic.start();
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mMusic.stop();
+        mMusic.release();
+        mMusic = null;
+        super.onDestroy();
+    }
+
     //endregion
 
     //region Activity Result Callback
@@ -888,6 +966,9 @@ public class BottomBarActivity extends BaseActivity implements
                 mFragmentManager.beginTransaction().add(R.id.container, mBattleHomeFragment, "battle").commit();
                 mFragmentManager.executePendingTransactions();
             }
+            //set up battle music
+            startMusic(R.raw.music_battle);
+            setMusicCompletionListener(R.raw.music_battle_cont);
         } else if(mApplication.getApplicationPhase() == ApplicationPhase.INACTIVE_BATTLE) {
             //deletes in-game chat from Firebase
             mChatInGameFragment.deleteChatRoom();
@@ -902,6 +983,9 @@ public class BottomBarActivity extends BaseActivity implements
             }
             //TODO: Add In-Game Team UI Handling here
 
+            //set up menu music
+            startMusic(R.raw.music_menu);
+            setMusicCompletionListener(R.raw.music_menu_cont);
         }
     }
 
