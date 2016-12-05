@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.activity;
+package com.pokemonbattlearena.android.fragment.splash;
 
 import android.app.AlertDialog;
 import android.content.Context;

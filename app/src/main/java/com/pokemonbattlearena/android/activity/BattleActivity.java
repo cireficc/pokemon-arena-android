@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -28,6 +29,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
+import com.pokemonbattlearena.android.BattleEndListener;
+import com.pokemonbattlearena.android.application.ApplicationPhase;
+import com.pokemonbattlearena.android.application.PokemonBattleApplication;
+import com.pokemonbattlearena.android.engine.BattleEngine;
+import com.pokemonbattlearena.android.engine.ai.AiBattle;
+import com.pokemonbattlearena.android.engine.ai.AiPlayer;
+import com.pokemonbattlearena.android.engine.match.NoP;
 import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -54,8 +62,9 @@ import java.util.List;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 
-public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener, ChatBattleFragment.OnGameChatLoadedListener {
+public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener, ChatBattleFragment.OnGameChatLoadedListener, BattleEndListener {
     private static final String TAG = BattleActivity.class.getSimpleName();
+    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private static DatabaseReference mRootFirebase;
     private GoogleApiClient mGoogleApiClient;
     private FragmentManager mFragmentManager;
@@ -95,6 +104,8 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     private final Gson mCommandResultGson = new GsonBuilder().registerTypeAdapterFactory(mCommandResultRuntimeTypeAdapter).create();
 
     private SharedPreferences mPreferences;
+    private boolean isAiBattle;
+    private BattleEndListener battleEndListener = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +113,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         setContentView(R.layout.activity_battle);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        isAiBattle = getIntent().getBooleanExtra(PokemonUtils.AI_BATTLE_KEY, false);
         mPreferences = getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
         mBottomBar = (BottomBar) findViewById(R.id.battle_bottom_bar);
         mBottomBar.setDefaultTab(R.id.tab_battle);
@@ -122,6 +134,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                 .add(R.id.battle_container, mBattleFragment, "battle")
                 .hide(mBattleFragment)
                 .commit();
+
 
         showProgressDialog();
 
@@ -345,17 +358,27 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     private void setupBattleWithOpponent() {
         //TODO: Don't use the players saved team for the opponent.
         // get this from firebase using the ID sent from the message
-        BattlePokemonPlayer opponent = getPlayerForTeam(mOpponentUsername, getSavedTeam());
-        BattlePokemonPlayer self = getPlayerForTeam(mUsername, getSavedTeam());
-        mBattle = new Battle(self, opponent);
-
-        mBattleFragment.setPlayer(self);
-        mBattleFragment.setOpponent(opponent);
-        mBattleFragment.initPokemonViewsForBattle();
+        if (isAiBattle) {
+            PokemonPlayer player = new PokemonPlayer(mUsername);
+            player.setPokemonTeam(getSavedTeam());
+            PokemonPlayer ai = new AiPlayer(mApplication.getBattleDatabase(), player);
+            mBattle = new AiBattle(player, (AiPlayer) ai);
+            mBattleFragment.setPlayer(new BattlePokemonPlayer(player));
+            mBattleFragment.setOpponent(new BattlePokemonPlayer(ai));
+        } else {
+            BattlePokemonPlayer opponent = getPlayerForTeam(mOpponentUsername, getSavedTeam());
+            BattlePokemonPlayer self = getPlayerForTeam(mUsername, getSavedTeam());
+            mBattle = new Battle(self, opponent);
+            mBattleFragment.setPlayer(self);
+            mBattleFragment.setOpponent(opponent);
+        }
 
         mFragmentManager.beginTransaction()
                 .show(mBattleFragment)
                 .commit();
+
+        mBattleFragment.initPokemonViewsForBattle();
+
         hideProgressDialog();
     }
 
@@ -392,7 +415,11 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        startMatchMaking();
+        if (!isAiBattle) {
+            startMatchMaking();
+        } else {
+            setupBattleWithOpponent();
+        }
     }
 
     @Override
@@ -488,13 +515,20 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onMoveClicked(Move move) {
-        Attack attack = new Attack(mBattle.getSelf(), mBattle.getOpponent(), move);
-        if(mIsHost) {
-            Log.d(TAG, "Host: queuing move: " + move.getName());
-            queueHostMessage(attack);
+        if (mBattle instanceof AiBattle) {
+            if (mBattleFragment != null) {
+                Attack attack = new Attack(mBattle.getSelf(), mBattle.getOpponent(), move);
+                AIBattleTurn(attack);
+            }
         } else {
-            Log.d(TAG, "Client: sending move: " + move.getName());
-            sendClientMessage(attack);
+            Attack attack = new Attack(mBattle.getSelf(), mBattle.getOpponent(), move);
+            if (mIsHost) {
+                Log.d(TAG, "Host: queuing move: " + move.getName());
+                queueHostMessage(attack);
+            } else {
+                Log.d(TAG, "Client: sending move: " + move.getName());
+                sendClientMessage(attack);
+            }
         }
     }
 
@@ -513,9 +547,34 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         mBattleFragment.enableButtonActions(false);
     }
 
+    public void AIBattleTurn(Command cmd) {
+        if (mBattle instanceof AiBattle) {
+            mBattleFragment.enableButtonActions(false);
+            mBattle.getCurrentBattlePhase().queueCommand(cmd);
+
+            if (mBattle.oppPokemonFainted()) {
+
+                ((AiBattle) mBattle).buildIntelligence(mBattle, true);
+                Command aiCommand = ((AiBattle) mBattle).showIntelligence();
+                mBattle.getCurrentBattlePhase().queueCommand(aiCommand);
+
+            } else if (mBattle.selfPokemonFainted()) {
+                Command aiCommand = new NoP(mBattle.getOpponent());
+                mBattle.getCurrentBattlePhase().queueCommand(aiCommand);
+            } else{
+                ((AiBattle) mBattle).buildIntelligence(mBattle, false);
+                Command aiCommand = ((AiBattle) mBattle).showIntelligence();
+                mBattle.getCurrentBattlePhase().queueCommand(aiCommand);
+            }
+            mBattleFragment.refreshBattleUI(mBattle);
+            handleBattleResult();
+        }
+    }
+
     private void handleBattleResult() {
         BattlePhaseResult result = mBattle.executeCurrentBattlePhase();
         PokemonTeam pokes = new PokemonTeam(6);
+        boolean nop = false;
         for (BattlePokemon bp : mBattle.getSelf().getBattlePokemonTeam().getBattlePokemons()) {
             pokes.addPokemon(bp.getOriginalPokemon());
         }
@@ -525,17 +584,22 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mBattle.applyCommandResult(commandResult);
 
             if (mBattle.isFinished()) {
+                battleEndListener.onBattleEnd();
                 leaveRoom();
                 return;
+            }
+
+            if (mBattle.oppPokemonFainted()) {
+                nop = true;
             }
         }
         mBattleFragment.enableButtonActions(true);
         mBattleFragment.refreshBattleUI(mBattle);
 
-//        if(!isAiBattle) {
+        if(!isAiBattle) {
             String json = mCommandResultGson.toJson(result);
             sendMessage(json);
-//        }
+        }
 
         mBattle.startNewBattlePhase();
 
@@ -543,6 +607,14 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             Button force;
             force = (Button)findViewById(R.id.switch_button);
             force.performClick();
+            return;
+        } else if (nop) {
+            if (isAiBattle) {
+                AIBattleTurn(new NoP(mBattle.getSelf()));
+            } else {
+                mBattle.getCurrentBattlePhase().queueCommand(new NoP(mBattle.getSelf()));
+                mBattleFragment.enableButtonActions(false);
+            }
         }
     }
 
@@ -560,10 +632,14 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     @Override
     public void onSwitchPokemon(int position) {
         Switch s = new Switch(mBattle.getSelf(), position);
-        if (mIsHost) {
-            queueHostMessage(s);
+        if (mBattle instanceof AiBattle) {
+            AIBattleTurn(s);
         } else {
-            sendClientMessage(s);
+            if (mIsHost) {
+                queueHostMessage(s);
+            } else {
+                sendClientMessage(s);
+            }
         }
     }
 
@@ -576,5 +652,28 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     public String getHostId() {
         return mUsername;
     }
-    //endregion
+
+    @Override
+    public void onBattleEnd() {
+
+        if (mBattle instanceof AiBattle) {
+            if (mBattle.selfPokemonFainted()) {
+                Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();
+            } else if (mBattle.oppPokemonFainted()) {
+                Toast.makeText(mApplication," You have won the battle", Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
+
+        if (mBattle.isFinished()) {
+            if (mBattle.selfPokemonFainted()) {
+                Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
+                return;
+            } else if (mBattle.oppPokemonFainted()){
+                Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+        finish();
+    }
 }

@@ -157,13 +157,16 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, H
     public void onBattleNowClicked() {
         Intent battleIntent = new Intent();
         battleIntent.setAction("om.pokemonbattlearena.android.battle.START");
-
+        battleIntent.putExtra(PokemonUtils.AI_BATTLE_KEY, false);
         startActivityForResult(battleIntent, PokemonUtils.BATTLE_REQUEST);
     }
 
     @Override
     public void onAiBattleClicked() {
-
+        Intent battleIntent = new Intent();
+        battleIntent.setAction("om.pokemonbattlearena.android.battle.START");
+        battleIntent.putExtra(PokemonUtils.AI_BATTLE_KEY, true);
+        startActivityForResult(battleIntent, PokemonUtils.BATTLE_REQUEST);
     }
 
     @Override
@@ -223,7 +226,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, H
     @Override
     public void toggleAddTeamFragment() {
         if (mFragmentManager != null && mSavedTeamsFragment != null && mSavedTeamsFragment.isAdded()) {
-            mTeamBuilderFragment = new TeamsHomeFragment();
+            mTeamBuilderFragment = createTeamsHomeFragment();
             mFragmentManager.beginTransaction().remove(mSavedTeamsFragment).commit();
             mFragmentManager.beginTransaction().add(R.id.home_container, mTeamBuilderFragment, "team_builder").commit();
             mFragmentManager.executePendingTransactions();
@@ -232,6 +235,15 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, H
             mFragmentManager.beginTransaction().add(R.id.home_container, mSavedTeamsFragment, "team_save").commit();
             mFragmentManager.executePendingTransactions();
         }
+    }
+
+    private TeamsHomeFragment createTeamsHomeFragment() {
+        TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
+        // Set the team size
+        Bundle teamArgs = new Bundle();
+        teamArgs.putInt("teamSize", TEAM_SIZE_INT);
+        teamsHomeFragment.setArguments(teamArgs);
+        return teamsHomeFragment;
     }
 
     @Override

@@ -1,15 +1,10 @@
 package com.pokemonbattlearena.android.activity;
 
-import android.net.Uri;
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.pokemonbattlearena.android.R;
-import com.stephentuso.welcome.BasicPage;
+import com.pokemonbattlearena.android.fragment.splash.NameFragment;
+import com.pokemonbattlearena.android.fragment.splash.FirstTeamFragment;
 import com.stephentuso.welcome.FragmentWelcomePage;
 import com.stephentuso.welcome.TitlePage;
 import com.stephentuso.welcome.WelcomeActivity;

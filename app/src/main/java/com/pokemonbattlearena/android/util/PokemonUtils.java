@@ -10,4 +10,5 @@ public class PokemonUtils {
     public static final int BATTLE_REQUEST = 42247;
     public static final String PROFILE_NAME_KEY = "profile_name";
     public static final String PREFS_KEY = "Pokemon Battle Prefs";
+    public static final String AI_BATTLE_KEY = "AI_battle";
 }

@@ -596,7 +596,7 @@ public class BottomBarActivity extends BaseActivity implements
                     force.performClick();
                 } else if(nop) {
                     sendClientMessage(new NoP(mActiveBattle.getSelf()));
-                    mBattleHomeFragment.enableButtonActions(false);
+//                    mBattleHomeFragment.enableButtonActions(false);
                 }
                 updateUI();
             }
@@ -728,7 +728,7 @@ public class BottomBarActivity extends BaseActivity implements
                 AIBattleTurn(new NoP(mActiveBattle.getSelf()));
             } else {
                 mActiveBattle.getCurrentBattlePhase().queueCommand(new NoP(mActiveBattle.getSelf()));
-                mBattleHomeFragment.enableButtonActions(false);
+//                mBattleHomeFragment.enableButtonActions(false);
             }
         }
     }
