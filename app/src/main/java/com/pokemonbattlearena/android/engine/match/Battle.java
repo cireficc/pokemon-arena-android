@@ -200,6 +200,55 @@ public class Battle {
         BattlePokemonPlayer defendingPlayer = getPlayerFromId(defendingPlayerId);
         BattlePokemon defendingPokemon = defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
 
+
+        // Log the important things for the user
+        Pokemon attackingOriginal = attackingPokemon.getOriginalPokemon();
+        Pokemon defendingOriginal = defendingPokemon.getOriginalPokemon();
+        res.appendToLog(attackingOriginal.getName() + " used " + res.getMoveUsed().getName());
+
+        if (!res.isMoveHit()) {
+            res.appendToLog(attackingOriginal.getName() + "'s attack missed!");
+        }
+
+        if (res.isFlinched()) {
+            res.appendToLog(attackingOriginal.getName() + " flinched!");
+        }
+        else if (res.isSuccumbedToStatusEffect()) {
+            res.appendToLog(attackingOriginal.getName() + " succumbed to " + attackingPokemon.getStatusEffect());
+        }
+
+        if (res.getConfusionDamageTaken() > 0) {
+            res.appendToLog(attackingOriginal.getName() + " is confused. It hurt itself in confusion for " + res.getConfusionDamageTaken() + " damage");
+        }
+
+        if (!res.isSuccumbedToStatusEffect() && res.getDamageDone() > 0) {
+            res.appendToLog(attackingOriginal.getName() + " did " + res.getDamageDone() + " damage");
+        }
+
+        if (res.getStatusEffectApplied() != null) {
+            res.appendToLog(defendingOriginal.getName() + " had "  + res.getStatusEffectApplied() + " applied to it");
+        }
+
+        if (res.isConfused()) {
+            res.appendToLog(defendingOriginal.getName() + " had confusion applied to it");
+        }
+
+        if (res.getHealingDone() > 0) {
+            res.appendToLog(attackingOriginal.getName() + " healed itself for " + res.getHealingDone() + " HP");
+        }
+
+        if (res.getRecoilTaken() > 0 ) {
+            res.appendToLog(attackingOriginal.getName() + " took " + res.getRecoilTaken() + " recoil damage");
+        }
+
+        if (res.getBurnDamageTaken() > 0) {
+            res.appendToLog(attackingOriginal.getName() + " took " + res.getBurnDamageTaken() + " burn damage");
+        }
+
+        if (res.getPoisonDamageTaken() > 0) {
+            res.appendToLog(attackingOriginal.getName() + " took " + res.getPoisonDamageTaken() + " poison damage");
+        }
+
         Log.i(TAG, "Attacking player: " + attackingPlayerId);
         Log.i(TAG, "Attacking player pkmn: " + attackingPokemon.getOriginalPokemon().getName());
         Log.i(TAG, "Defending player ID: " + defendingPlayer.getId() + "Defending ID: " + defendingPlayerId);
@@ -367,6 +416,14 @@ public class Battle {
         applyStatusEffectDamage(defendingPokemon, res);
         applyFainting(attackingPokemon);
         applyFainting(defendingPokemon);
+
+        if (attackingPokemon.isFainted()) {
+            res.appendToLog(attackingOriginal.getName() + " fainted");
+        }
+
+        if (defendingPokemon.isFainted()) {
+            res.appendToLog(defendingOriginal.getName() + " fainted");
+        }
     }
 
     private void decrementStatusEffectTurns(BattlePokemon pokemon) {
@@ -438,5 +495,23 @@ public class Battle {
 
     public boolean selfPokemonFainted() {
         return self.getBattlePokemonTeam().getCurrentPokemon().isFainted();
+    }
+
+    public String getBattleLog() {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (BattlePhase battlePhase : finishedBattlePhases) {
+
+            BattlePhaseResult battlePhaseResult = battlePhase.getBattlePhaseResult();
+
+            for (CommandResult commandResult : battlePhaseResult.getCommandResults()) {
+                sb.append(commandResult.getLog() + "\n");
+            }
+
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 }

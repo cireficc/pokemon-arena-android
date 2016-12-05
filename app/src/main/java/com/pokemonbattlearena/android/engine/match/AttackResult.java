@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android.engine.match;
 
 import android.util.Log;
 
+import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.StatType;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 
@@ -9,7 +10,7 @@ public class AttackResult extends CommandResult {
 
     private transient static final String TAG = AttackResult.class.getName();
 
-    private int moveUsedId;
+    private Move moveUsed;
 
     private boolean moveHit;
     private int damageDone;
@@ -41,7 +42,7 @@ public class AttackResult extends CommandResult {
         super();
 
         this.targetInfo = builder.targetInfo;
-        this.moveUsedId = builder.moveUsedId;
+        this.moveUsed = builder.moveUsed;
 
         this.moveHit = builder.moveHit;
         this.damageDone = builder.damageDone;
@@ -69,8 +70,8 @@ public class AttackResult extends CommandResult {
         this.isHaze = builder.isHaze;
     }
 
-    public int getMoveUsedId() {
-        return moveUsedId;
+    public Move getMoveUsed() {
+        return moveUsed;
     }
 
     public boolean isMoveHit() {
@@ -172,7 +173,7 @@ public class AttackResult extends CommandResult {
     protected static class Builder {
 
         private TargetInfo targetInfo;
-        private int moveUsedId;
+        private Move moveUsed;
 
         private boolean moveHit;
         private int damageDone;
@@ -199,9 +200,9 @@ public class AttackResult extends CommandResult {
         private int critStageChange;
         private boolean isHaze;
 
-        protected Builder(TargetInfo targetInfo, int moveUsedId) {
+        protected Builder(TargetInfo targetInfo, Move moveUsed) {
             this.targetInfo = targetInfo;
-            this.moveUsedId = moveUsedId;
+            this.moveUsed = moveUsed;
         }
 
         public void setMoveHit(boolean moveHit) {
