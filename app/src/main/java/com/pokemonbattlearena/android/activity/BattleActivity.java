@@ -704,7 +704,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onBattleEnd() {
-
+        mChatFragment.deleteChatRoom();
         if (mBattle instanceof AiBattle) {
             if (mBattle.selfPokemonFainted()) {
                 Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();
