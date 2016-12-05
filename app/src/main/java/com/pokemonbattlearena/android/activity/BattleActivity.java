@@ -41,6 +41,7 @@ import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.match.NoP;
 import com.pokemonbattlearena.android.engine.match.NoPResult;
 import com.pokemonbattlearena.android.fragment.chat.ChatType;
+import com.pokemonbattlearena.android.fragment.team.TeamStatFragment;
 import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -75,6 +76,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     private FragmentManager mFragmentManager;
     private BattleFragment mBattleFragment;
     private ChatFragment mChatFragment;
+    private TeamStatFragment mTeamStatFragment;
     private BottomBar mBottomBar;
     private Button mCancelBattleButton;
     private Battle mBattle;
@@ -176,12 +178,30 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     public void onTabSelected(@IdRes int tabId) {
         switch (tabId) {
             case R.id.tab_teams:
+                if (mTeamStatFragment == null) {
+                    mTeamStatFragment = new TeamStatFragment();
+                    Bundle statBundle = new Bundle();
+                    statBundle.putString(PokemonUtils.POKEMON_TEAM_KEY, new Gson().toJson(getSavedTeam(), PokemonTeam.class));
+                    mTeamStatFragment.setArguments(statBundle);
+                    mFragmentManager.beginTransaction()
+                            .add(R.id.battle_container, mTeamStatFragment, "team_stat")
+                            .hide(mBattleFragment)
+                            .hide(mChatFragment)
+                            .commit();
+                } else if (mTeamStatFragment.isHidden()) {
+                    mFragmentManager.beginTransaction()
+                            .hide(mBattleFragment)
+                            .hide(mChatFragment)
+                            .show(mTeamStatFragment)
+                            .commit();
+                }
                 break;
             case R.id.tab_battle:
                 if (mBattleFragment.isHidden()) {
                     mFragmentManager.beginTransaction()
                             .show(mBattleFragment)
                             .hide(mChatFragment)
+                            .hide(mTeamStatFragment)
                             .commit();
                 }
                 break;
@@ -196,11 +216,13 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                     mChatFragment.setArguments(chatBundle);
                     mFragmentManager.beginTransaction()
                             .add(R.id.battle_container, mChatFragment, "chat")
+                            .hide(mTeamStatFragment)
                             .hide(mBattleFragment)
                             .commit();
                 } else if (mChatFragment.isHidden()) {
                     mFragmentManager.beginTransaction()
                             .show(mChatFragment)
+                            .hide(mTeamStatFragment)
                             .hide(mBattleFragment)
                             .commit();
                 }

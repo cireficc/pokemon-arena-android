@@ -28,4 +28,7 @@
     <string name="append_profile_text">\'s Team:</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_activity_battle">BattleActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

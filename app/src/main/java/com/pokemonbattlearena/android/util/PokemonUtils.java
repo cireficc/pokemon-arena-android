@@ -1,5 +1,8 @@
 package com.pokemonbattlearena.android.util;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+
 import com.pokemonbattlearena.android.activity.SplashActivity;
 
 /**
@@ -13,4 +16,11 @@ public class PokemonUtils {
     public static final String AI_BATTLE_KEY = "AI_battle";
     public static String CHAT_TYPE_KEY = "chat_type";
     public static final String CHAT_ALLOW_IN_GAME = "allows_switch_chat";
+    public static String POKEMON_TEAM_KEY = "pokemon_team";
+
+    public static Drawable getDrawableForPokemon(Context c, String name) {
+        String key = "ic_pokemon_" + name.toLowerCase();
+        int id = c.getResources().getIdentifier(key, "drawable", c.getPackageName());
+        return c.getDrawable(id);
+    }
 }
