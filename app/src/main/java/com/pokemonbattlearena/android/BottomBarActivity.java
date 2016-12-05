@@ -44,6 +44,8 @@ import com.pokemonbattlearena.android.application.ApplicationPhase;
 import com.pokemonbattlearena.android.application.PokemonBattleApplication;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
+import com.pokemonbattlearena.android.engine.match.NoP;
+import com.pokemonbattlearena.android.engine.match.NoPResult;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.Attack;
@@ -133,21 +135,20 @@ public class BottomBarActivity extends BaseActivity implements
     private Battle mActiveBattle = null;
     private boolean isAiBattle = false;
 
-    //TODO Temporary integer used for AI switching. Need 2 kill. Need 4 Speed.
-    private int ind = 0;
-
     //SAVED TEAMS
     private String newestAddedPokemonTeamName;
 
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
             .registerSubtype(Attack.class)
-            .registerSubtype(Switch.class);
+            .registerSubtype(Switch.class)
+            .registerSubtype(NoP.class);
 
     private final RuntimeTypeAdapterFactory<CommandResult> mCommandResultRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(CommandResult.class, "type")
             .registerSubtype(AttackResult.class)
-            .registerSubtype(SwitchResult.class);
+            .registerSubtype(SwitchResult.class)
+            .registerSubtype(NoPResult.class);
 
     private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mCommandRuntimeTypeAdapter).create();
     private final Gson mCommandResultGson = new GsonBuilder().registerTypeAdapterFactory(mCommandResultRuntimeTypeAdapter).create();
@@ -573,12 +574,16 @@ public class BottomBarActivity extends BaseActivity implements
                     handleBattleResult();
                 }
             } else {
+                boolean nop = false;
                 BattlePhaseResult resultFromJson = mCommandResultGson.fromJson(bufferString, BattlePhaseResult.class);
                 Log.d(TAG, "We got a battle phase result: " + resultFromJson.toString());
                 for (CommandResult commandResult : resultFromJson.getCommandResults()) {
                     // Update the internal state of the battle (only host really needs to do this, but opponent can too)
                     // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
                     mActiveBattle.applyCommandResult(commandResult);
+                    if (mActiveBattle.oppPokemonFainted()) {
+                        nop = true;
+                    }
                     Log.d(TAG, commandResult.getTargetInfo().toString());
                     //TODO: check if battle ended
                     updateUI();
@@ -589,6 +594,9 @@ public class BottomBarActivity extends BaseActivity implements
                     Button force;
                     force = (Button)findViewById(R.id.switch_button);
                     force.performClick();
+                } else if(nop) {
+                    sendClientMessage(new NoP(mActiveBattle.getSelf()));
+                    mBattleHomeFragment.enableButtonActions(false);
                 }
                 updateUI();
             }
@@ -654,15 +662,19 @@ public class BottomBarActivity extends BaseActivity implements
             mBattleFragment.enableButtonActions(false);
             updateUI();
             mActiveBattle.getCurrentBattlePhase().queueCommand(cmd);
-            ((AiBattle) mActiveBattle).buildIntelligence();
-            Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
 
-            if (mActiveBattle.oppPokemonFainted() && ind < 5) {
-                ind++;
-                BattlePokemon cur = mActiveBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon();
-                Switch aiSw = new Switch(mActiveBattle.getOpponent(), ind);
-                mActiveBattle.getCurrentBattlePhase().queueCommand(aiSw);
-            } else {
+            if (mActiveBattle.oppPokemonFainted()) {
+
+                ((AiBattle) mActiveBattle).buildIntelligence(mActiveBattle, true);
+                Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiCommand);
+
+            } else if (mActiveBattle.selfPokemonFainted()) {
+                Command aiCommand = new NoP(mActiveBattle.getOpponent());
+                mActiveBattle.getCurrentBattlePhase().queueCommand(aiCommand);
+            } else{
+                ((AiBattle) mActiveBattle).buildIntelligence(mActiveBattle, false);
+                Command aiCommand = ((AiBattle) mActiveBattle).showIntelligence();
                 mActiveBattle.getCurrentBattlePhase().queueCommand(aiCommand);
             }
 
@@ -673,6 +685,7 @@ public class BottomBarActivity extends BaseActivity implements
     private void handleBattleResult() {
         BattlePhaseResult result = mActiveBattle.executeCurrentBattlePhase();
         PokemonTeam pokes = new PokemonTeam(6);
+        boolean nop = false;
         for (BattlePokemon bp : mActiveBattle.getSelf().getBattlePokemonTeam().getBattlePokemons()) {
             pokes.addPokemon(bp.getOriginalPokemon());
         }
@@ -688,6 +701,10 @@ public class BottomBarActivity extends BaseActivity implements
                 battleEndListener.onBattleEnd();
                 leaveRoom();
                 return;
+            }
+
+            if (mActiveBattle.oppPokemonFainted()) {
+                nop = true;
             }
         }
         mBattleFragment.enableButtonActions(true);
@@ -705,6 +722,14 @@ public class BottomBarActivity extends BaseActivity implements
             Button force;
             force = (Button)findViewById(R.id.switch_button);
             force.performClick();
+            return;
+        } else if (nop) {
+            if (isAiBattle) {
+                AIBattleTurn(new NoP(mActiveBattle.getSelf()));
+            } else {
+                mActiveBattle.getCurrentBattlePhase().queueCommand(new NoP(mActiveBattle.getSelf()));
+                mBattleHomeFragment.enableButtonActions(false);
+            }
         }
     }
     //endregion
@@ -916,7 +941,6 @@ public class BottomBarActivity extends BaseActivity implements
         }
 
         if (isAiBattle) {
-            ind = 0;
             if (mActiveBattle.selfPokemonFainted()) {
                 Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();
             } else if (mActiveBattle.oppPokemonFainted()) {

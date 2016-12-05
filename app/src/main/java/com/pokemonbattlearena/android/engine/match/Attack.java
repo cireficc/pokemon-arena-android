@@ -67,7 +67,7 @@ public class Attack extends Command {
         BattlePokemon defendingPokemon = getDefendingPokemon(battle);
         TargetInfo targetInfo =
                 new TargetInfo(attackingPlayer, defendingPlayer, attackingPokemon, defendingPokemon);
-        AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move.getId());
+        AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move);
 
         if (move.isChargingMove()) {
             Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
@@ -85,22 +85,30 @@ public class Attack extends Command {
         boolean sleeping = statusEffectCalculator.isAffectedBySleep(attackingPokemon);
 
         // If the Pokemon is not affected by the freeze, it means it unfroze
-        if (!frozen) {
+        if (attackingPokemon.getStatusEffect() == StatusEffect.FREEZE && !frozen) {
             builder.setUnfroze(true);
         }
 
         if (attackingPokemon.isFlinched() || frozen || paralyzed || sleeping) {
             builder.setSuccumbedToStatusEffect(true);
-            return builder.build();
         }
 
         // If a Pokemon is confused, see if it hurts itself and finish the attack
         if (attackingPokemon.isConfused()) {
             if (statusEffectCalculator.isHurtByConfusion()) {
                 builder.setConfusionDamageTaken(statusEffectCalculator.getConfusionDamage(attackingPokemon));
-                return builder.build();
             }
         }
+
+        if (attackingPokemon.getStatusEffect() == StatusEffect.BURN) {
+            builder.setBurnDamageTaken(statusEffectCalculator.getBurnDamage(attackingPokemon));
+        }
+        if (attackingPokemon.getStatusEffect() == StatusEffect.POISON) {
+            builder.setPoisonDamageTaken(statusEffectCalculator.getPoisonDamage(attackingPokemon));
+        }
+
+        // Set whether or not the move hit
+        builder.setMoveHit(damageCalculator.moveHit(move));
 
         int damageDone = 0;
         for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
