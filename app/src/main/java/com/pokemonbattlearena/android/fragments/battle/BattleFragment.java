@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.method.ScrollingMovementMethod;
@@ -64,14 +65,14 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
 
     private Button mSwitchButton;
 
+    private BattlePokemonPlayer mPlayerBattlePlayer;
+    private BattlePokemonPlayer mOpponentBattlePlayer;
 
     private final static int typePokemon = 0;
     private final static int typeStatus = 1;
 
     public BattleFragment() {
         super();
-        mPlayerBattleView = new BattleViewItem();
-        mOpponentBattleView = new BattleViewItem();
         mTypeModel = new TypeModel();
     }
 
@@ -99,46 +100,38 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void refreshActivePokemon(Battle activeBattle) {
-        if (activeBattle != null) {
+    public void refreshBattleUI(Battle activeBattle) {
             BattlePokemon self = activeBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon();
             BattlePokemon opponent = activeBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon();
-            mPlayerBattleView.setActivePokemon(self, getDrawableForPokemon(self.getOriginalPokemon().getName(), typePokemon));
-            mOpponentBattleView.setActivePokemon(opponent, getDrawableForPokemon(opponent.getOriginalPokemon().getName(), typePokemon));
+            mPlayerBattleView.setActivePokemon(self);
+            mOpponentBattleView.setActivePokemon(opponent);
 
-            updatePokemonImages(self, opponent);
-            configureButtonsWithMoves(self.getMoveSet());
-            updateHealthBars(self.getCurrentHp(), opponent.getCurrentHp());
-            updateStatusEffects(self.getStatusEffect(), opponent.getStatusEffect());
+            updatePokemonUI(self, opponent);
+    }
+
+    private void updatePokemonUI(BattlePokemon a, BattlePokemon b) {
+        if (getView() != null) {
+            Pokemon self = a.getOriginalPokemon();
+            Pokemon opponent = b.getOriginalPokemon();
+            mPlayerBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(self.getName(), typePokemon));
+            mOpponentBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(opponent.getName(), typePokemon));
+
+            mPlayerBattleView.pokemonName.setText(self.getName());
+            mOpponentBattleView.pokemonName.setText(opponent.getName());
+
+            mPlayerBattleView.pokemonHpProgress.setMax(self.getHp());
+            mPlayerBattleView.pokemonHpProgress.setProgress(a.getCurrentHp());
+
+            mOpponentBattleView.pokemonHpProgress.setMax(opponent.getHp());
+            mOpponentBattleView.pokemonHpProgress.setProgress(b.getCurrentHp());
+
+            updateStatusForPlayer();
+            updateStatusForOpponent();
+
+            configureButtonsWithMoves(a.getMoveSet());
         }
     }
 
-    private void updatePokemonImages(BattlePokemon self, BattlePokemon opponent) {
-        mPlayerBattleView.setActivePokemon(self, getDrawableForPokemon(self.getOriginalPokemon().getName(),typePokemon));
-        mOpponentBattleView.setActivePokemon(opponent, getDrawableForPokemon(opponent.getOriginalPokemon().getName(), typePokemon));
-    }
-
-    private void updateStatusEffects(StatusEffect playerEffect, StatusEffect opponentEffect) {
-        applyEffect(playerEffect, mPlayerBattleView);
-        applyEffect(opponentEffect, mOpponentBattleView);
-    }
-
-    private void applyEffect(StatusEffect statusEffect, BattleViewItem battleViewItem) {
-        if (statusEffect == null) {
-            battleViewItem.removeStatusEffects();
-            return;
-        }
-        Drawable drawable = getDrawableForPokemon(statusEffect.name().toLowerCase(), typeStatus);
-        boolean isConfusion = statusEffect == StatusEffect.CONFUSION;
-        battleViewItem.updateStatusEffect(isConfusion, drawable);
-    }
-
-    public void setPlayerTeam(PokemonTeam playerTeam) {
-        //TODO: Don't use this method
-//        if (mPlayerBattleView != null && mPlayerBattleView.getActivePlayer() != null) {
-//            mPlayerBattleView.getActivePlayer().getBattlePokemonTeam();
-//        }
-    }
 
     public interface OnBattleFragmentTouchListener {
         void onCancelBattle();
@@ -158,10 +151,10 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         View playerView = view.findViewById(R.id.player_1_ui);
         View opponentView = view.findViewById(R.id.player_2_ui);
 
-        mPlayerBattleView.setPlayerView(playerView);
+        mPlayerBattleView = new BattleViewItem(playerView);
         mPlayerBattleView.setVisibility(false);
 
-        mOpponentBattleView.setPlayerView(opponentView);
+        mOpponentBattleView = new BattleViewItem(opponentView);
         mOpponentBattleView.setVisibility(false);
 
         setupMoveButtons(view);
@@ -215,7 +208,7 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         View switchView = inflater.inflate(R.layout.switch_layout, null, false);
 
         ArrayList<Pokemon> pokemon = new ArrayList<>();
-        for (BattlePokemon battlePokemon : mPlayerBattleView.getActivePlayer().getBattlePokemonTeam().getBattlePokemons()) {
+        for (BattlePokemon battlePokemon : mPlayerBattlePlayer.getBattlePokemonTeam().getBattlePokemons()) {
             pokemon.add(battlePokemon.getOriginalPokemon());
         }
 
@@ -293,22 +286,21 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
     }
 
     public void setPlayer(BattlePokemonPlayer player) {
-        mPlayerBattleView.setActivePlayer(player);
-        BattlePokemon activePokemon = player.getBattlePokemonTeam().getCurrentPokemon();
-        mPlayerBattleView.setActivePokemon(activePokemon, getDrawableForPokemon(activePokemon.getOriginalPokemon().getName(), typePokemon));
-        List<Move> moves = activePokemon.getMoveSet();
-        configureButtonsWithMoves(moves);
-        mSwitchButton.setVisibility(View.VISIBLE);
+        this.mPlayerBattlePlayer = player;
+        if (getView() != null) {
+            mPlayerBattleView.setActivePokemon(player.getBattlePokemonTeam().getCurrentPokemon());
+        }
     }
 
     public void setOpponent(BattlePokemonPlayer opponent) {
-        mOpponentBattleView.setActivePlayer(opponent);
-        BattlePokemon activePokemon = opponent.getBattlePokemonTeam().getCurrentPokemon();
-        mOpponentBattleView.setActivePokemon(activePokemon, getDrawableForPokemon(activePokemon.getOriginalPokemon().getName(), typePokemon));
+        mOpponentBattlePlayer = opponent;
+        if (getView() != null) {
+            mOpponentBattleView.setActivePokemon(opponent.getBattlePokemonTeam().getCurrentPokemon());
+        }
     }
 
     public void setBattleVisible(boolean visible) {
-        if (mPlayerBattleView != null && mOpponentBattleView != null) {
+        if (getView() != null) {
             mPlayerBattleView.setVisibility(visible);
             mOpponentBattleView.setVisibility(visible);
             mMoveHistoryText.setText(String.format("Match Started: %s", DateFormat.getDateTimeInstance().format(new Date())));
@@ -331,9 +323,71 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void updateHealthBars(int health1, int health2) {
-        mPlayerBattleView.updateHealthBar(health1);
-        mOpponentBattleView.updateHealthBar(health2);
+    public void initPokemonViewsForBattle() {
+        if (getView() != null) {
+            Pokemon self = mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon();
+            Pokemon opponent = mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getOriginalPokemon();
+
+            mPlayerBattleView.pokemonHpProgress.setMax(self.getHp());
+            mPlayerBattleView.pokemonName.setText(self.getName());
+            mPlayerBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(self.getName(), typePokemon));
+
+            mPlayerBattleView.pokemonHpProgress.setProgress(mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getCurrentHp());
+
+            mOpponentBattleView.pokemonHpProgress.setMax(opponent.getHp());
+            mOpponentBattleView.pokemonName.setText(opponent.getName());
+            mOpponentBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(opponent.getName(), typePokemon));
+
+            mOpponentBattleView.pokemonHpProgress.setProgress(mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getCurrentHp());
+
+            updateStatusForPlayer();
+            updateStatusForOpponent();
+
+            List<Move> moves = mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getMoveSet();
+            configureButtonsWithMoves(moves);
+            mSwitchButton.setVisibility(View.VISIBLE);
+
+            mPlayerBattleView.setVisibility(true);
+            mOpponentBattleView.setVisibility(true);
+        }
     }
 
+    private void updateStatusForOpponent() {
+        if (mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().isConfused()) {
+            mOpponentBattleView.confusedStatusImage.setVisibility(View.VISIBLE);
+        } else {
+            mOpponentBattleView.confusedStatusImage.setVisibility(View.INVISIBLE);
+        }
+        if (mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().hasStatusEffect()) {
+            StatusEffect e = mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getStatusEffect();
+            Drawable drawable = getDrawableForPokemon(e.name().toLowerCase(), typeStatus);
+            mOpponentBattleView.extraStatusImage.setImageDrawable(drawable);
+            mPlayerBattleView.extraStatusImage.setVisibility(View.VISIBLE);
+        } else {
+            mOpponentBattleView.extraStatusImage.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void updateStatusForPlayer() {
+        if (mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().isConfused()) {
+            mPlayerBattleView.confusedStatusImage.setVisibility(View.VISIBLE);
+        } else {
+            mPlayerBattleView.confusedStatusImage.setVisibility(View.INVISIBLE);
+        }
+        if (mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().hasStatusEffect()) {
+            StatusEffect e = mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getStatusEffect();
+            Drawable drawable = getDrawableForPokemon(e.name().toLowerCase(), typeStatus);
+            mPlayerBattleView.extraStatusImage.setImageDrawable(drawable);
+            mPlayerBattleView.extraStatusImage.setVisibility(View.VISIBLE);
+        } else {
+            mPlayerBattleView.extraStatusImage.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    public void updateHealthBars(int health1, int health2) {
+        if (getView() != null) {
+            mPlayerBattleView.pokemonHpProgress.setProgress(health1);
+            mOpponentBattleView.pokemonHpProgress.setProgress(health2);
+        }
+    }
 }

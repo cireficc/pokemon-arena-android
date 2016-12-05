@@ -10,6 +10,7 @@ import android.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,10 +31,11 @@ import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
-import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.Attack;
 import com.pokemonbattlearena.android.engine.match.AttackResult;
 import com.pokemonbattlearena.android.engine.match.Battle;
+import com.pokemonbattlearena.android.engine.match.BattlePhaseResult;
+import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.Command;
 import com.pokemonbattlearena.android.engine.match.CommandResult;
@@ -111,6 +113,12 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                 .build();
 
         mGoogleApiClient.connect();
+
+        mBattleFragment = new BattleFragment();
+        mFragmentManager.beginTransaction()
+                .add(R.id.battle_container, mBattleFragment, "battle")
+                .hide(mBattleFragment)
+                .commit();
 
         showProgressDialog();
 
@@ -283,31 +291,51 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mOpponentUsername = bufferString.trim();
             setupBattleWithOpponent();
             return;
+        } else {
+            if (mIsHost) {
+                Command command = mCommandGson.fromJson(bufferString, Command.class);
+                Log.d(TAG, "We got a command from client of type: " + command.getClass());
+                boolean phaseReady = mBattle.getCurrentBattlePhase().queueCommand(command);
+                if (phaseReady) {
+                    handleBattleResult();
+                }
+            } else {
+                BattlePhaseResult resultFromJson = mCommandResultGson.fromJson(bufferString, BattlePhaseResult.class);
+                Log.d(TAG, "We got a battle phase result: " + resultFromJson.toString());
+                for (CommandResult commandResult : resultFromJson.getCommandResults()) {
+                    // Update the internal state of the battle (only host really needs to do this, but opponent can too)
+                    // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
+                    mBattle.applyCommandResult(commandResult);
+                    Log.d(TAG, commandResult.getTargetInfo().toString());
+                }
+
+                mBattleFragment.enableButtonActions(true);
+                if (mBattle.selfPokemonFainted()) {
+                    Button force;
+                    force = (Button)findViewById(R.id.switch_button);
+                    force.performClick();
+                }
+            }
+            mBattleFragment.refreshBattleUI(mBattle);
         }
 
     }
 
     private void setupBattleWithOpponent() {
+        //TODO: Don't use the players saved team for the opponent.
+        // get this from firebase using the ID sent from the message
         BattlePokemonPlayer opponent = getPlayerForTeam(mOpponentUsername, getSavedTeam());
         BattlePokemonPlayer self = getPlayerForTeam(mUsername, getSavedTeam());
         mBattle = new Battle(self, opponent);
-        mBattleFragment = new BattleFragment();
+
         mBattleFragment.setPlayer(self);
         mBattleFragment.setOpponent(opponent);
+        mBattleFragment.initPokemonViewsForBattle();
+
         mFragmentManager.beginTransaction()
-                .add(R.id.battle_container, mBattleFragment, "battle")
+                .show(mBattleFragment)
                 .commit();
-        updateUI();
-    }
-
-    private void updateUI() {
-        if (mBattleFragment != null) {
-
-            int selfHP = mBattle.getSelf().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
-            int opponentHP = mBattle.getOpponent().getBattlePokemonTeam().getCurrentPokemon().getCurrentHp();
-            mBattleFragment.updateHealthBars(selfHP, opponentHP);
-            mBattleFragment.refreshActivePokemon(mBattle);
-        }
+        hideProgressDialog();
     }
 
 
@@ -439,12 +467,83 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onMoveClicked(Move move) {
+        Attack attack = new Attack(mBattle.getSelf(), mBattle.getOpponent(), move);
+        if(mIsHost) {
+            Log.d(TAG, "Host: queuing move: " + move.getName());
+            queueHostMessage(attack);
+        } else {
+            Log.d(TAG, "Client: sending move: " + move.getName());
+            sendClientMessage(attack);
+        }
+    }
 
+    //region Networking Helper methods
+    private void queueHostMessage(Command c) {
+        boolean movesReady = mBattle.getCurrentBattlePhase().queueCommand(c);
+        mBattleFragment.enableButtonActions(movesReady);
+        if (movesReady) {
+            handleBattleResult();
+        }
+    }
+
+    private void sendClientMessage(Command c) {
+        String gson = mCommandGson.toJson(c, Command.class);
+        sendMessage(gson);
+        mBattleFragment.enableButtonActions(false);
+    }
+
+    private void handleBattleResult() {
+        BattlePhaseResult result = mBattle.executeCurrentBattlePhase();
+        PokemonTeam pokes = new PokemonTeam(6);
+        for (BattlePokemon bp : mBattle.getSelf().getBattlePokemonTeam().getBattlePokemons()) {
+            pokes.addPokemon(bp.getOriginalPokemon());
+        }
+
+        for (CommandResult commandResult : result.getCommandResults()) {
+
+            mBattle.applyCommandResult(commandResult);
+
+            if (mBattle.isFinished()) {
+                leaveRoom();
+                return;
+            }
+        }
+        mBattleFragment.enableButtonActions(true);
+        mBattleFragment.refreshBattleUI(mBattle);
+
+//        if(!isAiBattle) {
+            String json = mCommandResultGson.toJson(result);
+            sendMessage(json);
+//        }
+
+        mBattle.startNewBattlePhase();
+
+        if (mBattle.selfPokemonFainted()) {
+            Button force;
+            force = (Button)findViewById(R.id.switch_button);
+            force.performClick();
+        }
+    }
+
+    private void sendMessage(String message) {
+        byte[] byteMessage = message.getBytes();
+        for (Participant p : mParticipants) {
+            if (!p.getParticipantId().equals(mMyId)) {
+                Games.RealTimeMultiplayer.sendReliableMessage(mGoogleApiClient, null, byteMessage,
+                        mRoomId, p.getParticipantId());
+                Log.d(TAG, "Reliable message sent (sendMessage()) + " + message);
+            }
+        }
     }
 
     @Override
     public void onSwitchPokemon(int position) {
-
+        Switch s = new Switch(mBattle.getSelf(), position);
+        if (mIsHost) {
+            queueHostMessage(s);
+        } else {
+            sendClientMessage(s);
+        }
     }
     //endregion
 }

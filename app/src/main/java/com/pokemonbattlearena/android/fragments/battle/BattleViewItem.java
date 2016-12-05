@@ -19,25 +19,16 @@ import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
  */
 
 public class BattleViewItem {
+    private final static String TAG = BattleViewItem.class.getSimpleName();
     ImageView pokemonImage;
     TextView pokemonName;
     TextView pokemonHPText;
     SeekBar pokemonHpProgress;
     BattlePokemon activePokemon;
-    //TODO: use battle pokemon player
-    //TODO: create a method to update the player when the battle changes
-    BattlePokemonPlayer battlePokemonPlayer;
-    boolean hasConfusion = false;
     ImageView confusedStatusImage;
     ImageView extraStatusImage;
 
-    private final static String TAG = BattleViewItem.class.getSimpleName();
-
-    public BattleViewItem() {
-
-    }
-
-    public void setPlayerView(View playerView) {
+    public BattleViewItem(View playerView) {
         this.pokemonName = (TextView) playerView.findViewById(R.id.active_name_textview);
         this.pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
         this.pokemonHpProgress = (SeekBar) playerView.findViewById(R.id.hp_imageview);
@@ -48,21 +39,8 @@ public class BattleViewItem {
         this.extraStatusImage.setVisibility(View.GONE);
     }
 
-    public BattlePokemonPlayer getActivePlayer() {
-        return battlePokemonPlayer;
-    }
-
-    public void setActivePlayer(BattlePokemonPlayer player) {
-        this.battlePokemonPlayer = player;
-    }
-
-    public void setActivePokemon(BattlePokemon activePokemon, Drawable d) {
+    public void setActivePokemon(BattlePokemon activePokemon) {
         this.activePokemon = activePokemon;
-        this.pokemonHpProgress.setMax(activePokemon.getOriginalPokemon().getHp());
-        this.pokemonName.setText(activePokemon.getOriginalPokemon().getName());
-        this.pokemonImage.setImageDrawable(d);
-
-        setHPBar(activePokemon.getOriginalPokemon().getHp());
     }
 
     public void setVisibility(boolean visibility) {
@@ -71,36 +49,5 @@ public class BattleViewItem {
         this.pokemonName.setVisibility(visible);
         this.pokemonHpProgress.setVisibility(visible);
         this.pokemonHPText.setVisibility(visible);
-    }
-
-    public void updateHealthBar(int amount) {
-        Log.e("UPDATING HEALTH AT", "HEALTH: " + amount);
-       pokemonHpProgress.setProgress(amount);
-    }
-
-    public void setHPBar(int hp) {
-        pokemonHpProgress.setMax(hp);
-        pokemonHpProgress.setProgress(hp);
-    }
-
-    public boolean getConfusion() {
-        return hasConfusion;
-    }
-
-    public void updateStatusEffect(boolean isConfusion, Drawable d) {
-        if (isConfusion) {
-            hasConfusion = isConfusion;
-            confusedStatusImage.setImageDrawable(d);
-            confusedStatusImage.setVisibility(View.VISIBLE);
-        } else {
-            extraStatusImage.setImageDrawable(d);
-            extraStatusImage.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void removeStatusEffects() {
-        hasConfusion = false;
-        this.confusedStatusImage.setImageResource(0);
-        this.extraStatusImage.setImageResource(0);
     }
 }

@@ -688,7 +688,7 @@ public class BottomBarActivity extends BaseActivity implements
             }
         }
         mBattleFragment.enableButtonActions(true);
-        mBattleFragment.refreshActivePokemon(mActiveBattle);
+        mBattleFragment.refreshBattleUI(mActiveBattle);
         updateUI();
 
         if(!isAiBattle) {
@@ -730,7 +730,7 @@ public class BottomBarActivity extends BaseActivity implements
         String json = new Gson().toJson(team, PokemonTeam.class);
         setCurrentTeam(json);
         if (mBattleFragment != null) {
-            mBattleFragment.setPlayerTeam(team);
+//            mBattleFragment.setPlayerTeam(team);
         }
     }
 
@@ -772,7 +772,7 @@ public class BottomBarActivity extends BaseActivity implements
             Log.d(TAG, name + ": " + currentHp);
 
             mBattleFragment.updateHealthBars(health1, health2);
-            mBattleFragment.refreshActivePokemon(mActiveBattle);
+            mBattleFragment.refreshBattleUI(mActiveBattle);
         }
     }
 
