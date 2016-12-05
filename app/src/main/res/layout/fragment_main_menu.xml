@@ -5,101 +5,115 @@
     android:layout_height="match_parent"
     tools:context=".BottomBarActivity">
 
-
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="horizontal"
         android:background="@color/color_blastoise_light">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:gravity="center_horizontal">
 
-        <ImageView
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:scaleY="1.1"
-            android:scaleX="1.1"
-            app:srcCompat="@drawable/ic_title_logo"
-            android:layout_marginTop="15dp"
-            android:layout_alignStart="@+id/battle_now_button"
-            android:id="@+id/TitleImageView" />
+            <ImageView
+                android:layout_height="0dp"
+                android:scaleY="1.1"
+                android:scaleX="1.1"
+                app:srcCompat="@drawable/ic_title_logo"
+                android:layout_marginTop="15dp"
+                android:layout_alignStart="@+id/battle_now_button"
+                android:id="@+id/TitleImageView"
+                android:elevation="1dp"
+                android:layout_weight="1"
+                android:layout_width="160dp" />
 
-        <Button
-            android:layout_width="160dp"
-            android:layout_height="75dp"
-            android:layout_marginStart="16dp"
-            android:id="@+id/battle_now_button"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="175dp"
-            android:background="@drawable/ic_battle_now_button" />
+            <Button
+                android:layout_width="160dp"
+                android:id="@+id/battle_now_button"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/ic_battle_now_button"
+                android:layout_height="75dp" />
 
-        <Button
-            android:layout_width="160dp"
-            android:layout_height="75dp"
-            android:id="@+id/battle_friend_button"
-            android:layout_below="@+id/battle_now_button"
-            android:layout_alignStart="@+id/battle_now_button"
-            android:layout_marginTop="13dp"
-            android:background="@drawable/ic_battle_friend_button" />
+            <Button
+                android:layout_width="160dp"
+                android:id="@+id/battle_friend_button"
+                android:layout_below="@+id/battle_now_button"
+                android:layout_alignStart="@+id/battle_now_button"
+                android:layout_marginTop="13dp"
+                android:background="@drawable/ic_battle_friend_button"
+                android:layout_height="75dp" />
 
-        <Button
-            android:layout_width="160dp"
-            android:layout_height="75dp"
-            android:id="@+id/battle_ai_button"
-            android:layout_below="@+id/battle_friend_button"
-            android:layout_alignStart="@+id/battle_now_button"
-            android:layout_marginTop="13dp"
-            android:background="@drawable/ic_battle_ai_button" />
-
-        <TextView
-            android:text="Match History"
-            android:layout_width="175dp"
-            android:layout_height="35dp"
-            android:layout_marginTop="25dp"
-            android:id="@+id/match_history_title"
-            android:layout_alignParentTop="true"
-            android:layout_alignStart="@+id/match_history_scrollview"
-            android:textAlignment="center"
-            android:textStyle="normal|bold"
-            android:textSize="24sp"
-            android:background="@color/color_venusaur"
-            android:paddingTop="3dp"
-            android:textColor="@color/white" />
-        <TextView
-            android:text="W: 998\t\t\t\tL:2"
-            android:layout_width="175dp"
-            android:layout_height="25dp"
-            android:layout_marginTop="60dp"
-            android:id="@+id/match_history_win_loss"
-            android:layout_alignParentTop="true"
-            android:layout_alignStart="@+id/match_history_scrollview"
-            android:textAlignment="center"
-            android:textStyle="normal|bold"
-            android:textSize="16sp"
-            android:paddingTop="3dp"
-            android:background="@color/color_pikachu" />
-        <ScrollView
-            android:id="@+id/match_history_scrollview"
-            android:layout_width="175dp"
-            android:layout_height="335dp"
-            android:layout_marginTop="85dp"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/battle_now_button"
-            android:layout_marginStart="22dp"
-            android:background="@color/match_history_background">
+            <Button
+                android:layout_width="160dp"
+                android:id="@+id/battle_ai_button"
+                android:layout_below="@+id/battle_friend_button"
+                android:layout_alignStart="@+id/battle_now_button"
+                android:layout_marginTop="13dp"
+                android:background="@drawable/ic_battle_ai_button"
+                android:layout_marginBottom="33dp"
+                android:layout_height="75dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:elevation="1dp"
+            android:gravity="center_horizontal">
             <TextView
-                android:text="TEST TEXT"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/match_history_text"
-                android:background="@color/color_blastoise"
-                android:layout_marginBottom="3dp"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="3dp"
-                android:paddingLeft="2dp"
-                android:paddingRight="2dp"
-                android:paddingBottom="2dp"
-                android:paddingTop="2dp"
+                android:text="Match History"
+                android:layout_width="175dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="25dp"
+                android:id="@+id/match_history_title"
+                android:layout_alignParentTop="true"
+                android:layout_alignStart="@+id/match_history_scrollview"
+                android:textAlignment="center"
+                android:textStyle="normal|bold"
+                android:textSize="24sp"
+                android:background="@color/color_venusaur"
+                android:paddingTop="3dp"
                 android:textColor="@color/white" />
-        </ScrollView>
+            <TextView
+                android:text="W: 998\t\t\t\tL:2"
+                android:layout_width="175dp"
+                android:layout_height="25dp"
+                android:id="@+id/match_history_win_loss"
+                android:layout_alignParentTop="true"
+                android:layout_alignStart="@+id/match_history_scrollview"
+                android:textAlignment="center"
+                android:textStyle="normal|bold"
+                android:textSize="16sp"
+                android:paddingTop="3dp"
+                android:background="@color/color_pikachu" />
+            <ScrollView
+                android:id="@+id/match_history_scrollview"
+                android:layout_width="175dp"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/battle_now_button"
+                android:background="@color/match_history_background"
+                android:layout_weight="1"
+                android:layout_height="0dp"
+                android:layout_marginBottom="40dp">
+                <TextView
+                    android:text="TEST TEXT"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/match_history_text"
+                    android:background="@color/color_blastoise"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginRight="3dp"
+                    android:layout_marginTop="3dp"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"
+                    android:paddingBottom="2dp"
+                    android:paddingTop="2dp"
+                    android:textColor="@color/white" />
+            </ScrollView>
 
-    </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>

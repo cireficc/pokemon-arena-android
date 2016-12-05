@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".BottomBarActivity"
-    android:background="@color/bb_darkBackgroundColor">
+    android:background="@color/cardview_dark_background">
 
     <TextView
         android:text="Game Chat"
@@ -17,7 +17,6 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-        android:background="@color/bb_darkBackgroundColor"
         android:textColor="@color/cardview_light_background" />
 
     <Button
