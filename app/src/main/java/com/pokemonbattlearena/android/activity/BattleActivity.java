@@ -381,12 +381,16 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                     handleBattleResult();
                 }
             } else {
+                boolean nop = false;
                 BattlePhaseResult resultFromJson = mCommandResultGson.fromJson(bufferString, BattlePhaseResult.class);
                 Log.d(TAG, "We got a battle phase result: " + resultFromJson.toString());
                 for (CommandResult commandResult : resultFromJson.getCommandResults()) {
                     // Update the internal state of the battle (only host really needs to do this, but opponent can too)
                     // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
                     mBattle.applyCommandResult(commandResult);
+                    if (mBattle.oppPokemonFainted()) {
+                        nop = true;
+                    }
                     Log.d(TAG, commandResult.getTargetInfo().toString());
                 }
 
@@ -395,6 +399,9 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                     Button force;
                     force = (Button)findViewById(R.id.switch_button);
                     force.performClick();
+                } else if (nop) {
+                    sendClientMessage(new NoP(mBattle.getSelf()));
+                    mBattleFragment.enableButtonActions(false);
                 }
             }
             mBattleFragment.refreshBattleUI(mBattle);
