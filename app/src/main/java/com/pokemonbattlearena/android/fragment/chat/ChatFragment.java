@@ -99,7 +99,7 @@ public class ChatFragment extends Fragment {
         }
         mUsername = prefs.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
         layoutInflater = inflater;
-
+        root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
         return view;
     }
 
@@ -111,9 +111,12 @@ public class ChatFragment extends Fragment {
         chatTitle = (TextView) activity.findViewById(R.id.chat_room_title);
         chatHolder = (ViewGroup) activity.findViewById(R.id.chat_holder);
         chatTitle.setText(chatType == ChatType.IN_GAME ? "Battle Chat" : "Global Chat");
-        DatabaseReference tempRoot = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
+
         gameChatRoomName = "Chat-"+mCallback.getHostId();
-        root = tempRoot.child(gameChatRoomName);
+
+        if (chatType == ChatType.IN_GAME) {
+            root = root.child(gameChatRoomName);
+        }
 
         //adds switch chat type listener
         switchChatButton.setOnClickListener(new View.OnClickListener() {
