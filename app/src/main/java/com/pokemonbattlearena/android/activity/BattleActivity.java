@@ -716,9 +716,9 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
         if (mBattle.isFinished()) {
             if (mBattle.selfPokemonFainted()) {
-                Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
+                Toast.makeText(mApplication, mUsername + " has won the battle", Toast.LENGTH_LONG).show();
             } else if (mBattle.oppPokemonFainted()){
-                Toast.makeText(mApplication, "A player" + " has won the battle", Toast.LENGTH_LONG).show();
+                Toast.makeText(mApplication, mOpponentUsername + " has won the battle", Toast.LENGTH_LONG).show();
             }
         }
         finish();
