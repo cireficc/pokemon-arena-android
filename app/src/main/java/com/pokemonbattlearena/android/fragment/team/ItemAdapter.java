@@ -1,10 +1,12 @@
-package com.pokemonbattlearena.android.fragment.team;
+package com.pokemonbattlearena.android.fragments.team;
 
 /**
  * Created by mitchcout on 11/20/2016.
  */
 
+import android.media.Image;
 import android.support.v4.util.Pair;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,18 +28,16 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, PokemonTeam>, ItemAd
     private int mGrabHandleId;
     private boolean mDragOnLongPress;
     private View.OnClickListener deleteListener;
-    private View.OnClickListener editListener;
 
     private LayoutInflater inflater;
 
-    public ItemAdapter(ArrayList<Pair<Long, PokemonTeam>> list, int layoutId, int grabHandleId, boolean dragOnLongPress, View.OnClickListener deleteListener, View.OnClickListener editListener) {
+    public ItemAdapter(ArrayList<Pair<Long, PokemonTeam>> list, int layoutId, int grabHandleId, boolean dragOnLongPress, View.OnClickListener deleteListener) {
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
         mDragOnLongPress = dragOnLongPress;
         setHasStableIds(true);
         setItemList(list);
         this.deleteListener = deleteListener;
-        this.editListener = editListener;
     }
 
     @Override
@@ -60,7 +60,6 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, PokemonTeam>, ItemAd
 
         //set button listeners
         holder.mDeleteTeam.setOnClickListener(deleteListener);
-        holder.mEditTeam.setOnClickListener(editListener);
     }
 
     @Override
@@ -73,14 +72,12 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, PokemonTeam>, ItemAd
         public TextView mTeamName;
         public LinearLayout mPokemonTeam;
         public ImageButton mDeleteTeam;
-        public ImageButton mEditTeam;
 
         public ViewHolder(final View itemView) {
             super(itemView, mGrabHandleId, mDragOnLongPress);
             mTeamName = (TextView) itemView.findViewById(R.id.team_name_textView);
             mPokemonTeam = (LinearLayout) itemView.findViewById(R.id.team_all_pokemon);
             mDeleteTeam = (ImageButton) itemView.findViewById(R.id.team_delete_imageButton);
-            mEditTeam = (ImageButton) itemView.findViewById(R.id.team_edit_imageButton);
         }
 
         @Override
