@@ -97,7 +97,6 @@ public class Attack extends Command {
         if (attackingPokemon.isConfused()) {
             if (statusEffectCalculator.isHurtByConfusion()) {
                 builder.setConfusionDamageTaken(statusEffectCalculator.getConfusionDamage(attackingPokemon));
-                return builder.build();
             }
         }
 
