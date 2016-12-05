@@ -188,12 +188,15 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
                     edit.putString("pokemon_team", json);
                     edit.apply();
                     edit.commit();
-                    //Add Team to Firebase
+                    //Add Team to Firebase under 'teams'
                     String username = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
-                    DatabaseReference root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);;
+                    DatabaseReference root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put(pokemonTeam.getTeamName(), json);
                     root.updateChildren(map);
+
+                    // add first team as active team
+                    FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child("active_team").setValue(json);
                     //end SplashActivity
                     welcomeFinisher.finish();
                 }

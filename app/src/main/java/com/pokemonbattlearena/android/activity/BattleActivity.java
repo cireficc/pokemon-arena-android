@@ -26,8 +26,11 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
@@ -36,6 +39,7 @@ import com.pokemonbattlearena.android.application.PokemonBattleApplication;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.match.NoP;
+import com.pokemonbattlearena.android.engine.match.NoPResult;
 import com.pokemonbattlearena.android.fragment.chat.ChatType;
 import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
@@ -90,16 +94,19 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     private boolean mSignInClicked = false;
 
     private String mOpponentUsername = null;
+    private PokemonTeam mOpponentTeam = null;
     private String mUsername = null;
 
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
             .registerSubtype(Attack.class)
+            .registerSubtype(NoP.class)
             .registerSubtype(Switch.class);
 
     private final RuntimeTypeAdapterFactory<CommandResult> mCommandResultRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(CommandResult.class, "type")
             .registerSubtype(AttackResult.class)
+            .registerSubtype(NoPResult.class)
             .registerSubtype(SwitchResult.class);
 
     private final Gson mCommandGson = new GsonBuilder().registerTypeAdapterFactory(mCommandRuntimeTypeAdapter).create();
@@ -268,15 +275,33 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         }
     }
 
+    private void sendPokemonTeam(PokemonTeam savedTeam) {
+        String json = new Gson().toJson(savedTeam);
+        byte[] message = json.getBytes();
+        String id = findOpponentId();
+        if (id != null) {
+            Games.RealTimeMultiplayer.sendReliableMessage(mGoogleApiClient, null, message, mRoomId, id);
+            Log.d(TAG, "Sent team over Google API");
+        }
+    }
+
     private void sendUsername(String selfUsername) {
         byte[] byteMessage = selfUsername.getBytes();
+        String id = findOpponentId();
+        if (id != null) {
+            Games.RealTimeMultiplayer.sendReliableMessage(mGoogleApiClient, null, byteMessage,
+                    mRoomId, id);
+            Log.d(TAG, "Reliable message (username) sent to " + id + " + " + selfUsername);
+        }
+    }
+
+    private String findOpponentId() {
         for (Participant p : mParticipants) {
             if (!p.getParticipantId().equals(mMyId)) {
-                Games.RealTimeMultiplayer.sendReliableMessage(mGoogleApiClient, null, byteMessage,
-                        mRoomId, p.getParticipantId());
-                Log.d(TAG, "Reliable message sent to " + p.getParticipantId() + " + " + selfUsername);
+               return p.getParticipantId();
             }
         }
+        return null;
     }
 
     // create a RoomConfigBuilder that's appropriate for your implementation
@@ -322,9 +347,18 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         Log.d(TAG, "In Game Message Received: " + bufferString);
         if (mOpponentUsername == null) {
             mOpponentUsername = bufferString.trim();
-            setupBattleWithOpponent();
+            sendPokemonTeam(getSavedTeam());
             return;
-        } else {
+        } else if (mOpponentTeam == null) {
+            try {
+                mOpponentTeam = new Gson().fromJson(bufferString, PokemonTeam.class);
+                setupBattleWithOpponent();
+                return;
+            } catch (IllegalStateException e) {
+
+            }
+        }
+        if (mOpponentTeam != null && mOpponentUsername != null) {
             if (mIsHost) {
                 Command command = mCommandGson.fromJson(bufferString, Command.class);
                 Log.d(TAG, "We got a command from client of type: " + command.getClass());
@@ -365,7 +399,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mBattleFragment.setPlayer(new BattlePokemonPlayer(player));
             mBattleFragment.setOpponent(new BattlePokemonPlayer(ai));
         } else {
-            BattlePokemonPlayer opponent = getPlayerForTeam(mOpponentUsername, getSavedTeam());
+            BattlePokemonPlayer opponent = getPlayerForTeam(mOpponentUsername, mOpponentTeam);
             BattlePokemonPlayer self = getPlayerForTeam(mUsername, getSavedTeam());
             mBattle = new Battle(self, opponent);
             mBattleFragment.setPlayer(self);
@@ -389,12 +423,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         opponentPlayer.setPokemonTeam(team);
         BattlePokemonPlayer opponent = new BattlePokemonPlayer(opponentPlayer);
         return opponent;
-    }
-
-    private PokemonTeam getOpponentTeamFromFirebase() {
-        //TODO: Use this method to get the opponents team from firebase using 'mOpponentUsername' for the player_name field
-
-        return null;
     }
 
     private PokemonTeam getSavedTeam() {

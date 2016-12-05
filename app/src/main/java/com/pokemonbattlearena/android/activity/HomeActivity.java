@@ -17,6 +17,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.fragment.chat.ChatFragment;
 import com.pokemonbattlearena.android.fragment.chat.ChatType;
@@ -58,6 +59,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
     private String newestAddedPokemonTeamName;
+    private String mUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +69,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
         setSupportActionBar(toolbar);
         mPreferences = getSharedPreferences(PokemonUtils.PREFS_KEY, Context.MODE_PRIVATE);
         mWelcomeHelper = new WelcomeHelper(this, com.pokemonbattlearena.android.activity.SplashActivity.class);
-
+        mUsername = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example-name");
         mBottomBar = (BottomBar) findViewById(R.id.home_bottom_bar);
         mBottomBar.setDefaultTab(R.id.tab_battle);
         mBottomBar.setOnTabSelectListener(this);
@@ -292,6 +294,8 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
         Log.d(TAG, "Setting current team: " + pokemonJSON);
         editor.putString("pokemon_team", pokemonJSON).apply();
         editor.commit();
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("Users").child(mUsername).child("active_team");
+        root.setValue(pokemonJSON);
     }
 
     @Override
