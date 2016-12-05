@@ -110,7 +110,7 @@ public class ChatFragment extends Fragment {
         switchChatButton = (Button) activity.findViewById(R.id.chat_switch_button);
         chatTitle = (TextView) activity.findViewById(R.id.chat_room_title);
         chatHolder = (ViewGroup) activity.findViewById(R.id.chat_holder);
-        chatTitle.setText(chatType.toString());
+        chatTitle.setText(chatType == ChatType.IN_GAME ? "Battle Chat" : "Global Chat");
         DatabaseReference tempRoot = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
         gameChatRoomName = "Chat-"+mCallback.getHostId();
         root = tempRoot.child(gameChatRoomName);
@@ -134,7 +134,7 @@ public class ChatFragment extends Fragment {
                     //update UI
                     resetChatUI();
                 }
-                chatTitle.setText(chatType.toString());
+                chatTitle.setText(chatType == ChatType.IN_GAME ? "Battle Chat" : "Global Chat");
             }
         });
 

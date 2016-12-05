@@ -142,11 +142,26 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
         mBattleFragment = new BattleFragment();
 
-        mFragmentManager.beginTransaction()
-                .add(R.id.battle_container, mBattleFragment, "battle")
-                .hide(mBattleFragment)
-                .commit();
+        mChatFragment = new ChatFragment();
+        Bundle chatBundle = new Bundle();
+        ChatType type = isAiBattle ? ChatType.GLOBAL : ChatType.IN_GAME;
+        chatBundle.putSerializable(PokemonUtils.CHAT_TYPE_KEY, type);
+        // we want to hide the ability to switch chats when AI battle mode
+        chatBundle.putBoolean(PokemonUtils.CHAT_ALLOW_IN_GAME, !isAiBattle);
+        mChatFragment.setArguments(chatBundle);
 
+        mTeamStatFragment = new TeamStatFragment();
+        Bundle statBundle = new Bundle();
+        statBundle.putString(PokemonUtils.POKEMON_TEAM_KEY, new Gson().toJson(getSavedTeam(), PokemonTeam.class));
+        mTeamStatFragment.setArguments(statBundle);
+
+        mFragmentManager.beginTransaction()
+                .add(R.id.battle_container, mChatFragment, "chat")
+                .add(R.id.battle_container, mTeamStatFragment, "team_stat")
+                .add(R.id.battle_container, mBattleFragment, "battle")
+                .hide(mChatFragment)
+                .hide(mTeamStatFragment)
+                .commit();
 
         showProgressDialog();
 
@@ -178,17 +193,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     public void onTabSelected(@IdRes int tabId) {
         switch (tabId) {
             case R.id.tab_teams:
-                if (mTeamStatFragment == null) {
-                    mTeamStatFragment = new TeamStatFragment();
-                    Bundle statBundle = new Bundle();
-                    statBundle.putString(PokemonUtils.POKEMON_TEAM_KEY, new Gson().toJson(getSavedTeam(), PokemonTeam.class));
-                    mTeamStatFragment.setArguments(statBundle);
-                    mFragmentManager.beginTransaction()
-                            .add(R.id.battle_container, mTeamStatFragment, "team_stat")
-                            .hide(mBattleFragment)
-                            .hide(mChatFragment)
-                            .commit();
-                } else if (mTeamStatFragment.isHidden()) {
+                if (mTeamStatFragment.isHidden()) {
                     mFragmentManager.beginTransaction()
                             .hide(mBattleFragment)
                             .hide(mChatFragment)
@@ -206,20 +211,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                 }
                 break;
             case R.id.tab_chat:
-                if (mChatFragment == null) {
-                    mChatFragment = new ChatFragment();
-                    Bundle chatBundle = new Bundle();
-                    ChatType type = isAiBattle ? ChatType.GLOBAL : ChatType.IN_GAME;
-                    chatBundle.putSerializable(PokemonUtils.CHAT_TYPE_KEY, type);
-                    // we want to hide the ability to switch chats when AI battle mode
-                    chatBundle.putBoolean(PokemonUtils.CHAT_ALLOW_IN_GAME, !isAiBattle);
-                    mChatFragment.setArguments(chatBundle);
-                    mFragmentManager.beginTransaction()
-                            .add(R.id.battle_container, mChatFragment, "chat")
-                            .hide(mTeamStatFragment)
-                            .hide(mBattleFragment)
-                            .commit();
-                } else if (mChatFragment.isHidden()) {
+                if (mChatFragment.isHidden()) {
                     mFragmentManager.beginTransaction()
                             .show(mChatFragment)
                             .hide(mTeamStatFragment)

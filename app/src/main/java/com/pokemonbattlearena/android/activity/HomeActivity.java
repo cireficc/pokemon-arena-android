@@ -87,6 +87,8 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
         mFragmentManager.beginTransaction()
                 .add(R.id.home_container, mHomeFragment, "home")
                 .add(R.id.home_container, mSavedTeamsFragment, "team_save")
+                .add(R.id.home_container, mChatFragment, "chat")
+                .hide(mChatFragment)
                 .hide(mSavedTeamsFragment)
                 .commit();
 
