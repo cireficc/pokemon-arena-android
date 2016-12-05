@@ -1,9 +1,12 @@
-package com.pokemonbattlearena.android;
+package com.pokemonbattlearena.android.activity;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
+
+import com.pokemonbattlearena.android.R;
 
 /**
  * Created by droidowl on 9/25/16.
@@ -29,6 +32,14 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    public void keepScreenOn() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    // Clears the flag that keeps the screen on.
+    public void stopKeepingScreenOn() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 
     public void hideKeyboard() {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);

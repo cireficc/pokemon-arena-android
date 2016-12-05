@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragments.team;
+package com.pokemonbattlearena.android.fragment.team;
 
 import android.support.v7.widget.CardView;
 import android.widget.CheckBox;

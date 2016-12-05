@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".BottomBarActivity"
+    tools:context=".activity.BattleActivity"
     android:background="@color/color_blastoise_darl">
 
     <Button

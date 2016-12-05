@@ -1,18 +1,15 @@
-package com.pokemonbattlearena.android.fragments.team;
+package com.pokemonbattlearena.android.fragment.team;
 
 import android.content.Context;
-import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
-import com.pokemonbattlearena.android.engine.database.Pokemon;
 
 import java.util.List;
 

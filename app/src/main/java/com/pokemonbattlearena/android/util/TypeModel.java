@@ -1,4 +1,6 @@
-package com.pokemonbattlearena.android;
+package com.pokemonbattlearena.android.util;
+
+import com.pokemonbattlearena.android.R;
 
 import java.util.HashMap;
 import java.util.Map;

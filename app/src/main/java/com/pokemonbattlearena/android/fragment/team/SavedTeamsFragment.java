@@ -1,44 +1,32 @@
-package com.pokemonbattlearena.android.fragments.team;
+package com.pokemonbattlearena.android.fragment.team;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.gms.games.Games;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
-import com.pokemonbattlearena.android.PokemonBattleApplication;
+import com.pokemonbattlearena.android.application.PokemonBattleApplication;
+import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
-import com.pokemonbattlearena.android.activity.NameFragment;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
-import com.woxthebox.draglistview.DragItem;
 import com.woxthebox.draglistview.DragListView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 
 public class SavedTeamsFragment extends Fragment {
@@ -68,7 +56,6 @@ public class SavedTeamsFragment extends Fragment {
         mSavedTeams = new ArrayList<Pair<Long, PokemonTeam>>();
         longValue = 0;
         adapterListSizeCurrent = 0;
-
     }
 
     public interface OnSavedTeamsFragmentTouchListener {
@@ -84,7 +71,7 @@ public class SavedTeamsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         //connect to this user's saved teams on Firebase
         mPreferences = getActivity().getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
-        username = mPreferences.getString(NameFragment.profile_name_key, "User");
+        username = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "User");
         root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);
         //listener for populating saved teams page
         mChildListener = new ChildEventListener() {

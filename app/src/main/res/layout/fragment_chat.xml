@@ -4,14 +4,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".BottomBarActivity"
+    tools:context=".activity.BaseActivity"
     android:background="@color/bb_darkBackgroundColor">
 
     <TextView
+        android:id="@+id/chat_room_title"
         android:text="Game Chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/chat_room_title_in_game"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
@@ -32,7 +32,7 @@
         android:id="@+id/chat_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/chat_room_title_in_game">
+        android:layout_below="@+id/chat_room_title">
         <include layout="@layout/fragment_chatui"
             android:id="@+id/include_in_game" />
     </RelativeLayout>
