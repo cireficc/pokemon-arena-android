@@ -1,7 +1,6 @@
 package com.pokemonbattlearena.android.fragment.chat;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -36,9 +35,9 @@ import com.pokemonbattlearena.android.activity.BaseActivity;
  * Created by mitchcout on 10/22/2016.
  */
 
-public class ChatBattleFragment extends Fragment {
+public class ChatFragment extends Fragment {
 
-    private static final String TAG = ChatBattleFragment.class.getSimpleName();
+    private static final String TAG = ChatFragment.class.getSimpleName();
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
     private BaseActivity activity;
@@ -57,17 +56,18 @@ public class ChatBattleFragment extends Fragment {
     private String chatMsg, chatUser;
     private String mUsername;
 
-    private FragmentManager mFragmentManager;
     private ChildEventListener mChildListener;
     private LayoutInflater layoutInflater;
 
-    private OnGameChatLoadedListener mCallback;
+    private OnChatLoadedListener mCallback;
 
-    public ChatBattleFragment() {
+    private boolean allowsForBattleChat;
+
+    public ChatFragment() {
         super();
     }
 
-    public interface OnGameChatLoadedListener {
+    public interface OnChatLoadedListener {
         void onChatLoaded();
         String getHostId();
     }
@@ -77,7 +77,7 @@ public class ChatBattleFragment extends Fragment {
         super.onAttach(context);
         activity = (BaseActivity) context;
         try {
-            mCallback = (ChatBattleFragment.OnGameChatLoadedListener) context;
+            mCallback = (OnChatLoadedListener) context;
         } catch (ClassCastException e) {
             Log.e(TAG, e.getMessage());
             throw new ClassCastException(context.toString() + "must implement listener");
@@ -87,9 +87,16 @@ public class ChatBattleFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_chat_in_game, container, false);
+        final View view = inflater.inflate(R.layout.fragment_chat, container, false);
         SharedPreferences prefs = activity.getSharedPreferences(PokemonUtils.PREFS_KEY, Context.MODE_PRIVATE);
-        chatType = ChatType.IN_GAME;
+
+        if (this.getArguments() != null) {
+            chatType = (ChatType) getArguments().getSerializable(PokemonUtils.CHAT_TYPE_KEY);
+            allowsForBattleChat = getArguments().getBoolean(PokemonUtils.CHAT_ALLOW_IN_GAME);
+        } else {
+            chatType = ChatType.IN_GAME;
+            allowsForBattleChat = true;
+        }
         mUsername = prefs.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
         layoutInflater = inflater;
 
@@ -101,9 +108,9 @@ public class ChatBattleFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         switchChatButton = (Button) activity.findViewById(R.id.chat_switch_button);
-        chatTitle = (TextView) activity.findViewById(R.id.chat_room_title_in_game);
+        chatTitle = (TextView) activity.findViewById(R.id.chat_room_title);
         chatHolder = (ViewGroup) activity.findViewById(R.id.chat_holder);
-
+        chatTitle.setText(chatType.toString());
         DatabaseReference tempRoot = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
         gameChatRoomName = "Chat-"+mCallback.getHostId();
         root = tempRoot.child(gameChatRoomName);
@@ -117,7 +124,6 @@ public class ChatBattleFragment extends Fragment {
                     chatType = ChatType.GLOBAL;
                     root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
                     switchChatButton.setText(R.string.to_game_chat);
-                    chatTitle.setText(R.string.global_chat);
                     //update UI
                     resetChatUI();
                 } else if(chatType == ChatType.GLOBAL) {
@@ -125,12 +131,16 @@ public class ChatBattleFragment extends Fragment {
                     chatType = ChatType.IN_GAME;
                     root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType()).child(gameChatRoomName);
                     switchChatButton.setText(R.string.to_global_chat);
-                    chatTitle.setText(R.string.game_chat);
                     //update UI
                     resetChatUI();
                 }
+                chatTitle.setText(chatType.toString());
             }
         });
+
+        if (!allowsForBattleChat) {
+            switchChatButton.setVisibility(View.GONE);
+        }
 
         setSendMessageListener();
     }

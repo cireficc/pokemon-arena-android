@@ -1,6 +1,7 @@
 package com.pokemonbattlearena.android.activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -9,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
@@ -30,12 +32,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import com.pokemonbattlearena.android.BattleEndListener;
-import com.pokemonbattlearena.android.application.ApplicationPhase;
 import com.pokemonbattlearena.android.application.PokemonBattleApplication;
-import com.pokemonbattlearena.android.engine.BattleEngine;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
 import com.pokemonbattlearena.android.engine.match.NoP;
+import com.pokemonbattlearena.android.fragment.chat.ChatType;
 import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
@@ -52,7 +53,7 @@ import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Switch;
 import com.pokemonbattlearena.android.engine.match.SwitchResult;
 import com.pokemonbattlearena.android.fragment.battle.BattleFragment;
-import com.pokemonbattlearena.android.fragment.chat.ChatBattleFragment;
+import com.pokemonbattlearena.android.fragment.chat.ChatFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 
@@ -62,15 +63,16 @@ import java.util.List;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 
-public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener, ChatBattleFragment.OnGameChatLoadedListener, BattleEndListener {
+public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener, ChatFragment.OnChatLoadedListener, BattleEndListener {
     private static final String TAG = BattleActivity.class.getSimpleName();
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     private static DatabaseReference mRootFirebase;
     private GoogleApiClient mGoogleApiClient;
     private FragmentManager mFragmentManager;
     private BattleFragment mBattleFragment;
-    private ChatBattleFragment mChatFragment;
+    private ChatFragment mChatFragment;
     private BottomBar mBottomBar;
+    private Button mCancelBattleButton;
     private Battle mBattle;
 
     private static final int TEAM_SIZE_INT = 6;
@@ -117,6 +119,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         mPreferences = getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
         mBottomBar = (BottomBar) findViewById(R.id.battle_bottom_bar);
         mBottomBar.setDefaultTab(R.id.tab_battle);
+
         mFragmentManager = getFragmentManager();
         mUsername = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
         // Button listeners
@@ -138,6 +141,16 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
         showProgressDialog();
 
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (!isAiBattle) {
+                    Toast.makeText(mApplication, "Cancelled Battle", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        });
+
         mRootFirebase = FirebaseDatabase.getInstance().getReference().child(PokemonUtils.PROFILE_NAME_KEY);
         mBottomBar.setOnTabSelectListener(this);
     }
@@ -150,12 +163,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mGoogleApiClient.connect();
         }
         super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        leaveRoom();
-        super.onStop();
     }
 
     @Override
@@ -173,7 +180,13 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                 break;
             case R.id.tab_chat:
                 if (mChatFragment == null) {
-                    mChatFragment = new ChatBattleFragment();
+                    mChatFragment = new ChatFragment();
+                    Bundle chatBundle = new Bundle();
+                    ChatType type = isAiBattle ? ChatType.GLOBAL : ChatType.IN_GAME;
+                    chatBundle.putSerializable(PokemonUtils.CHAT_TYPE_KEY, type);
+                    // we want to hide the ability to switch chats when AI battle mode
+                    chatBundle.putBoolean(PokemonUtils.CHAT_ALLOW_IN_GAME, !isAiBattle);
+                    mChatFragment.setArguments(chatBundle);
                     mFragmentManager.beginTransaction()
                             .add(R.id.battle_container, mChatFragment, "chat")
                             .hide(mBattleFragment)
@@ -233,8 +246,8 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     @Override
     public void onLeftRoom(int statusCode, String s) {
         // we have left the room; return to main screen.
-        leaveRoom();
         Log.d(TAG, "onLeftRoom, code " + statusCode);
+        finish();
     }
 
     @Override
@@ -274,14 +287,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     }
     //endregion
 
-    private void keepScreenOn() {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
-
-    // Clears the flag that keeps the screen on.
-    private void stopKeepingScreenOn() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
     private void setHost(ArrayList<String> sortedIds) {
         for (Participant mParticipant : mParticipants) {
             sortedIds.add(mParticipant.getParticipantId());
@@ -306,14 +311,8 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         stopKeepingScreenOn();
         if (mRoomId != null) {
             Games.RealTimeMultiplayer.leave(mGoogleApiClient, this, mRoomId);
-            mRoomId = null;
-            mBattle = null;
-            mMyId = null;
-            mParticipants = null;
-            mIsHost = false;
-            mHostId = null;
-            Log.d(TAG, "Left room everything is null.");
         }
+        finish();
     }
 
     @Override
@@ -372,6 +371,8 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mBattleFragment.setPlayer(self);
             mBattleFragment.setOpponent(opponent);
         }
+
+        getFragmentManager().executePendingTransactions();
 
         mFragmentManager.beginTransaction()
                 .show(mBattleFragment)
@@ -474,7 +475,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onPeerLeft(Room room, List<String> list) {
-        updateRoom(room);
+        leaveRoom();
     }
 
     @Override
@@ -494,7 +495,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onPeersDisconnected(Room room, List<String> list) {
-        updateRoom(room);
+        leaveRoom();
     }
 
     @Override
@@ -510,7 +511,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     @Override
     public void onCancelBattle() {
         leaveRoom();
-        finish();
     }
 
     @Override

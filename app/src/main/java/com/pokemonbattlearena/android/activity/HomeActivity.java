@@ -18,11 +18,12 @@ import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
+import com.pokemonbattlearena.android.fragment.chat.ChatFragment;
+import com.pokemonbattlearena.android.fragment.chat.ChatType;
 import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragment.HomeFragment;
-import com.pokemonbattlearena.android.fragment.chat.ChatHomeFragment;
 import com.pokemonbattlearena.android.fragment.team.SavedTeamsFragment;
 import com.pokemonbattlearena.android.fragment.team.TeamsHomeFragment;
 import com.roughike.bottombar.BottomBar;
@@ -33,7 +34,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HomeActivity extends BaseActivity implements OnTabSelectListener, HomeFragment.OnHomeFragmentTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ChatHomeFragment.OnChatLoadedListener, SavedTeamsFragment.OnSavedTeamsFragmentTouchListener, TeamsHomeFragment.OnPokemonTeamSelectedListener{
+public class HomeActivity extends BaseActivity implements OnTabSelectListener,
+        HomeFragment.OnHomeFragmentTouchListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        ChatFragment.OnChatLoadedListener,
+        SavedTeamsFragment.OnSavedTeamsFragmentTouchListener,
+        TeamsHomeFragment.OnPokemonTeamSelectedListener {
     private static final String TAG = HomeActivity.class.getSimpleName();
     private static final int RC_SIGN_IN = 9001;
     private static final int TEAM_SIZE_INT = 6;
@@ -44,7 +51,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, H
     private HomeFragment mHomeFragment;
     private SavedTeamsFragment mSavedTeamsFragment;
     private TeamsHomeFragment mTeamBuilderFragment;
-    private ChatHomeFragment mChatFragment;
+    private ChatFragment mChatFragment;
     private SharedPreferences mPreferences;
     // GOOGLE PLAY SIGN IN FIELDS
     private boolean mResolvingConnectionFailure = false;
@@ -69,7 +76,11 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, H
 
         mHomeFragment = new HomeFragment();
         mSavedTeamsFragment = new SavedTeamsFragment();
-        mChatFragment = new ChatHomeFragment();
+        mChatFragment = new ChatFragment();
+        Bundle chatBundle = new Bundle();
+        chatBundle.putSerializable(PokemonUtils.CHAT_TYPE_KEY, ChatType.GLOBAL);
+        chatBundle.putSerializable(PokemonUtils.CHAT_ALLOW_IN_GAME, false);
+        mChatFragment.setArguments(chatBundle);
 
         mFragmentManager.beginTransaction()
                 .add(R.id.home_container, mHomeFragment, "home")
@@ -202,6 +213,11 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, H
     @Override
     public void onChatLoaded() {
         hideProgressDialog();
+    }
+
+    @Override
+    public String getHostId() {
+        return mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
     }
 
     @Override

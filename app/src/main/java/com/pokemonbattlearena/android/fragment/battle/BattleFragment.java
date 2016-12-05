@@ -63,6 +63,8 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
 
     private Button mSwitchButton;
 
+    private Button mCancelBattleButton;
+
     private BattlePokemonPlayer mPlayerBattlePlayer;
     private BattlePokemonPlayer mOpponentBattlePlayer;
 
@@ -141,8 +143,13 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_battle, container, false);
-        Button mCancelBattleButton = (Button) view.findViewById(R.id.cancel_battle_button);
-        mCancelBattleButton.setOnClickListener(this);
+        mCancelBattleButton = (Button) view.findViewById(R.id.cancel_battle_button);
+        mCancelBattleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onCancelBattle();
+            }
+        });
         mMoveHistoryText = (TextView) view.findViewById(R.id.move_history_text);
         mMoveHistoryText.setMovementMethod( new ScrollingMovementMethod());
 

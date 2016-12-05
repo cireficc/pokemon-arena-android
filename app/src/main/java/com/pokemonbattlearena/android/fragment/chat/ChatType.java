@@ -5,8 +5,8 @@ package com.pokemonbattlearena.android.fragment.chat;
  */
 
 public enum ChatType {
-    GLOBAL("Global"),
-    IN_GAME("In-Game");
+    GLOBAL("Global Chat"),
+    IN_GAME("Battle Chat");
 
     private String chatRoomType;
 

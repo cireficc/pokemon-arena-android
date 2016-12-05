@@ -62,7 +62,7 @@ import com.pokemonbattlearena.android.engine.match.SwitchResult;
 import com.pokemonbattlearena.android.fragment.battle.BattleFragment;
 import com.pokemonbattlearena.android.fragment.HomeFragment;
 import com.pokemonbattlearena.android.fragment.chat.ChatHomeFragment;
-import com.pokemonbattlearena.android.fragment.chat.ChatBattleFragment;
+import com.pokemonbattlearena.android.fragment.chat.ChatFragment;
 import com.pokemonbattlearena.android.fragment.team.SavedTeamsFragment;
 import com.pokemonbattlearena.android.fragment.team.TeamsHomeFragment;
 import com.pokemonbattlearena.android.fragment.team.TeamsHomeFragment.OnPokemonTeamSelectedListener;
@@ -93,7 +93,7 @@ public class BottomBarActivity extends BaseActivity implements
         BattleFragment.OnBattleFragmentTouchListener,
         HomeFragment.OnHomeFragmentTouchListener,
         ChatHomeFragment.OnChatLoadedListener,
-        ChatBattleFragment.OnGameChatLoadedListener,
+        ChatFragment.OnChatLoadedListener,
         SavedTeamsFragment.OnSavedTeamsFragmentTouchListener,
         BattleEndListener {
 
@@ -123,7 +123,7 @@ public class BottomBarActivity extends BaseActivity implements
     private SavedTeamsFragment mSavedTeamsFragment;
     private TeamsHomeFragment mTeamsHomeFragment;
     private ChatHomeFragment mChatHomeFragment;
-    private ChatBattleFragment mChatBattleFragment;
+    private ChatFragment mChatBattleFragment;
 
     // UI Elements
     private BottomBar mBottomBar;
@@ -198,7 +198,7 @@ public class BottomBarActivity extends BaseActivity implements
         mTeamsHomeFragment = createTeamsHomeFragment();
         mBattleFragment = new BattleFragment();
         mChatHomeFragment = new ChatHomeFragment();
-        mChatBattleFragment = new ChatBattleFragment();
+        mChatBattleFragment = new ChatFragment();
         mFragmentManager.beginTransaction()
                 .add(R.id.container, mHomeFragment, "main")
                 .commit();
@@ -915,14 +915,6 @@ public class BottomBarActivity extends BaseActivity implements
         return c.getDrawable(id);
     }
 
-    private void keepScreenOn() {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
-
-    // Clears the flag that keeps the screen on.
-    private void stopKeepingScreenOn() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
 
     // Show error message about game being cancelled and return to main screen.
     private void showGameError() {
