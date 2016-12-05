@@ -2,6 +2,7 @@ package com.pokemonbattlearena.android.fragments.chat;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -27,7 +29,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
+import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.activity.BaseActivity;
 
 /**
  * Created by mitchcout on 10/22/2016.
@@ -36,9 +40,7 @@ import com.pokemonbattlearena.android.R;
 public class ChatHomeFragment extends Fragment{
 
     private static final String TAG = ChatHomeFragment.class.getSimpleName();
-    private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
-
-    private BottomBarActivity activity;
+    private BaseActivity activity;
     private DatabaseReference root;
 
     private ImageButton sendMessage;
@@ -55,6 +57,7 @@ public class ChatHomeFragment extends Fragment{
 
     private OnChatLoadedListener mCallback;
 
+
     public ChatHomeFragment() {
         super();
     }
@@ -66,7 +69,7 @@ public class ChatHomeFragment extends Fragment{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        activity = (BottomBarActivity) context;
+        activity = (BaseActivity) context;
         try {
             mCallback = (ChatHomeFragment.OnChatLoadedListener) context;
         } catch (ClassCastException e) {
@@ -79,9 +82,9 @@ public class ChatHomeFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_chathome, container, false);
-
+        SharedPreferences prefs = activity.getSharedPreferences(PokemonUtils.PREFS_KEY, Context.MODE_PRIVATE);
         chatRoom = "Global";
-        mUsername = Games.Players.getCurrentPlayer(mApplication.getGoogleApiClient()).getDisplayName();
+        mUsername = prefs.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
         layoutInflater = inflater;
 
         return view;

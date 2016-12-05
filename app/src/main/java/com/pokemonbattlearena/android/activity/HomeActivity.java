@@ -1,13 +1,16 @@
 package com.pokemonbattlearena.android.activity;
 
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -18,25 +21,42 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.google.firebase.database.DatabaseReference;
+import com.google.gson.Gson;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
 import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
+import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
+import com.pokemonbattlearena.android.fragments.team.SavedTeamsFragment;
+import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 import com.stephentuso.welcome.WelcomeHelper;
 
-public class HomeActivity extends BaseActivity implements OnTabSelectListener, MainMenuFragment.OnHomeFragmentTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+public class HomeActivity extends BaseActivity implements OnTabSelectListener, MainMenuFragment.OnHomeFragmentTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ChatHomeFragment.OnChatLoadedListener, SavedTeamsFragment.OnSavedTeamsFragmentTouchListener, TeamsHomeFragment.OnPokemonTeamSelectedListener{
     private static final String TAG = HomeActivity.class.getSimpleName();
     private static final int RC_SIGN_IN = 9001;
+    private static final int TEAM_SIZE_INT = 6;
     private WelcomeHelper mWelcomeHelper;
     private GoogleApiClient mGoogleApiClient;
     private BottomBar mBottomBar;
     private FragmentManager mFragmentManager;
+    private MainMenuFragment mHomeFragment;
+    private SavedTeamsFragment mSavedTeamsFragment;
+    private TeamsHomeFragment mTeamBuilderFragment;
+    private ChatHomeFragment mChatFragment;
+    private SharedPreferences mPreferences;
     // GOOGLE PLAY SIGN IN FIELDS
     private boolean mResolvingConnectionFailure = false;
     private boolean mAutoStartSignInFlow = true;
     private boolean mSignInClicked = false;
+    private String newestAddedPokemonTeamName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +64,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        mPreferences = getSharedPreferences(PokemonUtils.PREFS_KEY, Context.MODE_PRIVATE);
         mWelcomeHelper = new WelcomeHelper(this, com.pokemonbattlearena.android.activity.SplashActivity.class);
 
         mBottomBar = (BottomBar) findViewById(R.id.home_bottom_bar);
@@ -53,7 +73,15 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
 
         mFragmentManager = getFragmentManager();
 
-        mFragmentManager.beginTransaction().add(R.id.home_container, new MainMenuFragment(), "home").commit();
+        mHomeFragment = new MainMenuFragment();
+        mSavedTeamsFragment = new SavedTeamsFragment();
+        mChatFragment = new ChatHomeFragment();
+
+        mFragmentManager.beginTransaction()
+                .add(R.id.home_container, mHomeFragment, "home")
+                .add(R.id.home_container, mSavedTeamsFragment, "team_save")
+                .hide(mSavedTeamsFragment)
+                .commit();
 
         // Button listeners
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -96,10 +124,37 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
     public void onTabSelected(@IdRes int tabId) {
         switch (tabId) {
             case R.id.tab_teams:
+                if (mSavedTeamsFragment != null && mSavedTeamsFragment.isAdded() && mSavedTeamsFragment.isHidden()) {
+                    mFragmentManager.beginTransaction()
+                            .hide(mHomeFragment)
+                            .hide(mChatFragment)
+                            .show(mSavedTeamsFragment)
+                            .commit();
+                }
                 break;
             case R.id.tab_battle:
+                if (mHomeFragment != null && mHomeFragment.isAdded() && mHomeFragment.isHidden()) {
+                    mFragmentManager.beginTransaction()
+                            .hide(mSavedTeamsFragment)
+                            .hide(mChatFragment)
+                            .show(mHomeFragment)
+                            .commit();
+                }
                 break;
             case R.id.tab_chat:
+                if (mChatFragment != null && !mChatFragment.isAdded()) {
+                    mFragmentManager.beginTransaction()
+                            .add(R.id.home_container, mChatFragment, "chat")
+                            .hide(mSavedTeamsFragment)
+                            .hide(mHomeFragment)
+                            .commit();
+                } else if (mChatFragment != null && mChatFragment.isAdded() && mChatFragment.isHidden()){
+                    mFragmentManager.beginTransaction()
+                            .hide(mHomeFragment)
+                            .hide(mSavedTeamsFragment)
+                            .show(mChatFragment)
+                            .commit();
+                }
                 break;
         }
     }
@@ -145,5 +200,96 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
             }
         }
 
+    }
+
+    @Override
+    public void onChatLoaded() {
+        hideProgressDialog();
+    }
+
+    @Override
+    public void onTeamSelected(String pokemonJSON) {
+        Log.d(TAG, "Selected: " + pokemonJSON);
+        if (mFragmentManager != null) {
+            PokemonTeam team = new Gson().fromJson(pokemonJSON, PokemonTeam.class);
+            //add saved Team to Firebase
+            newestAddedPokemonTeamName = team.getTeamName();
+            addSavedTeam(newestAddedPokemonTeamName, pokemonJSON);
+
+            toggleAddTeamFragment();
+        }
+
+    }
+    private void addSavedTeam(String teamName, String pokemonJSON) {
+        DatabaseReference root = SavedTeamsFragment.root;
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(teamName, pokemonJSON);
+        root.updateChildren(map);
+    }
+    @Override
+    public void toggleAddTeamFragment() {
+        if (mFragmentManager != null && mSavedTeamsFragment != null && mSavedTeamsFragment.isAdded()) {
+            mTeamBuilderFragment = new TeamsHomeFragment();
+            mFragmentManager.beginTransaction().remove(mSavedTeamsFragment).commit();
+            mFragmentManager.beginTransaction().add(R.id.home_container, mTeamBuilderFragment, "team_builder").commit();
+            mFragmentManager.executePendingTransactions();
+        } else if (mFragmentManager != null && mTeamBuilderFragment != null && mTeamBuilderFragment.isAdded()) {
+            mFragmentManager.beginTransaction().remove(mTeamBuilderFragment).commit();
+            mFragmentManager.beginTransaction().add(R.id.home_container, mSavedTeamsFragment, "team_save").commit();
+            mFragmentManager.executePendingTransactions();
+        }
+    }
+
+    @Override
+    public void updateTeamOrder() {
+        ArrayList<Pair<Long, PokemonTeam>> savedTeams;
+        ArrayList<String> teamOrder = new ArrayList<String>();
+        //put team order from drag listview into new Arraylist
+        savedTeams = mSavedTeamsFragment.getTeamOrder();
+        //populate temp ArrayList with all team names
+        for(Pair<Long, PokemonTeam> team : savedTeams){
+            teamOrder.add(team.second.getTeamName());
+        }
+
+        //add temp Arraylist to sharedpreferences for team order
+        SharedPreferences.Editor editor = mPreferences.edit();
+        String orderedTeamJSON = new Gson().toJson(teamOrder);
+        Log.d(TAG, "Setting saved team order: " + orderedTeamJSON);
+        editor.putString("orderedTeamJSON", orderedTeamJSON).apply();
+        editor.commit();
+
+        //add first team as your active team
+        if(savedTeams.size() != 0) {
+            String pokemonJSON = new Gson().toJson(savedTeams.get(0).second);
+            setCurrentTeam(pokemonJSON);
+        }
+    }
+
+    private void setCurrentTeam(String pokemonJSON){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        Log.d(TAG, "Setting current team: " + pokemonJSON);
+        editor.putString("pokemon_team", pokemonJSON).apply();
+        editor.commit();
+    }
+
+    @Override
+    public ArrayList<String> retrieveTeamOrder() {
+        String orderedTeamJSON = mPreferences.getString("orderedTeamJSON", "mew");
+        if (!orderedTeamJSON.equals("mew")) {
+            Log.d(TAG, "Got team order: " + orderedTeamJSON);
+            return new Gson().fromJson(orderedTeamJSON, ArrayList.class);
+        }
+        return new ArrayList<String>();
+    }
+
+    @Override
+    public String getNewestPokemonTeamName() {
+        return newestAddedPokemonTeamName;
+    }
+
+    @Override
+    public void deleteSavedTeam(String teamName) {
+        DatabaseReference root = SavedTeamsFragment.root;
+        root.child(teamName).removeValue();
     }
 }

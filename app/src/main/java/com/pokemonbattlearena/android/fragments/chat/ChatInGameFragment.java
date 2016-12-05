@@ -3,6 +3,7 @@ package com.pokemonbattlearena.android.fragments.chat;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -29,7 +30,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.pokemonbattlearena.android.BottomBarActivity;
 import com.pokemonbattlearena.android.PokemonBattleApplication;
+import com.pokemonbattlearena.android.PokemonUtils;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.activity.BaseActivity;
 
 /**
  * Created by mitchcout on 10/22/2016.
@@ -40,7 +43,7 @@ public class ChatInGameFragment extends Fragment {
     private static final String TAG = ChatInGameFragment.class.getSimpleName();
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
-    private BottomBarActivity activity;
+    private BaseActivity activity;
     private DatabaseReference root;
     private ChatType chatType;
     private String gameChatRoomName;
@@ -74,7 +77,7 @@ public class ChatInGameFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        activity = (BottomBarActivity) context;
+        activity = (BaseActivity) context;
         try {
             mCallback = (ChatInGameFragment.OnGameChatLoadedListener) context;
         } catch (ClassCastException e) {
@@ -87,9 +90,9 @@ public class ChatInGameFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_chat_in_game, container, false);
-
+        SharedPreferences prefs = activity.getSharedPreferences(PokemonUtils.PREFS_KEY, Context.MODE_PRIVATE);
         chatType = ChatType.IN_GAME;
-        mUsername = Games.Players.getCurrentPlayer(mApplication.getGoogleApiClient()).getDisplayName();
+        mUsername = prefs.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
         layoutInflater = inflater;
 
         return view;

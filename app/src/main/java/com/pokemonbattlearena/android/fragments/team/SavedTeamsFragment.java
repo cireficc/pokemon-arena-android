@@ -69,7 +69,6 @@ public class SavedTeamsFragment extends Fragment {
         mSavedTeams = new ArrayList<Pair<Long, PokemonTeam>>();
         longValue = 0;
         adapterListSizeCurrent = 0;
-
     }
 
     public interface OnSavedTeamsFragmentTouchListener {

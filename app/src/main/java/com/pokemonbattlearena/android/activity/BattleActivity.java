@@ -44,6 +44,7 @@ import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Switch;
 import com.pokemonbattlearena.android.engine.match.SwitchResult;
 import com.pokemonbattlearena.android.fragments.battle.BattleFragment;
+import com.pokemonbattlearena.android.fragments.chat.ChatInGameFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 
@@ -53,12 +54,13 @@ import java.util.List;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 
-public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener{
+public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener, ChatInGameFragment.OnGameChatLoadedListener {
     private static final String TAG = BattleActivity.class.getSimpleName();
     private static DatabaseReference mRootFirebase;
     private GoogleApiClient mGoogleApiClient;
     private FragmentManager mFragmentManager;
     private BattleFragment mBattleFragment;
+    private ChatInGameFragment mChatFragment;
     private BottomBar mBottomBar;
     private Battle mBattle;
 
@@ -115,6 +117,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         mGoogleApiClient.connect();
 
         mBattleFragment = new BattleFragment();
+
         mFragmentManager.beginTransaction()
                 .add(R.id.battle_container, mBattleFragment, "battle")
                 .hide(mBattleFragment)
@@ -148,8 +151,26 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             case R.id.tab_teams:
                 break;
             case R.id.tab_battle:
+                if (mBattleFragment.isHidden()) {
+                    mFragmentManager.beginTransaction()
+                            .show(mBattleFragment)
+                            .hide(mChatFragment)
+                            .commit();
+                }
                 break;
             case R.id.tab_chat:
+                if (mChatFragment == null) {
+                    mChatFragment = new ChatInGameFragment();
+                    mFragmentManager.beginTransaction()
+                            .add(R.id.battle_container, mChatFragment, "chat")
+                            .hide(mBattleFragment)
+                            .commit();
+                } else if (mChatFragment.isHidden()) {
+                    mFragmentManager.beginTransaction()
+                            .show(mChatFragment)
+                            .hide(mBattleFragment)
+                            .commit();
+                }
                 break;
         }
     }
@@ -544,6 +565,16 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         } else {
             sendClientMessage(s);
         }
+    }
+
+    @Override
+    public void onChatLoaded() {
+        hideProgressDialog();
+    }
+
+    @Override
+    public String getHostId() {
+        return mUsername;
     }
     //endregion
 }
