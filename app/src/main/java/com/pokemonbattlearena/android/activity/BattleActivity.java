@@ -163,18 +163,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                 .hide(mTeamStatFragment)
                 .commit();
 
-        showProgressDialog();
-
-        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                if (!isAiBattle) {
-                    Toast.makeText(mApplication, "Cancelled Battle", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-            }
-        });
-
         mRootFirebase = FirebaseDatabase.getInstance().getReference().child(PokemonUtils.PROFILE_NAME_KEY);
         mBottomBar.setOnTabSelectListener(this);
     }
@@ -363,13 +351,15 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mOpponentUsername = bufferString.trim();
             sendPokemonTeam(getSavedTeam());
             return;
-        } else if (mOpponentTeam == null) {
+        }
+        if (mOpponentTeam == null && mOpponentUsername != null) {
             try {
                 mOpponentTeam = new Gson().fromJson(bufferString, PokemonTeam.class);
                 setupBattleWithOpponent();
                 return;
-            } catch (IllegalStateException e) {
-
+            } catch (Exception e) {
+                mOpponentTeam = null;
+                return;
             }
         }
         if (mOpponentTeam != null && mOpponentUsername != null) {
@@ -427,7 +417,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mBattleFragment.setOpponent(opponent);
         }
 
-        getFragmentManager().executePendingTransactions();
+//        getFragmentManager().executePendingTransactions();
 
         mFragmentManager.beginTransaction()
                 .show(mBattleFragment)
@@ -465,6 +455,16 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        showProgressDialog();
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (!isAiBattle) {
+                    Toast.makeText(mApplication, "Cancelled Battle", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        });
         if (!isAiBattle) {
             startMatchMaking();
         } else {
@@ -699,7 +699,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public String getHostId() {
-        return mUsername;
+        return mHostId;
     }
 
     @Override
