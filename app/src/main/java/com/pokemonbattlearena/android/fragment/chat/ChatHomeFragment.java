@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragments.chat;
+package com.pokemonbattlearena.android.fragment.chat;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -20,16 +20,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.games.Games;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.pokemonbattlearena.android.BottomBarActivity;
-import com.pokemonbattlearena.android.PokemonBattleApplication;
-import com.pokemonbattlearena.android.PokemonUtils;
+import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.activity.BaseActivity;
 

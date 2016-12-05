@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragments.chat;
+package com.pokemonbattlearena.android.fragment.chat;
 
 /**
  * Created by mitchcout on 11/12/2016.

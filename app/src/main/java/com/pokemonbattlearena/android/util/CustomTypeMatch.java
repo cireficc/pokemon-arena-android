@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android;
+package com.pokemonbattlearena.android.util;
 
 /**
  * Created by Spencer Amann on 10/27/16.

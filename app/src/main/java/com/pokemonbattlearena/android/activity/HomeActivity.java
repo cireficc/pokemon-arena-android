@@ -8,14 +8,9 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.util.Pair;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -23,14 +18,13 @@ import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.gson.Gson;
-import com.pokemonbattlearena.android.PokemonBattleApplication;
-import com.pokemonbattlearena.android.PokemonUtils;
+import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.pokemonbattlearena.android.fragments.battle.MainMenuFragment;
-import com.pokemonbattlearena.android.fragments.chat.ChatHomeFragment;
-import com.pokemonbattlearena.android.fragments.team.SavedTeamsFragment;
-import com.pokemonbattlearena.android.fragments.team.TeamsHomeFragment;
+import com.pokemonbattlearena.android.fragment.HomeFragment;
+import com.pokemonbattlearena.android.fragment.chat.ChatHomeFragment;
+import com.pokemonbattlearena.android.fragment.team.SavedTeamsFragment;
+import com.pokemonbattlearena.android.fragment.team.TeamsHomeFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 import com.stephentuso.welcome.WelcomeHelper;
@@ -39,7 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HomeActivity extends BaseActivity implements OnTabSelectListener, MainMenuFragment.OnHomeFragmentTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ChatHomeFragment.OnChatLoadedListener, SavedTeamsFragment.OnSavedTeamsFragmentTouchListener, TeamsHomeFragment.OnPokemonTeamSelectedListener{
+public class HomeActivity extends BaseActivity implements OnTabSelectListener, HomeFragment.OnHomeFragmentTouchListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ChatHomeFragment.OnChatLoadedListener, SavedTeamsFragment.OnSavedTeamsFragmentTouchListener, TeamsHomeFragment.OnPokemonTeamSelectedListener{
     private static final String TAG = HomeActivity.class.getSimpleName();
     private static final int RC_SIGN_IN = 9001;
     private static final int TEAM_SIZE_INT = 6;
@@ -47,7 +41,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
     private GoogleApiClient mGoogleApiClient;
     private BottomBar mBottomBar;
     private FragmentManager mFragmentManager;
-    private MainMenuFragment mHomeFragment;
+    private HomeFragment mHomeFragment;
     private SavedTeamsFragment mSavedTeamsFragment;
     private TeamsHomeFragment mTeamBuilderFragment;
     private ChatHomeFragment mChatFragment;
@@ -73,7 +67,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener, M
 
         mFragmentManager = getFragmentManager();
 
-        mHomeFragment = new MainMenuFragment();
+        mHomeFragment = new HomeFragment();
         mSavedTeamsFragment = new SavedTeamsFragment();
         mChatFragment = new ChatHomeFragment();
 

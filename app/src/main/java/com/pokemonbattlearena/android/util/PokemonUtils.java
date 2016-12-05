@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android;
+package com.pokemonbattlearena.android.util;
 
 import com.pokemonbattlearena.android.activity.SplashActivity;
 

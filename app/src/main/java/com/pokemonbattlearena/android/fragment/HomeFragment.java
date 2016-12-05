@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragments.battle;
+package com.pokemonbattlearena.android.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,16 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.pokemonbattlearena.android.PokemonBattleApplication;
+import com.pokemonbattlearena.android.application.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 
 /**
  * Created by Mitch Couturier
  */
-public class MainMenuFragment extends Fragment {
+public class HomeFragment extends Fragment {
 
     PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
-    private final static String TAG = MainMenuFragment.class.getSimpleName();
+    private final static String TAG = HomeFragment.class.getSimpleName();
 
     private Button mBattleNowButton;
     private Button mBattleFriendButton;
@@ -27,7 +27,7 @@ public class MainMenuFragment extends Fragment {
 
     private OnHomeFragmentTouchListener mCallback;
 
-    public MainMenuFragment() {
+    public HomeFragment() {
         // Required empty public constructor
     }
 

@@ -1,18 +1,12 @@
-package com.pokemonbattlearena.android.fragments.battle;
+package com.pokemonbattlearena.android.fragment.battle;
 
-import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.pokemonbattlearena.android.R;
-import com.pokemonbattlearena.android.engine.database.Pokemon;
-import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
-import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
-import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 
 /**
  * Created by Spencer Amann on 10/20/16.

@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragments.chat;
+package com.pokemonbattlearena.android.fragment.chat;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -22,15 +22,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.google.android.gms.games.Games;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.pokemonbattlearena.android.BottomBarActivity;
-import com.pokemonbattlearena.android.PokemonBattleApplication;
-import com.pokemonbattlearena.android.PokemonUtils;
+import com.pokemonbattlearena.android.application.PokemonBattleApplication;
+import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.activity.BaseActivity;
 
@@ -38,9 +36,9 @@ import com.pokemonbattlearena.android.activity.BaseActivity;
  * Created by mitchcout on 10/22/2016.
  */
 
-public class ChatInGameFragment extends Fragment {
+public class ChatBattleFragment extends Fragment {
 
-    private static final String TAG = ChatInGameFragment.class.getSimpleName();
+    private static final String TAG = ChatBattleFragment.class.getSimpleName();
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
 
     private BaseActivity activity;
@@ -65,7 +63,7 @@ public class ChatInGameFragment extends Fragment {
 
     private OnGameChatLoadedListener mCallback;
 
-    public ChatInGameFragment() {
+    public ChatBattleFragment() {
         super();
     }
 
@@ -79,7 +77,7 @@ public class ChatInGameFragment extends Fragment {
         super.onAttach(context);
         activity = (BaseActivity) context;
         try {
-            mCallback = (ChatInGameFragment.OnGameChatLoadedListener) context;
+            mCallback = (ChatBattleFragment.OnGameChatLoadedListener) context;
         } catch (ClassCastException e) {
             Log.e(TAG, e.getMessage());
             throw new ClassCastException(context.toString() + "must implement listener");

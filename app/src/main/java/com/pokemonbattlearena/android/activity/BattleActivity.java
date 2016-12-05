@@ -28,7 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
-import com.pokemonbattlearena.android.PokemonUtils;
+import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.match.Attack;
@@ -43,8 +43,8 @@ import com.pokemonbattlearena.android.engine.match.PokemonPlayer;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.engine.match.Switch;
 import com.pokemonbattlearena.android.engine.match.SwitchResult;
-import com.pokemonbattlearena.android.fragments.battle.BattleFragment;
-import com.pokemonbattlearena.android.fragments.chat.ChatInGameFragment;
+import com.pokemonbattlearena.android.fragment.battle.BattleFragment;
+import com.pokemonbattlearena.android.fragment.chat.ChatBattleFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 
@@ -54,13 +54,13 @@ import java.util.List;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 
-public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener, ChatInGameFragment.OnGameChatLoadedListener {
+public class BattleActivity extends BaseActivity implements OnTabSelectListener, RoomUpdateListener, RealTimeMessageReceivedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, RoomStatusUpdateListener, BattleFragment.OnBattleFragmentTouchListener, ChatBattleFragment.OnGameChatLoadedListener {
     private static final String TAG = BattleActivity.class.getSimpleName();
     private static DatabaseReference mRootFirebase;
     private GoogleApiClient mGoogleApiClient;
     private FragmentManager mFragmentManager;
     private BattleFragment mBattleFragment;
-    private ChatInGameFragment mChatFragment;
+    private ChatBattleFragment mChatFragment;
     private BottomBar mBottomBar;
     private Battle mBattle;
 
@@ -160,7 +160,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                 break;
             case R.id.tab_chat:
                 if (mChatFragment == null) {
-                    mChatFragment = new ChatInGameFragment();
+                    mChatFragment = new ChatBattleFragment();
                     mFragmentManager.beginTransaction()
                             .add(R.id.battle_container, mChatFragment, "chat")
                             .hide(mBattleFragment)

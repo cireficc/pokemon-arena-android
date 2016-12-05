@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragments.battle;
+package com.pokemonbattlearena.android.fragment.battle;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.method.ScrollingMovementMethod;
@@ -19,18 +18,17 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import com.pokemonbattlearena.android.PokemonBattleApplication;
+import com.pokemonbattlearena.android.application.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
-import com.pokemonbattlearena.android.TypeModel;
+import com.pokemonbattlearena.android.util.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.Battle;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonPlayer;
-import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.pokemonbattlearena.android.fragments.team.PokemonGridAdapter;
-import com.pokemonbattlearena.android.fragments.team.PokemonGridViewItem;
+import com.pokemonbattlearena.android.fragment.team.PokemonGridAdapter;
+import com.pokemonbattlearena.android.fragment.team.PokemonGridViewItem;
 
 import java.text.DateFormat;
 import java.util.ArrayList;

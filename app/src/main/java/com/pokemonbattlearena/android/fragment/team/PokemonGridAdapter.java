@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragments.team;
+package com.pokemonbattlearena.android.fragment.team;
 
 import android.content.Context;
 import android.graphics.Color;
