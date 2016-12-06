@@ -3,6 +3,8 @@ package com.pokemonbattlearena.android.activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -62,6 +64,7 @@ import com.pokemonbattlearena.android.fragment.chat.ChatFragment;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,6 +101,8 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     private String mOpponentUsername = null;
     private PokemonTeam mOpponentTeam = null;
     private String mUsername = null;
+    //MUSIC
+    private MediaPlayer mMusic;
 
     private final RuntimeTypeAdapterFactory<Command> mCommandRuntimeTypeAdapter = RuntimeTypeAdapterFactory
             .of(Command.class, "type")
@@ -186,7 +191,91 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         } else {
             mGoogleApiClient.connect();
         }
+        if(mMusic == null) {
+            //Sets up and plays theme music
+            createMusic();
+            setUpMusic(R.raw.music_battle, R.raw.music_battle_cont);
+        } else {
+            mMusic.start();
+        }
+
         super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        mMusic.pause();
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        mMusic.pause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mMusic.start();
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mMusic.stop();
+        mMusic.release();
+        mMusic = null;
+        super.onDestroy();
+    }
+
+    public void createMusic() {
+        if (mMusic != null && mMusic.isPlaying()) {
+            mMusic.stop();
+            mMusic.release();
+        }
+        mMusic = new MediaPlayer();
+    }
+
+    public void startMusic(int id) {
+        Uri ins = Uri.parse("android.resource://com.pokemonbattlearena.android/" + id);
+        try{
+            mMusic.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mMusic.start();
+                }
+            });
+            mMusic.setDataSource(this, ins);
+        } catch (IOException e) {
+            Log.e(TAG, "Could not set DataSource for MediaPlayer");
+        }
+        mMusic.prepareAsync();
+    }
+
+    public void setUpMusic(int startId, int endId){
+        final int ENDID = endId;
+        Uri ins = Uri.parse("android.resource://com.pokemonbattlearena.android/" + startId);
+        try {
+            mMusic.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mMusic.start();
+                    mMusic.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            createMusic();
+                            startMusic(ENDID);
+                            mMusic.setLooping(true);
+                            mMusic.setOnCompletionListener(null);
+                        }
+                    });
+                }
+            });
+            mMusic.setDataSource(this, ins);
+        } catch (IOException e) {
+            Log.e(TAG, "Could not set DataSource for MediaPlayer");
+        }
+        mMusic.prepareAsync();
     }
 
     @Override
