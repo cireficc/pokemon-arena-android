@@ -10,6 +10,7 @@ import android.widget.ListView;
 
 import com.google.gson.Gson;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.adapter.StatAdapter;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.util.PokemonUtils;

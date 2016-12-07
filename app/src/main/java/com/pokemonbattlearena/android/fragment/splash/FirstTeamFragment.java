@@ -27,8 +27,8 @@ import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.pokemonbattlearena.android.fragment.team.MoveAdapter;
-import com.pokemonbattlearena.android.fragment.team.PokemonGridAdapter;
+import com.pokemonbattlearena.android.adapter.MoveAdapter;
+import com.pokemonbattlearena.android.adapter.PokemonGridAdapter;
 import com.pokemonbattlearena.android.fragment.team.PokemonGridViewItem;
 import com.stephentuso.welcome.WelcomeFinisher;
 

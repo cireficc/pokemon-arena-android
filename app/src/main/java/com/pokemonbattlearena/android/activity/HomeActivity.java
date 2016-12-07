@@ -24,7 +24,7 @@ import com.pokemonbattlearena.android.fragment.chat.ChatType;
 import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
-import com.pokemonbattlearena.android.fragment.HomeFragment;
+import com.pokemonbattlearena.android.fragment.home.HomeFragment;
 import com.pokemonbattlearena.android.fragment.team.SavedTeamsFragment;
 import com.pokemonbattlearena.android.fragment.team.TeamsHomeFragment;
 import com.roughike.bottombar.BottomBar;

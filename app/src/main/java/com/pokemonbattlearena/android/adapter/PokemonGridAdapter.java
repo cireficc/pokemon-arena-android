@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragment.team;
+package com.pokemonbattlearena.android.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
+import com.pokemonbattlearena.android.fragment.team.PokemonGridViewItem;
 
 import java.util.ArrayList;
 
