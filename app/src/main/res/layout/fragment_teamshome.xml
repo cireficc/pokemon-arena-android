@@ -4,12 +4,44 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/teams_home"
     tools:context=".BottomBarActivity">
-    <Button
-        android:text="@string/save_team"
+    <TextView
+        android:id="@+id/save_first_team_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/save_team_button" />
+        android:text="Pick your first team of 6"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:textStyle="bold"
+        android:textSize="10pt"
+        android:visibility="gone"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp">
+
+        <Button
+            android:id="@+id/cancel_team_button"
+            android:layout_width="0dp"
+            android:layout_weight="0.41"
+            android:background="@drawable/ic_pokeball_cancel_button"
+            android:layout_marginLeft="5dp"
+            android:layout_height="60dp"
+            android:layout_below="@+id/save_first_team_textview"
+            android:scaleX=".95"
+            android:scaleY=".95" />
+        <Button
+            android:id="@+id/save_team_button"
+            android:layout_weight="0.7"
+            android:elevation="1dp"
+            android:background="@drawable/ic_pokeball_save_button"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="0dp"
+            android:layout_height="55dp" />
+    </LinearLayout>
 
     <include layout="@layout/fragment_team_setup"
         android:layout_height="match_parent"

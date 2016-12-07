@@ -1,5 +1,7 @@
 package com.pokemonbattlearena.android.engine.match;
 
+// TODO: convert to builder pattern, so as not to have ridiculous constructor overloads
+
 public class TargetInfo {
 
     private BattlePokemonPlayer attackingPlayer;
@@ -7,6 +9,9 @@ public class TargetInfo {
     private transient BattlePokemon attackingPokemon;
     private transient BattlePokemon defendingPokemon;
 
+    /*
+     * This constructor is used in AttackResult.Builder.
+     */
     protected TargetInfo(BattlePokemonPlayer attackingPlayer, BattlePokemonPlayer defendingPlayer,
                          BattlePokemon attackingPokemon, BattlePokemon defendingPokemon) {
         this.attackingPlayer = attackingPlayer;
@@ -14,6 +19,21 @@ public class TargetInfo {
         this.attackingPokemon = attackingPokemon;
         this.defendingPokemon = defendingPokemon;
     }
+
+    /*
+     * This constructor is used in SwitchResult.Builder.
+     */
+    protected TargetInfo(BattlePokemonPlayer attackingPlayer) {
+        this.attackingPlayer = attackingPlayer;
+    }
+
+
+    /*
+     * This constructor is used in NoPResult.Builder.
+     */
+    protected TargetInfo() {
+    }
+
 
     public BattlePokemonPlayer getAttackingPlayer() {
         return attackingPlayer;

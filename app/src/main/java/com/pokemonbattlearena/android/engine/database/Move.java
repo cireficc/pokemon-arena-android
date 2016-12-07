@@ -7,37 +7,37 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "moves")
 public class Move {
 
-    protected final static String ID_FIELD_NAME = "id";
-    protected final static String NAME_FIELD_NAME = "name";
-    protected final static String DESCRIPTION_FIELD_NAME = "description";
-    protected final static String TYPE_1_FIELD_NAME = "type_1";
-    protected final static String CATEGORY_FIELD_NAME = "category";
-    protected final static String POWER_FIELD_NAME = "power";
-    protected final static String ACCURACY_FIELD_NAME = "accuracy";
-    protected final static String POWER_POINTS_FIELD_NAME = "power_points";
-    protected final static String STATUS_EFFECT_FIELD_NAME = "status_effect";
-    protected final static String STATUS_EFFECT_CHANCE_FIELD_NAME = "status_effect_chance";
-    protected final static String STAGE_CHANGE_STAT_FIELD_NAME = "stage_change_stat";
-    protected final static String STAGE_CHANGE_FIELD_NAME = "stage_change";
-    protected final static String STAGE_CHANGE_CHANCE_FIELD_NAME = "stage_change_chance";
-    protected final static String CAN_FLINCH_FIELD_NAME = "can_flinch";
-    protected final static String MIN_HITS_FIELD_NAME = "min_hits";
-    protected final static String MAX_HITS_FIELD_NAME = "max_hits";
-    protected final static String CHARGING_TURNS_FIELD_NAME = "charging_turns";
-    protected final static String RECHARGE_TURNS_FIELD_NAME = "recharge_turns";
-    protected final static String SELF_HEAL_FIELD_NAME = "self_heal";
-    protected final static String SELF_HEAL_TYPE_FIELD_NAME = "self_heal_type";
-    protected final static String SELF_HEAL_AMOUNT_FIELD_NAME = "self_heal_amount";
-    protected final static String RECOIL_FIELD_NAME = "recoil";
-    protected final static String RECOIL_AMOUNT_FIELD_NAME = "recoil_amount";
-    protected final static String CRASH_FIELD_NAME = "crash";
+    protected transient final static String ID_FIELD_NAME = "id";
+    protected transient final static String NAME_FIELD_NAME = "name";
+    protected transient final static String DESCRIPTION_FIELD_NAME = "description";
+    protected transient final static String TYPE_1_FIELD_NAME = "type_1";
+    protected transient final static String CATEGORY_FIELD_NAME = "category";
+    protected transient final static String POWER_FIELD_NAME = "power";
+    protected transient final static String ACCURACY_FIELD_NAME = "accuracy";
+    protected transient final static String POWER_POINTS_FIELD_NAME = "power_points";
+    protected transient final static String STATUS_EFFECT_FIELD_NAME = "status_effect";
+    protected transient final static String STATUS_EFFECT_CHANCE_FIELD_NAME = "status_effect_chance";
+    protected transient final static String STAGE_CHANGE_STAT_FIELD_NAME = "stage_change_stat";
+    protected transient final static String STAGE_CHANGE_FIELD_NAME = "stage_change";
+    protected transient final static String STAGE_CHANGE_CHANCE_FIELD_NAME = "stage_change_chance";
+    protected transient final static String CAN_FLINCH_FIELD_NAME = "can_flinch";
+    protected transient final static String MIN_HITS_FIELD_NAME = "min_hits";
+    protected transient final static String MAX_HITS_FIELD_NAME = "max_hits";
+    protected transient final static String CHARGING_TURNS_FIELD_NAME = "charging_turns";
+    protected transient final static String RECHARGE_TURNS_FIELD_NAME = "recharge_turns";
+    protected transient final static String SELF_HEAL_FIELD_NAME = "self_heal";
+    protected transient final static String SELF_HEAL_TYPE_FIELD_NAME = "self_heal_type";
+    protected transient final static String SELF_HEAL_AMOUNT_FIELD_NAME = "self_heal_amount";
+    protected transient final static String RECOIL_FIELD_NAME = "recoil";
+    protected transient final static String RECOIL_AMOUNT_FIELD_NAME = "recoil_amount";
+    protected transient final static String CRASH_FIELD_NAME = "crash";
 
     @DatabaseField(generatedId = true, columnName = ID_FIELD_NAME)
     int id;
     @DatabaseField(columnName = NAME_FIELD_NAME)
     private String name;
     @DatabaseField(columnName = DESCRIPTION_FIELD_NAME)
-    private String description;
+    private transient String description;
     @DatabaseField(columnName = TYPE_1_FIELD_NAME)
     private String type1;
     @DatabaseField(columnName = CATEGORY_FIELD_NAME)

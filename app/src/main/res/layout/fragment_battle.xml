@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.BattleActivity"
+    android:background="@color/color_blastoise_darl">
+
+    <Button
+        android:text="@string/cancel_battle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cancel_battle_button" />
+
+    <include layout="@layout/fragment_battleui"/>
+
+</LinearLayout>

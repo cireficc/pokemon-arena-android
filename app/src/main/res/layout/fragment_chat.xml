@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.BaseActivity"
+    android:background="@color/bb_darkBackgroundColor">
+
+    <TextView
+        android:id="@+id/chat_room_title"
+        android:text="Game Chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:background="@color/bb_darkBackgroundColor"
+        android:textColor="@color/cardview_light_background" />
+
+    <Button
+        android:text="@string/to_global_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/chat_holder"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/chat_switch_button" />
+
+    <RelativeLayout
+        android:id="@+id/chat_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/chat_room_title">
+        <include layout="@layout/fragment_chatui"
+            android:id="@+id/include_in_game" />
+    </RelativeLayout>
+
+</RelativeLayout>

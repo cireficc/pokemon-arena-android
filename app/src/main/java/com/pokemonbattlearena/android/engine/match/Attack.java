@@ -3,6 +3,7 @@ package com.pokemonbattlearena.android.engine.match;
 import android.util.Log;
 
 import com.pokemonbattlearena.android.engine.database.Move;
+import com.pokemonbattlearena.android.engine.database.StatType;
 import com.pokemonbattlearena.android.engine.database.StatusEffect;
 import com.pokemonbattlearena.android.engine.match.calculators.DamageCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.HealingCalculator;
@@ -10,7 +11,7 @@ import com.pokemonbattlearena.android.engine.match.calculators.RecoilCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StageChangeCalculator;
 import com.pokemonbattlearena.android.engine.match.calculators.StatusEffectCalculator;
 
-class Attack implements Command {
+public class Attack extends Command {
 
     private transient static final String TAG = Attack.class.getName();
 
@@ -24,15 +25,13 @@ class Attack implements Command {
     private transient static RecoilCalculator recoilCalculator = RecoilCalculator.getInstance();
     private transient static StageChangeCalculator stageChangeCalculator = StageChangeCalculator.getInstance();
 
-    Attack(BattlePokemonPlayer attacker, BattlePokemonPlayer defender, Move move) {
+    public Attack(BattlePokemonPlayer attacker, BattlePokemonPlayer defender, Move move) {
         this.attackingPlayer = attacker;
         this.defendingPlayer = defender;
         this.move = move;
     }
 
-    protected Move getMove() {
-        return move;
-    }
+    public Move getMove() { return move; }
 
     public BattlePokemonPlayer getAttackingPlayer() {
         return attackingPlayer;
@@ -42,25 +41,33 @@ class Attack implements Command {
         return defendingPlayer;
     }
 
-    protected BattlePokemon getAttackingPokemon() {
 
-        return attackingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+    /*
+     * id. When serializing and sending a Command, the player's team info is lost (as
+     * the host, who has access to the actual objects, would be the one queueing commands).
+     * I can't think of a better way to do it though, because allowing consumers of the
+     * Battle Engine to create Command themselves cleans up the logic in the BE quite a bit.
+     *
+     * Fixed by giving an instance of battle where it is needed
+     */
+    protected BattlePokemon getAttackingPokemon(Battle battle) {
+
+        return battle.getPlayerFromId(attackingPlayer.getId()).getBattlePokemonTeam().getCurrentPokemon();
     }
 
-    protected BattlePokemon getDefendingPokemon() {
+    protected BattlePokemon getDefendingPokemon(Battle battle) {
 
-        return defendingPlayer.getBattlePokemonTeam().getCurrentPokemon();
+        return battle.getPlayerFromId(defendingPlayer.getId()).getBattlePokemonTeam().getPokemonOnDeck();
     }
-
 
     @Override
-    public AttackResult execute() {
+    public AttackResult execute(Battle battle) {
 
-        BattlePokemon attackingPokemon = getAttackingPokemon();
-        BattlePokemon defendingPokemon = getDefendingPokemon();
+        BattlePokemon attackingPokemon = getAttackingPokemon(battle);
+        BattlePokemon defendingPokemon = getDefendingPokemon(battle);
         TargetInfo targetInfo =
                 new TargetInfo(attackingPlayer, defendingPlayer, attackingPokemon, defendingPokemon);
-        AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move.getId());
+        AttackResult.Builder builder = new AttackResult.Builder(targetInfo, move);
 
         if (move.isChargingMove()) {
             Log.i(TAG, move.getName() + " is charging move (for " + move.getChargingTurns() + " turns)");
@@ -72,8 +79,39 @@ class Attack implements Command {
             builder.setRechargingTurns(move.getRechargeTurns());
         }
 
+        // If a Pokemon is affected by a status effect, finish the attack
+        boolean frozen = statusEffectCalculator.isAffectedByFreeze(attackingPokemon);
+        boolean paralyzed = statusEffectCalculator.isAffectedByParalysis(attackingPokemon);
+        boolean sleeping = statusEffectCalculator.isAffectedBySleep(attackingPokemon);
+
+        // If the Pokemon is not affected by the freeze, it means it unfroze
+        if (attackingPokemon.getStatusEffect() == StatusEffect.FREEZE && !frozen) {
+            builder.setUnfroze(true);
+        }
+
+        if (attackingPokemon.isFlinched() || frozen || paralyzed || sleeping) {
+            builder.setSuccumbedToStatusEffect(true);
+        }
+
+        // If a Pokemon is confused, see if it hurts itself and finish the attack
+        if (attackingPokemon.isConfused()) {
+            if (statusEffectCalculator.isHurtByConfusion()) {
+                builder.setConfusionDamageTaken(statusEffectCalculator.getConfusionDamage(attackingPokemon));
+            }
+        }
+
+        if (attackingPokemon.getStatusEffect() == StatusEffect.BURN) {
+            builder.setBurnDamageTaken(statusEffectCalculator.getBurnDamage(attackingPokemon));
+        }
+        if (attackingPokemon.getStatusEffect() == StatusEffect.POISON) {
+            builder.setPoisonDamageTaken(statusEffectCalculator.getPoisonDamage(attackingPokemon));
+        }
+
+        // Set whether or not the move hit
+        builder.setMoveHit(damageCalculator.moveHit(move));
+
         int damageDone = 0;
-        for (int i = 0; i <= damageCalculator.getTimesHit(move); i++){
+        for (int i = 0; i < damageCalculator.getTimesHit(move); i++) {
             int partialDamage = damageCalculator.calculateDamage(attackingPokemon, move, defendingPokemon);
             Log.i(TAG, "Partial damage: " + partialDamage);
             damageDone += partialDamage;
@@ -133,11 +171,35 @@ class Attack implements Command {
         boolean doStageChange = stageChangeCalculator.doesApplyStageChange(move);
         Log.i(TAG, "Apply Stage change? " + doStageChange);
 
-        if(doStageChange) {
-            Log.i(TAG, move.getStageChange() + " is the amount");
-            Log.i(TAG, move.getStageChangeStatType() + " is the stage type");
-            builder.setStageChange(move.getStageChange());
-            builder.setStatTypeApplied(move.getStageChangeStatType());
+        if (doStageChange) {
+            int stageChange = move.getStageChange();
+            StatType stageChangeStatType = move.getStageChangeStatType();
+            Log.i(TAG, stageChange + " is the amount");
+            Log.i(TAG, stageChangeStatType + " is the stage type");
+            switch (stageChangeStatType) {
+                case ATTACK:
+                    builder.setAttackStageChange(stageChange);
+                    break;
+                case DEFENSE:
+                    builder.setDefenseStageChange(stageChange);
+                    break;
+                case SPECIALATTACK:
+                    builder.setSpAttackStageChange(stageChange);
+                    break;
+                case SPECIALDEFENSE:
+                    builder.setSpDefenseStageChange(stageChange);
+                    break;
+                case SPEED:
+                    builder.setSpeedStageChange(stageChange);
+                    break;
+                case CRITICALHIT:
+                    builder.setCritStageChange(stageChange);
+                    break;
+            }
+        }
+
+        if (move.getName().equals("Haze")) {
+            builder.setIsHaze(true);
         }
 
         return builder.build();

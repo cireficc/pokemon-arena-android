@@ -10,4 +10,5 @@
     <dimen name="appBarTopPadding">70dp</dimen>
     <dimen name="chatStartMargin">5dp</dimen>
     <dimen name="chatEndMargin">100dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>

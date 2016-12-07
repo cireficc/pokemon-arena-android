@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="98dp">
+        <android.support.v7.widget.CardView
+            android:id="@+id/saved_team_cardView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            card_view:cardCornerRadius="10dp"
+            card_view:cardBackgroundColor="@color/color_charizard">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="My Team Name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/team_name_textView"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginTop="5dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:textSize="15sp" />
+
+                <ImageButton
+                card_view:srcCompat="@drawable/ic_delete_button"
+                android:id="@+id/team_delete_imageButton"
+                android:layout_weight="1"
+                android:background="@null"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="4dp"
+                android:scaleY="0.65"
+                android:scaleX="0.65"
+                android:layout_width="20dp"
+                android:layout_height="20dp" />
+
+            </RelativeLayout>
+            <LinearLayout
+                android:id="@+id/team_all_pokemon"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp">
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+</RelativeLayout>

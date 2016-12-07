@@ -1,6 +1,6 @@
 package com.pokemonbattlearena.android.engine.match;
 
-interface Command {
+public abstract class Command {
 
-    CommandResult execute();
+    abstract CommandResult execute(Battle battle);
 }

@@ -8,32 +8,60 @@ import com.pokemonbattlearena.android.engine.database.MoveType;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DamageCalculator {
+
 
     private static DamageCalculator instance = null;
 
     private static final String TAG = DamageCalculator.class.getName();
 
+    private static final double[] CRIT_STAGES = new double[]{
+            6.25, 12.50, 25.00, 33.30, 50.00
+    };
+
+    private final static Map<Integer, Double> STAGE_MULTIPLIER = new HashMap<Integer, Double>()
+    {{
+        put(-6, 0.25);
+        put(-5, 0.28);
+        put(-4, 0.33);
+        put(-3, 0.4);
+        put(-2, 0.5);
+        put(-1, 0.66);
+        put(0, 1.0);
+        put(1, 1.5);
+        put(2, 2.0);
+        put(3, 2.5);
+        put(4, 3.0);
+        put(5, 3.5);
+        put(6, 4.0);
+    }};
+
+    private static final int MAX_CHANCE = 100;
+
     //Row type effectiveness vs Column type
-    private static final double[][] TYPE_MULTIPLIERS = new double[][] {
-            {1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, 0.5,   0,   1}, // Normal
-            {1, 0.5, 0.5,   1,   2,   2,   1,   1,   1,   1,   1,   2, 0.5,   1, 0.5}, // Fire
-            {1,   2, 0.5,   1, 0.5,   1,   1,   1,   2,   1,   1,   1,   2,   1, 0.5}, // Water
-            {1,   1,   2, 0.5, 0.5,   1,   1,   1,   0,   2,   1,   1,   1,   1, 0.5}, // Electric
-            {1, 0.5,   2,   1, 0.5,   1,   1, 0.5,   2, 0.5,   1, 0.5,   2,   1, 0.5}, // Grass
-            {1, 0.5, 0.5,   1,   2, 0.5,   1,   1,   2,   2,   1,   1,   1,   1,   2}, // Ice
-            {2,   1,   1,   1,   1,   2,   1, 0.5,   1, 0.5, 0.5, 0.5,   2,   0,   1}, // Fighting
-            {1,   1,   1,   1,   2,   1,   1, 0.5, 0.5,   1,   1,   1, 0.5, 0.5,   1}, // Poison
-            {1,   2,   1,   2, 0.5,   1,   1,   2,   1,   0,   1, 0.5,   2,   1,   1}, // Ground
-            {1,   1,   1, 0.5,   2,   1,   2,   1,   1,   1,   1,   2, 0.5,   1,   1}, // Flying
-            {1,   1,   1,   1,   1,   1,   2,   2,   1,   1, 0.5,   1,   1,   1,   1}, // Psychic
-            {1, 0.5,   1,   1,   2,   1, 0.5, 0.5,   1, 0.5,   2,   1,   1, 0.5,   1}, // Bug
-            {1,   2,   1,   1,   1,   2, 0.5,   1, 0.5,   2,   1,   2,   1,   1,   1}, // Rock
-            {0,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   1,   1,   2,   1}, // Ghost
-            {1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2}  // Dragon
-     //      No   Fr   Wa   El   Ga   Ic   Fg   Po   Gr   Fl   Py   Bu   Ro   Gh   Dr
+    private static final double[][] TYPE_MULTIPLIERS = new double[][]{
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.5, 0, 1}, // Normal
+            {1, 0.5, 0.5, 1, 2, 2, 1, 1, 1, 1, 1, 2, 0.5, 1, 0.5}, // Fire
+            {1, 2, 0.5, 1, 0.5, 1, 1, 1, 2, 1, 1, 1, 2, 1, 0.5}, // Water
+            {1, 1, 2, 0.5, 0.5, 1, 1, 1, 0, 2, 1, 1, 1, 1, 0.5}, // Electric
+            {1, 0.5, 2, 1, 0.5, 1, 1, 0.5, 2, 0.5, 1, 0.5, 2, 1, 0.5}, // Grass
+            {1, 0.5, 0.5, 1, 2, 0.5, 1, 1, 2, 2, 1, 1, 1, 1, 2}, // Ice
+            {2, 1, 1, 1, 1, 2, 1, 0.5, 1, 0.5, 0.5, 0.5, 2, 0, 1}, // Fighting
+            {1, 1, 1, 1, 2, 1, 1, 0.5, 0.5, 1, 1, 1, 0.5, 0.5, 1}, // Poison
+            {1, 2, 1, 2, 0.5, 1, 1, 2, 1, 0, 1, 0.5, 2, 1, 1}, // Ground
+            {1, 1, 1, 0.5, 2, 1, 2, 1, 1, 1, 1, 2, 0.5, 1, 1}, // Flying
+            {1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 0.5, 1, 1, 1, 1}, // Psychic
+            {1, 0.5, 1, 1, 2, 1, 0.5, 0.5, 1, 0.5, 2, 1, 1, 0.5, 1}, // Bug
+            {1, 2, 1, 1, 1, 2, 0.5, 1, 0.5, 2, 1, 2, 1, 1, 1}, // Rock
+            {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1}, // Ghost
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2}  // Dragon
+            //      No   Fr   Wa   El   Ga   Ic   Fg   Po   Gr   Fl   Py   Bu   Ro   Gh   Dr
     };
 
     private static final int MAX_ACCURACY = 100;
@@ -75,7 +103,7 @@ public class DamageCalculator {
         return getType1Effectiveness(move, target) * getType2Effectiveness(move, target);
     }
 
-    public boolean moveHit(Move move, BattlePokemon target) {
+    public boolean moveHit(Move move) {
 
         // TODO: Add support for accuracy stages
 
@@ -88,12 +116,30 @@ public class DamageCalculator {
         }
     }
 
-    public int getTimesHit(Move move){
+    public int getTimesHit(Move move) {
 
         int hits = ThreadLocalRandom.current().nextInt(move.getMinHits(), move.getMaxHits() + 1);
         Log.i(TAG, "Move hits " + hits + " times (min: " + move.getMinHits() + "; max: " + move.getMaxHits() + ")");
 
         return hits;
+    }
+
+    public boolean moveCrit(BattlePokemon attacker, Move move) {
+        List valid = Arrays.asList("Crabhammer", "Karate Chop", "Razor Leaf", "Razor Wind", "Slash");
+        double critBarrier = MAX_CHANCE;
+        if (valid.contains(move.getName())) {
+            if (attacker.getCritStage() < 3) {
+                critBarrier -= CRIT_STAGES[attacker.getCritStage() + 2];
+            } else {
+                critBarrier -= CRIT_STAGES[4];
+            }
+        } else {
+            critBarrier -= CRIT_STAGES[attacker.getCritStage()];
+        }
+        if (ThreadLocalRandom.current().nextInt(MAX_CHANCE) >= critBarrier) {
+            return true;
+        }
+        return false;
     }
 
     public int calculateDamage(BattlePokemon attacker, Move move, BattlePokemon target) {
@@ -104,7 +150,7 @@ public class DamageCalculator {
 
         Log.d(TAG, "\n\nCalculating damage for " + move.getName() + " against " + originalTarget.getName());
 
-        switch(move.getName()) {
+        switch (move.getName()) {
             case "Night Shade":
             case "Seismic Toss":
                 return POKEMON_LEVEL;
@@ -125,12 +171,14 @@ public class DamageCalculator {
             return 0;
         }
 
-        int attack = (move.getMoveType() == MoveType.PHYSICAL) ? originalAttacker.getAttack() : originalAttacker.getSpecialAttack();
-        int defense = (move.getMoveType() == MoveType.PHYSICAL) ? originalTarget.getDefense() : originalTarget.getSpecialDefense();
+        double attack = (move.getMoveType() == MoveType.PHYSICAL) ? originalAttacker.getAttack() * STAGE_MULTIPLIER.get(attacker.getAttackStage())
+                : originalAttacker.getSpecialAttack( ) * STAGE_MULTIPLIER.get(attacker.getSpAttackStage());
+        double defense = (move.getMoveType() == MoveType.PHYSICAL) ? originalTarget.getDefense() * STAGE_MULTIPLIER.get(target.getDefenseStage())
+                : originalTarget.getSpecialDefense() * STAGE_MULTIPLIER.get(target.getSpDefenseStage());
 
         double levelCalc = ((2 * POKEMON_LEVEL) + 10) / 250.0;
         double statCalc = attack / defense;
-        int basePower = move.getPower();
+        double basePower = move.getPower();
 
         double damage = (levelCalc * statCalc * basePower) + 2;
 
@@ -140,7 +188,8 @@ public class DamageCalculator {
 
         double typeEffectiveness = getOverallTypeEffectiveness(move, target);
 
-        int critMultiplier = 1;
+        double critMultiplier = moveCrit(attacker, move) ? 2 : 1;
+
         final int MAX = 100;
         final int MIN = 85;
         double roll = (ThreadLocalRandom.current().nextInt((MAX - MIN) + 1) + MIN) / 100.0;

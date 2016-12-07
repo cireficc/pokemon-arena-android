@@ -9,38 +9,41 @@ import java.util.List;
 
 public class BattlePokemon {
 
+    private transient final int MIN_STAGE = -6;
+    private transient final int MAX_STAGE = 6;
     private transient Pokemon originalPokemon;
     private transient int currentHp;
     private transient StatusEffect statusEffect;
     private transient int statusEffectTurns;
-    private transient boolean confused;
+    private transient boolean confused = false;
     private transient int confusedTurns;
-    private transient boolean flinched;
+    private transient boolean flinched = false;
     private transient int chargingForTurns;
     private transient int rechargingForTurns;
-    private transient boolean fainted;
-    private transient int attackStage;
-    private transient int defenseStage;
-    private transient int spAttackStage;
-    private transient int spDefenseStage;
-    private transient int speedStage;
-    private transient int critStage;
+    private transient boolean fainted = false;
+    private transient int attackStage = 0;
+    private transient int defenseStage = 0;
+    private transient int spAttackStage = 0;
+    private transient int spDefenseStage = 0;
+    private transient int speedStage = 0;
+    private transient int critStage = 0;
     private transient List<Move> moveSet;
+    private transient boolean isCurrentPokemon = false;
+    private transient boolean isPokemonOnDeck = false;
 
     public BattlePokemon(Pokemon pokemon) {
         this.originalPokemon = pokemon;
         this.currentHp = pokemon.getHp();
-        this.confused = false;
-        this.flinched = false;
-        this.fainted = false;
-        this.attackStage = 0;
-        this.defenseStage = 0;
-        this.spAttackStage = 0;
-        this.spDefenseStage = 0;
-        this.speedStage = 0;
-        this.critStage = 0;
         this.moveSet = pokemon.getActiveMoveList();
     }
+
+    public boolean isCurrentPokemon() { return isCurrentPokemon; }
+
+    public void setAsCurrentPokemon(boolean currentPokemon) { isCurrentPokemon = currentPokemon; }
+
+    public boolean isPokemonOnDeck() { return isPokemonOnDeck; }
+
+    public void setAsPokemonOnDeck(boolean pokemonOnDeck) { isPokemonOnDeck = pokemonOnDeck; }
 
     public Pokemon getOriginalPokemon() {
         return originalPokemon;
@@ -137,7 +140,7 @@ public class BattlePokemon {
     }
 
     public void setAttackStage(int attackStage) {
-        this.attackStage = attackStage;
+        this.attackStage = Math.min(Math.max(this.attackStage + attackStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getDefenseStage() {
@@ -145,7 +148,7 @@ public class BattlePokemon {
     }
 
     public void setDefenseStage(int defenseStage) {
-        this.defenseStage = defenseStage;
+        this.defenseStage = Math.min(Math.max(this.defenseStage + defenseStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getSpAttackStage() {
@@ -153,7 +156,7 @@ public class BattlePokemon {
     }
 
     public void setSpAttackStage(int spAttackStage) {
-        this.spAttackStage = spAttackStage;
+        this.spAttackStage = Math.min(Math.max(this.spAttackStage + spAttackStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getSpDefenseStage() {
@@ -161,7 +164,7 @@ public class BattlePokemon {
     }
 
     public void setSpDefenseStage(int spDefenseStage) {
-        this.spDefenseStage = spDefenseStage;
+        this.spDefenseStage = Math.min(Math.max(this.spDefenseStage + spDefenseStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getSpeedStage() {
@@ -169,7 +172,7 @@ public class BattlePokemon {
     }
 
     public void setSpeedStage(int speedStage) {
-        this.speedStage = speedStage;
+        this.speedStage = Math.min(Math.max(this.speedStage + speedStage, MIN_STAGE), MAX_STAGE);
     }
 
     public int getCritStage() {
@@ -177,6 +180,6 @@ public class BattlePokemon {
     }
 
     public void setCritStage(int critStage) {
-        this.critStage = critStage;
+        this.critStage = Math.min(Math.max(this.critStage + critStage, MIN_STAGE), MAX_STAGE);
     }
 }

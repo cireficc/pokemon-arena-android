@@ -9,10 +9,16 @@ public class BattlePokemonPlayer {
 
     private transient BattlePokemonTeam battlePokemonTeam;
 
-    public BattlePokemonPlayer(PokemonPlayer player) {
+    public BattlePokemonPlayer(String id, BattlePokemonTeam battlePokemonTeam) {
+        this.id = id;
+        this.battlePokemonTeam = battlePokemonTeam;
+    }
 
-        this.id = UUID.randomUUID().toString();
-        this.battlePokemonTeam = new BattlePokemonTeam(player.getPokemonTeam());
+    public BattlePokemonPlayer(PokemonPlayer player) {
+        this (
+                player.getPlayerId(),
+                new BattlePokemonTeam(player.getPokemonTeam())
+        );
     }
 
     public String getId() {
