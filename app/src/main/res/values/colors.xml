@@ -39,5 +39,7 @@
     <color name="color_venusaur_lighter">#70b24f</color>
     <color name="color_blastoise_darl">#17477e</color>
     <color name="color_pikachu_light">#f5cb57</color>
+    <color name="color_venusaur_dark">#357418</color>
+    <color name="grayish">#bcbcbc</color>
 
 </resources>

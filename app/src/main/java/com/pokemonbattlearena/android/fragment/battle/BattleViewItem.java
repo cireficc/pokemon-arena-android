@@ -27,10 +27,6 @@ public class BattleViewItem {
         this.pokemonImage = (ImageView) playerView.findViewById(R.id.active_imageview);
         this.pokemonHpProgress = (SeekBar) playerView.findViewById(R.id.hp_imageview);
         this.pokemonHPText = (TextView) playerView.findViewById(R.id.hp_textview);
-        this.confusedStatusImage = (ImageView) playerView.findViewById(R.id.status_effect_confusion);
-        this.extraStatusImage = (ImageView) playerView.findViewById(R.id.extra_status_effect);
-        this.confusedStatusImage.setVisibility(View.GONE);
-        this.extraStatusImage.setVisibility(View.GONE);
     }
 
     public void setActivePokemon(BattlePokemon activePokemon) {
@@ -43,5 +39,12 @@ public class BattleViewItem {
         this.pokemonName.setVisibility(visible);
         this.pokemonHpProgress.setVisibility(visible);
         this.pokemonHPText.setVisibility(visible);
+    }
+
+    public void setStatusLayout(View status) {
+        this.confusedStatusImage = (ImageView) status.findViewById(R.id.status_effect_confusion);
+        this.extraStatusImage = (ImageView) status.findViewById(R.id.extra_status_effect);
+        this.confusedStatusImage.setVisibility(View.INVISIBLE);
+        this.extraStatusImage.setVisibility(View.INVISIBLE);
     }
 }

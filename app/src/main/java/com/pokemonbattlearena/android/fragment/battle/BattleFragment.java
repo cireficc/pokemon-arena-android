@@ -125,8 +125,8 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
             mOpponentBattleView.pokemonHpProgress.setMax(opponent.getHp());
             mOpponentBattleView.pokemonHpProgress.setProgress(b.getCurrentHp());
 
-            updateStatusForPlayer();
-            updateStatusForOpponent();
+            updateStatusForPlayer(a);
+            updateStatusForOpponent(b);
 
             configureButtonsWithMoves(a.getMoveSet());
         }
@@ -156,10 +156,15 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         View playerView = view.findViewById(R.id.player_1_ui);
         View opponentView = view.findViewById(R.id.player_2_ui);
 
+        View player1status = view.findViewById(R.id.player_1_status_layout);
+        View player2status = view.findViewById(R.id.player_2_status_layout);
+
         mPlayerBattleView = new BattleViewItem(playerView);
+        mPlayerBattleView.setStatusLayout(player1status);
         mPlayerBattleView.setVisibility(false);
 
         mOpponentBattleView = new BattleViewItem(opponentView);
+        mOpponentBattleView.setStatusLayout(player2status);
         mOpponentBattleView.setVisibility(false);
 
         setupMoveButtons(view);
@@ -345,8 +350,8 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
 
             mOpponentBattleView.pokemonHpProgress.setProgress(mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getCurrentHp());
 
-            updateStatusForPlayer();
-            updateStatusForOpponent();
+            updateStatusForPlayer(mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon());
+            updateStatusForOpponent(mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon());
 
             List<Move> moves = mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getMoveSet();
             configureButtonsWithMoves(moves);
@@ -357,31 +362,33 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void updateStatusForOpponent() {
-        if (mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().isConfused()) {
+    private void updateStatusForOpponent(BattlePokemon b) {
+        if (b.isConfused()) {
             mOpponentBattleView.confusedStatusImage.setVisibility(View.VISIBLE);
         } else {
             mOpponentBattleView.confusedStatusImage.setVisibility(View.INVISIBLE);
         }
-        if (mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().hasStatusEffect()) {
-            StatusEffect e = mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getStatusEffect();
+
+        if (b.hasStatusEffect()) {
+            StatusEffect e = b.getStatusEffect();
             Drawable drawable = getDrawableForPokemon(e.name().toLowerCase(), typeStatus);
             mOpponentBattleView.extraStatusImage.setImageDrawable(drawable);
-            mPlayerBattleView.extraStatusImage.setVisibility(View.VISIBLE);
+            mOpponentBattleView.extraStatusImage.setVisibility(View.VISIBLE);
         } else {
             mOpponentBattleView.extraStatusImage.setVisibility(View.INVISIBLE);
         }
     }
 
-    private void updateStatusForPlayer() {
-        if (mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().isConfused()) {
+    private void updateStatusForPlayer(BattlePokemon a) {
+        if (a.isConfused()) {
             mPlayerBattleView.confusedStatusImage.setVisibility(View.VISIBLE);
         } else {
             mPlayerBattleView.confusedStatusImage.setVisibility(View.INVISIBLE);
         }
-        if (mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().hasStatusEffect()) {
-            StatusEffect e = mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getStatusEffect();
-            Drawable drawable = getDrawableForPokemon(e.name().toLowerCase(), typeStatus);
+
+        if (a.hasStatusEffect()) {
+            StatusEffect e = a.getStatusEffect();
+            Drawable drawable = getDrawableForPokemon(e.toString(), typeStatus);
             mPlayerBattleView.extraStatusImage.setImageDrawable(drawable);
             mPlayerBattleView.extraStatusImage.setVisibility(View.VISIBLE);
         } else {
