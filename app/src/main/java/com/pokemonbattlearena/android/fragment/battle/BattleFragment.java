@@ -110,20 +110,14 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
 
     private void updatePokemonUI() {
         if (getView() != null) {
-            Pokemon self = a.getOriginalPokemon();
-            Pokemon opponent = b.getOriginalPokemon();
+            BattlePokemon self = mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon();
+            BattlePokemon opponent = mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon();
             Pokemon originalSelf = self.getOriginalPokemon();
             Pokemon originalOpponent = opponent.getOriginalPokemon();
-            mPlayerBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(self.getName(), typePokemon));
-            int playerBackgroundId = mApplication.getResources().getIdentifier("background_" + self.getType1().toLowerCase(), "drawable", getContext().getPackageName());
-            mPlayerBattleView.pokemonImage.setBackgroundResource(playerBackgroundId);
-            mOpponentBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(opponent.getName(), typePokemon));
-            int opponentBackgroundId = mApplication.getResources().getIdentifier("background_" + opponent.getType1().toLowerCase(), "drawable", getContext().getPackageName());
-            mOpponentBattleView.pokemonImage.setBackgroundResource(opponentBackgroundId);
 
             mPlayerBattleView.updateViews(mApplication, originalSelf);
             mOpponentBattleView.updateViews(mApplication, originalOpponent);
-            mOpponentBattleView.updateHealthProgress(self.getCurrentHp());
+            mPlayerBattleView.updateHealthProgress(self.getCurrentHp());
             mOpponentBattleView.updateHealthProgress(opponent.getCurrentHp());
 
             updateStatusForPlayer();
@@ -333,13 +327,6 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
                 mOpponentBattleView.updateViews(mApplication, opponent);
                 mPlayerBattleView.updateHealthProgress(mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getCurrentHp());
                 mOpponentBattleView.updateHealthProgress(mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getCurrentHp());
-            mPlayerBattleView.pokemonHpProgress.setMax(self.getHp());
-            mPlayerBattleView.pokemonName.setText(self.getName());
-            mPlayerBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(self.getName(), typePokemon));
-            int playerBackgroundId = mApplication.getResources().getIdentifier("background_" + self.getType1().toLowerCase(), "drawable", getContext().getPackageName());
-            mPlayerBattleView.pokemonImage.setBackgroundResource(playerBackgroundId);
-            int opponentBackgroundId = mApplication.getResources().getIdentifier("background_" + opponent.getType1().toLowerCase(), "drawable", getContext().getPackageName());
-            mOpponentBattleView.pokemonImage.setBackgroundResource(opponentBackgroundId);
 
                 updateStatusForPlayer();
                 updateStatusForOpponent();
