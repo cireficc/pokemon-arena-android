@@ -61,6 +61,8 @@ public class BattleViewHolder {
         this.pokemonImage.setImageDrawable(PokemonUtils.getDrawableForPokemon(c, original.getName(), PokemonUtils.typePokemon));
         this.pokemonName.setText(original.getName());
         this.pokemonHpProgress.setMax(original.getHp());
+        int backgroundId = c.getResources().getIdentifier("background_" + original.getType1().toLowerCase(), "drawable", c.getPackageName());
+        this.pokemonImage.setBackgroundResource(backgroundId);
     }
 
     public void updateHealthProgress(int currentHp) {

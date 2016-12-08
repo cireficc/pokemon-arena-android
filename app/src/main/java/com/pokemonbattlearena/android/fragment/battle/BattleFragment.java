@@ -114,12 +114,10 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
             BattlePokemon opponent = mOpponentBattlePlayer.getBattlePokemonTeam().getCurrentPokemon();
             Pokemon originalSelf = self.getOriginalPokemon();
             Pokemon originalOpponent = opponent.getOriginalPokemon();
-            mPlayerBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(mApplication, originalSelf.getName(), typePokemon));
-            mOpponentBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(mApplication, originalOpponent.getName(), typePokemon));
 
             mPlayerBattleView.updateViews(mApplication, originalSelf);
             mOpponentBattleView.updateViews(mApplication, originalOpponent);
-            mOpponentBattleView.updateHealthProgress(self.getCurrentHp());
+            mPlayerBattleView.updateHealthProgress(self.getCurrentHp());
             mOpponentBattleView.updateHealthProgress(opponent.getCurrentHp());
 
             updateStatusForPlayer();
