@@ -115,11 +115,9 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
             Pokemon opponent = b.getOriginalPokemon();
             mPlayerBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(self.getName(), typePokemon));
             int playerBackgroundId = mApplication.getResources().getIdentifier("background_" + self.getType1().toLowerCase(), "drawable", getContext().getPackageName());
-            System.out.println("HERER 2Player: "+self.getType1());
             mPlayerBattleView.pokemonImage.setBackgroundResource(playerBackgroundId);
             mOpponentBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(opponent.getName(), typePokemon));
             int opponentBackgroundId = mApplication.getResources().getIdentifier("background_" + opponent.getType1().toLowerCase(), "drawable", getContext().getPackageName());
-            System.out.println("HERER 2Opponent: "+opponent.getType1());
             mOpponentBattleView.pokemonImage.setBackgroundResource(opponentBackgroundId);
 
             mPlayerBattleView.pokemonName.setText(self.getName());
@@ -343,10 +341,8 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
             mPlayerBattleView.pokemonName.setText(self.getName());
             mPlayerBattleView.pokemonImage.setImageDrawable(getDrawableForPokemon(self.getName(), typePokemon));
             int playerBackgroundId = mApplication.getResources().getIdentifier("background_" + self.getType1().toLowerCase(), "drawable", getContext().getPackageName());
-            System.out.println("HERER Player: "+self.getType1());
             mPlayerBattleView.pokemonImage.setBackgroundResource(playerBackgroundId);
             int opponentBackgroundId = mApplication.getResources().getIdentifier("background_" + opponent.getType1().toLowerCase(), "drawable", getContext().getPackageName());
-            System.out.println("HERER Opponent: "+opponent.getType1());
             mOpponentBattleView.pokemonImage.setBackgroundResource(opponentBackgroundId);
 
             mPlayerBattleView.pokemonHpProgress.setProgress(mPlayerBattlePlayer.getBattlePokemonTeam().getCurrentPokemon().getCurrentHp());
