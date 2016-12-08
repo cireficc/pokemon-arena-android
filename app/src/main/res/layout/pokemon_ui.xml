@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
     <TextView
         android:id="@+id/active_name_textview"
 
-        android:layout_width="wrap_content"
+        android:layout_width="110dp"
         android:layout_height="wrap_content"
 
         android:text="@string/default_pokemon"
@@ -18,20 +18,8 @@
         android:layout_marginStart="@dimen/marginStart"
         android:layout_marginTop="@dimen/marginStart"
         android:layout_marginBottom="@dimen/hpTopMargin"
-        />
+        android:gravity="center_horizontal" />
 
-    <include
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:paddingEnd="3dp"
-        android:paddingStart="3dp"
-        android:orientation="vertical"
-        android:layout_toStartOf="@+id/active_imageview"
-        android:layout_alignTop="@+id/active_imageview"
-        android:id="@+id/player_status_layout"
-        layout="@layout/status_layout"
-        />
     <include
         android:id="@+id/opponent_status_layout"
         android:visibility="gone"
@@ -47,13 +35,10 @@
 
     <ImageView
         android:id="@+id/active_imageview"
-
         android:layout_width="110dp"
         android:layout_height="110dp"
-
         android:background="@color/grey"
         android:src="@android:mipmap/sym_def_app_icon"
-
         android:layout_below="@+id/active_name_textview"
         android:layout_centerHorizontal="true"
         />
@@ -69,7 +54,7 @@
         android:layout_alignStart="@id/active_imageview"
         android:layout_alignBottom="@+id/hp_imageview"
         android:layout_marginTop="@dimen/hpTopMargin"
-        />
+        android:layout_marginStart="10dp" />
     <SeekBar
         style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
         android:progressDrawable="@drawable/hp_progress"

@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         card_view:cardCornerRadius="10dp"
-        card_view:cardBackgroundColor="@color/color_blastoise"
+        card_view:cardBackgroundColor="@color/color_venusaur_light"
         android:layout_marginLeft="@dimen/chatEndMargin"
         android:layout_marginRight="@dimen/chatStartMargin"
         android:gravity="right">

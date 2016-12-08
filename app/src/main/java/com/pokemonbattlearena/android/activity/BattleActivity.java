@@ -168,18 +168,6 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                 .hide(mTeamStatFragment)
                 .commit();
 
-        showProgressDialog();
-
-        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                if (!isAiBattle) {
-                    Toast.makeText(mApplication, "Cancelled Battle", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-            }
-        });
-
         mRootFirebase = FirebaseDatabase.getInstance().getReference().child(PokemonUtils.PROFILE_NAME_KEY);
         mBottomBar.setOnTabSelectListener(this);
     }
@@ -452,13 +440,15 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mOpponentUsername = bufferString.trim();
             sendPokemonTeam(getSavedTeam());
             return;
-        } else if (mOpponentTeam == null) {
+        }
+        if (mOpponentTeam == null && mOpponentUsername != null) {
             try {
                 mOpponentTeam = new Gson().fromJson(bufferString, PokemonTeam.class);
                 setupBattleWithOpponent();
                 return;
-            } catch (IllegalStateException e) {
-
+            } catch (Exception e) {
+                mOpponentTeam = null;
+                return;
             }
         }
         if (mOpponentTeam != null && mOpponentUsername != null) {
@@ -470,12 +460,16 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                     handleBattleResult();
                 }
             } else {
+                boolean nop = false;
                 BattlePhaseResult resultFromJson = mCommandResultGson.fromJson(bufferString, BattlePhaseResult.class);
                 Log.d(TAG, "We got a battle phase result: " + resultFromJson.toString());
                 for (CommandResult commandResult : resultFromJson.getCommandResults()) {
                     // Update the internal state of the battle (only host really needs to do this, but opponent can too)
                     // Have opponent update their own battle state if you want to use the Battle object directly to update the UI (which makes more sense, IMO)
                     mBattle.applyCommandResult(commandResult);
+                    if (mBattle.oppPokemonFainted()) {
+                        nop = true;
+                    }
                     Log.d(TAG, commandResult.getTargetInfo().toString());
                 }
 
@@ -484,6 +478,9 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
                     Button force;
                     force = (Button)findViewById(R.id.switch_button);
                     force.performClick();
+                } else if (nop) {
+                    sendClientMessage(new NoP(mBattle.getSelf()));
+                    mBattleFragment.enableButtonActions(false);
                 }
             }
             mBattleFragment.refreshBattleUI(mBattle);
@@ -509,7 +506,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             mBattleFragment.setOpponent(opponent);
         }
 
-        getFragmentManager().executePendingTransactions();
+//        getFragmentManager().executePendingTransactions();
 
         mFragmentManager.beginTransaction()
                 .show(mBattleFragment)
@@ -547,6 +544,16 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        showProgressDialog();
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (!isAiBattle) {
+                    Toast.makeText(mApplication, "Cancelled Battle", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        });
         if (!isAiBattle) {
             startMatchMaking();
         } else {
@@ -781,12 +788,12 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public String getHostId() {
-        return mUsername;
+        return mHostId;
     }
 
     @Override
     public void onBattleEnd() {
-
+        mChatFragment.deleteChatRoom();
         if (mBattle instanceof AiBattle) {
             if (mBattle.selfPokemonFainted()) {
                 Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();

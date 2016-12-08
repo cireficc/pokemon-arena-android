@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/list_footer"
         android:layout_below="@+id/chat_room_title"
-        android:background="@color/color_venusaur_light">
+        android:background="@color/cardview_shadow_end_color">
         <LinearLayout
             android:id="@+id/chat_list"
             android:orientation="vertical"

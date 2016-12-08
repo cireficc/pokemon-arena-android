@@ -18,6 +18,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.pokemonbattlearena.android.adapter.MoveAdapter;
+import com.pokemonbattlearena.android.adapter.PokemonGridAdapter;
 import com.pokemonbattlearena.android.application.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;

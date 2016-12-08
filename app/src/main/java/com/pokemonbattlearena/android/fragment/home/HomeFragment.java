@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragment;
+package com.pokemonbattlearena.android.fragment.home;
 
 import android.content.Context;
 import android.os.Bundle;

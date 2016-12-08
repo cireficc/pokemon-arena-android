@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
+import com.pokemonbattlearena.android.adapter.ItemAdapter;
 import com.pokemonbattlearena.android.application.PokemonBattleApplication;
 import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.R;
@@ -48,7 +49,6 @@ public class SavedTeamsFragment extends Fragment {
     private FloatingActionButton addTeamButton;
 
     private View.OnClickListener deleteListener;
-    private View.OnClickListener editListener;
     private OnSavedTeamsFragmentTouchListener mCallback;
 
     public SavedTeamsFragment() {
@@ -145,12 +145,6 @@ public class SavedTeamsFragment extends Fragment {
                     }
                 });
                 builder.show();
-            }
-        };
-        editListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
             }
         };
 
@@ -253,7 +247,7 @@ public class SavedTeamsFragment extends Fragment {
     }
 
     private void setAdapter() {
-        ItemAdapter listAdapter = new ItemAdapter(mSavedTeams, R.layout.saved_team_full_item, R.id.saved_team_cardView, false, deleteListener, editListener);
+        ItemAdapter listAdapter = new ItemAdapter(mSavedTeams, R.layout.saved_team_full_item, R.id.saved_team_cardView, false, deleteListener);
         mDragListView.setAdapter(listAdapter, true);
     }
 

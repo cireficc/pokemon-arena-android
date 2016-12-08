@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android.fragment.team;
+package com.pokemonbattlearena.android.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.CardView;
@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,7 +14,6 @@ import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemon;
 import com.pokemonbattlearena.android.engine.match.BattlePokemonTeam;
-import com.pokemonbattlearena.android.engine.match.PokemonTeam;
 import com.pokemonbattlearena.android.util.PokemonUtils;
 
 /**
@@ -65,7 +63,7 @@ public class StatAdapter extends BaseAdapter {
             holder = (StatViewHolder) convertView.getTag();
         }
         holder.name.setText(pokemon.getName());
-        holder.pokemonImage.setImageDrawable(PokemonUtils.getDrawableForPokemon(context, pokemon.getName()));
+        holder.pokemonImage.setImageDrawable(PokemonUtils.getDrawableForPokemon(context, pokemon.getName(), PokemonUtils.typePokemon));
         StringBuilder builder = new StringBuilder("Moves: \n");
         for (Move move : bPokemon.getMoveSet()) {
             builder.append(move.getName() + "\n");
