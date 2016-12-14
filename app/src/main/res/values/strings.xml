@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Pokemon Battle</string>
+    <string name="app_name">Pokémon Arena</string>
     <string name="action_settings">Settings</string>
     <string name="battle">Battle</string>
     <string name="chat">Chat</string>
@@ -26,9 +26,31 @@
     <string name="tap_a_pokemon_to_switch">Switch Pokemon</string>
     <string name="status_effects">Status Effects</string>
     <string name="append_profile_text">\'s Team:</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_activity_battle">BattleActivity</string>
+    <string name="title_activity_home">Pokémon Arena</string>
+    <string name="title_activity_battle">Pokémon Battle</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="cancelled_battle">Cancelled Battle</string>
+    <string name="ai_win">" AI has won the battle"</string>
+    <string name="player_win">" You have won the battle"</string>
+    <string name="winner">" has won the battle"</string>
+    <string name="message_sent">"Reliable message sent (sendMessage()) + "</string>
+    <string name="fragment_chat">chat</string>
+    <string name="fragment_team_stat">team_stat</string>
+    <string name="fragment_battle">battle</string>
+    <string name="battle_prefs">Pokemon Battle Prefs</string>
+    <string name="fragment_team_builder">team_builder</string>
+    <string name="fragment_team_save">team_save</string>
+    <string name="welcome_splash">Welcome to Pokémon Arena!</string>
+    <string name="switch_pokemon">Switch</string>
+    <string name="battle_chat">Battle Chat</string>
+    <string name="global">Global</string>
+    <string name="save_team_name">Set Team Name</string>
+    <string name="enter_team_name">Please enter a team name</string>
+    <string name="pick_move_title">Pick 4 Moves</string>
+    <string name="save_moves">Save Moves</string>
+    <string name="default_moves">Default Moves</string>
+    <string name="complete">Complete</string>
+    <string name="delete_team_title">Delete Team</string>
 </resources>

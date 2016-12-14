@@ -79,8 +79,8 @@ public class ChatHomeFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_chathome, container, false);
         SharedPreferences prefs = activity.getSharedPreferences(PokemonUtils.PREFS_KEY, Context.MODE_PRIVATE);
-        chatRoom = "Global";
-        mUsername = prefs.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
+        chatRoom = getString(R.string.global);
+        mUsername = prefs.getString(PokemonUtils.PROFILE_NAME_KEY, PokemonUtils.DEFAULT_NAME);
         layoutInflater = inflater;
 
         return view;

@@ -20,7 +20,7 @@ public class SplashActivity extends WelcomeActivity {
         return new WelcomeConfiguration.Builder(this)
                 .defaultBackgroundColor(R.color.color_blastoise)
                 .page(new TitlePage(R.drawable.ic_title_logo,
-                        "Welcome to Pokemon Battle!")
+                        getString(R.string.welcome_splash))
                 ).page(new FragmentWelcomePage() {
                     @Override
                     protected Fragment fragment() {
