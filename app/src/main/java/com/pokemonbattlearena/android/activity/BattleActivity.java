@@ -12,8 +12,6 @@ import android.support.annotation.Nullable;
 import android.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -28,15 +26,12 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
-import com.pokemonbattlearena.android.BattleEndListener;
+import com.pokemonbattlearena.android.fragment.battle.BattleEndListener;
 import com.pokemonbattlearena.android.application.PokemonBattleApplication;
 import com.pokemonbattlearena.android.engine.ai.AiBattle;
 import com.pokemonbattlearena.android.engine.ai.AiPlayer;
@@ -130,12 +125,12 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         isAiBattle = getIntent().getBooleanExtra(PokemonUtils.AI_BATTLE_KEY, false);
-        mPreferences = getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
+        mPreferences = getSharedPreferences(getString(R.string.battle_prefs), Context.MODE_PRIVATE);
         mBottomBar = (BottomBar) findViewById(R.id.battle_bottom_bar);
         mBottomBar.setDefaultTab(R.id.tab_battle);
 
         mFragmentManager = getFragmentManager();
-        mUsername = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
+        mUsername = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, PokemonUtils.DEFAULT_NAME);
         // Button listeners
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -161,9 +156,9 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         mTeamStatFragment.setArguments(statBundle);
 
         mFragmentManager.beginTransaction()
-                .add(R.id.battle_container, mChatFragment, "chat")
-                .add(R.id.battle_container, mTeamStatFragment, "team_stat")
-                .add(R.id.battle_container, mBattleFragment, "battle")
+                .add(R.id.battle_container, mChatFragment, getString(R.string.fragment_chat))
+                .add(R.id.battle_container, mTeamStatFragment, getString(R.string.fragment_team_stat))
+                .add(R.id.battle_container, mBattleFragment, getString(R.string.fragment_battle))
                 .hide(mChatFragment)
                 .hide(mTeamStatFragment)
                 .commit();
@@ -225,7 +220,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     }
 
     public void startMusic(int id) {
-        Uri ins = Uri.parse("android.resource://com.pokemonbattlearena.android/" + id);
+        Uri ins = Uri.parse(PokemonUtils.ROOT_URL + id);
         try{
             mMusic.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -242,7 +237,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
 
     public void setUpMusic(int startId, int endId){
         final int ENDID = endId;
-        Uri ins = Uri.parse("android.resource://com.pokemonbattlearena.android/" + startId);
+        Uri ins = Uri.parse(PokemonUtils.ROOT_URL + startId);
         try {
             mMusic.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -526,8 +521,8 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
     }
 
     private PokemonTeam getSavedTeam() {
-        String teamJSON = mPreferences.getString("pokemon_team", "mew");
-        if (!teamJSON.equals("mew")) {
+        String teamJSON = mPreferences.getString(PokemonUtils.POKEMON_TEAM_KEY, PokemonUtils.DEFAULT_TEAM);
+        if (!teamJSON.equals(PokemonUtils.DEFAULT_TEAM)) {
             Log.d(TAG, "Got saved team: " + teamJSON);
             return new Gson().fromJson(teamJSON, PokemonTeam.class);
         }
@@ -549,7 +544,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             @Override
             public void onCancel(DialogInterface dialog) {
                 if (!isAiBattle) {
-                    Toast.makeText(mApplication, "Cancelled Battle", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mApplication, R.string.cancelled_battle, Toast.LENGTH_SHORT).show();
                     finish();
                 }
             }
@@ -762,7 +757,7 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
             if (!p.getParticipantId().equals(mMyId)) {
                 Games.RealTimeMultiplayer.sendReliableMessage(mGoogleApiClient, null, byteMessage,
                         mRoomId, p.getParticipantId());
-                Log.d(TAG, "Reliable message sent (sendMessage()) + " + message);
+                Log.d(TAG, getString(R.string.message_sent) + message);
             }
         }
     }
@@ -796,17 +791,17 @@ public class BattleActivity extends BaseActivity implements OnTabSelectListener,
         mChatFragment.deleteChatRoom();
         if (mBattle instanceof AiBattle) {
             if (mBattle.selfPokemonFainted()) {
-                Toast.makeText(mApplication," AI has won the battle", Toast.LENGTH_LONG).show();
+                Toast.makeText(mApplication, R.string.ai_win, Toast.LENGTH_LONG).show();
             } else if (mBattle.oppPokemonFainted()) {
-                Toast.makeText(mApplication," You have won the battle", Toast.LENGTH_LONG).show();
+                Toast.makeText(mApplication, R.string.player_win, Toast.LENGTH_LONG).show();
             }
         }
 
         if (mBattle.isFinished()) {
             if (mBattle.selfPokemonFainted()) {
-                Toast.makeText(mApplication, mUsername + " has won the battle", Toast.LENGTH_LONG).show();
+                Toast.makeText(mApplication, mUsername + getString(R.string.winner), Toast.LENGTH_LONG).show();
             } else if (mBattle.oppPokemonFainted()){
-                Toast.makeText(mApplication, mOpponentUsername + " has won the battle", Toast.LENGTH_LONG).show();
+                Toast.makeText(mApplication, mOpponentUsername + getString(R.string.winner), Toast.LENGTH_LONG).show();
             }
         }
         finish();

@@ -1,4 +1,4 @@
-package com.pokemonbattlearena.android;
+package com.pokemonbattlearena.android.fragment.battle;
 
 /**
  * Created by nathan on 11/12/16.

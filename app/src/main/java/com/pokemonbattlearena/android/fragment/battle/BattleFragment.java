@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.pokemonbattlearena.android.application.PokemonBattleApplication;
 import com.pokemonbattlearena.android.R;
+import com.pokemonbattlearena.android.util.PokemonUtils;
 import com.pokemonbattlearena.android.util.TypeModel;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
@@ -78,7 +79,7 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
     }
 
     public void enableButtonActions(boolean enabled) {
-        String locked = enabled ? "UNLOCKED":"LOCKED";
+        String locked = enabled ? PokemonUtils.UNLOCKED:PokemonUtils.LOCKED;
         Log.d(TAG, "UI is now " + locked);
         for (Button button : mMoveButtons) {
             button.setEnabled(enabled);
@@ -246,13 +247,13 @@ public class BattleFragment extends Fragment implements View.OnClickListener {
         builder.setTitle(getString(R.string.tap_a_pokemon_to_switch));
         builder.setView(switchView);
         builder.setCancelable(false);
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
-        builder.setPositiveButton("Switch", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.switch_pokemon, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (selected[0] > -1) {

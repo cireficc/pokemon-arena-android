@@ -34,8 +34,6 @@ public class SavedTeamsFragment extends Fragment {
 
     private PokemonBattleApplication mApplication = PokemonBattleApplication.getInstance();
     public static DatabaseReference root;
-    private final String headRootName = "Users";
-    private final String teamsRootName = "Teams";
     private String username;
     private ChildEventListener mChildListener;
     int longValue;
@@ -70,9 +68,9 @@ public class SavedTeamsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //connect to this user's saved teams on Firebase
-        mPreferences = getActivity().getSharedPreferences("Pokemon Battle Prefs", Context.MODE_PRIVATE);
-        username = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "User");
-        root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);
+        mPreferences = getActivity().getSharedPreferences(PokemonUtils.PREFS_KEY, Context.MODE_PRIVATE);
+        username = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, PokemonUtils.DEFAULT_NAME);
+        root = FirebaseDatabase.getInstance().getReference().child(PokemonUtils.FIREBASE_USER).child(username).child(PokemonUtils.FIREBASE_TEAMS);
         //listener for populating saved teams page
         mChildListener = new ChildEventListener() {
             @Override
@@ -120,7 +118,7 @@ public class SavedTeamsFragment extends Fragment {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 LayoutInflater inflater = LayoutInflater.from(getActivity());
                 View deleteView = inflater.inflate(R.layout.saved_team_delete_dialog,(ViewGroup) getActivity().findViewById(R.id.teams_home),false);
-                builder.setTitle("Delete Team");
+                builder.setTitle(R.string.delete_team_title);
                 builder.setView(deleteView);
                 builder.setCancelable(false);
                 builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {

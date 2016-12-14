@@ -63,22 +63,7 @@ public class HomeFragment extends Fragment {
                 mCallback.onAiBattleClicked();
             }
         });
-//        mBattleNowButton.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                //on button pressed
-//                if(event.getAction() == MotionEvent.ACTION_DOWN) {
-//                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button_clicked);
-//                    return true;
-//                }
-//                //on button release
-//                else {
-//                    mCallback.onBattleNowClicked();
-//                    mBattleNowButton.setBackgroundResource(R.drawable.ic_battle_now_button);
-//                    return false;
-//                }
-//            }
-//        });
+
         mBattleFriendButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -94,22 +79,7 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-//        mBattleAIButton.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                //on button pressed
-//                if(event.getAction() == MotionEvent.ACTION_DOWN) {
-//                    mBattleAIButton.setBackgroundResource(R.drawable.ic_battle_ai_button_clicked);
-//                    return true;
-//                }
-//                //on button release
-//                else {
-//                    mCallback.onAiBattleClicked();
-//                    mBattleAIButton.setBackgroundResource(R.drawable.ic_battle_ai_button);
-//                    return false;
-//                }
-//            }
-//        });
+
 
         return view;
     }

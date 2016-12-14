@@ -97,7 +97,7 @@ public class ChatFragment extends Fragment {
             chatType = ChatType.IN_GAME;
             allowsForBattleChat = true;
         }
-        mUsername = prefs.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
+        mUsername = prefs.getString(PokemonUtils.PROFILE_NAME_KEY, PokemonUtils.DEFAULT_NAME);
         layoutInflater = inflater;
         root = FirebaseDatabase.getInstance().getReference().child(chatType.getChatRoomType());
         return view;
@@ -110,7 +110,7 @@ public class ChatFragment extends Fragment {
         switchChatButton = (Button) activity.findViewById(R.id.chat_switch_button);
         chatTitle = (TextView) activity.findViewById(R.id.chat_room_title);
         chatHolder = (ViewGroup) activity.findViewById(R.id.chat_holder);
-        chatTitle.setText(chatType == ChatType.IN_GAME ? "Battle Chat" : "Global Chat");
+        chatTitle.setText(chatType == ChatType.IN_GAME ? getString(R.string.battle_chat) : getString(R.string.global_chat));
 
         gameChatRoomName = "Chat-"+mCallback.getHostId();
 
@@ -137,7 +137,7 @@ public class ChatFragment extends Fragment {
                     //update UI
                     resetChatUI();
                 }
-                chatTitle.setText(chatType == ChatType.IN_GAME ? "Battle Chat" : "Global Chat");
+                chatTitle.setText(chatType == ChatType.IN_GAME ? getString(R.string.battle_chat) : getString(R.string.global_chat));
             }
         });
 

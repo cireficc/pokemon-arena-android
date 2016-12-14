@@ -51,9 +51,6 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
     private int teamSize = 6;
     private ArrayList<Pokemon> selectedTeamArrayList;
     private TextView mSaveTeamText;
-    private final String headRootName = "Users";
-    private final String teamsRootName = "Teams";
-    private final int mTeamSize = 6;
 
     private WelcomeFinisher welcomeFinisher;
 
@@ -93,7 +90,7 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
             }
             saveTeam(pokemonTeam);
         } else {
-            Toast.makeText(mApplication, "You must have" +mTeamSize+" Pokemon in your team", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mApplication, "You must have" +PokemonUtils.TEAM_SIZE_STRING +" Pokemon in your team", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -127,10 +124,10 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
                         }
                     }
                 });
-                builder.setTitle("Pick 4 Moves");
+                builder.setTitle(R.string.pick_move_title);
                 builder.setView(moveSelectionView);
                 builder.setCancelable(false);
-                builder.setPositiveButton("Save Moves", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.save_moves, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         selectedPokemon.setActiveMoveList(selectedMoves);
@@ -138,7 +135,7 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
                         item.mCheckbox.setChecked(true);
                     }
                 });
-                builder.setNeutralButton("Default Moves", new DialogInterface.OnClickListener() {
+                builder.setNeutralButton(R.string.default_moves, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         List<Move> moves = mApplication.getBattleDatabase().getMovesForPokemon(selectedPokemon);
@@ -148,7 +145,7 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
                         item.mCheckbox.setChecked(true);
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         selectedTeamArrayList.remove(selectedPokemon);
@@ -169,34 +166,34 @@ public class FirstTeamFragment extends Fragment implements AdapterView.OnItemCli
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View saveTeamView = inflater.inflate(R.layout.saved_team_name_dialog,(ViewGroup) getActivity().findViewById(R.id.teams_home),false);
         final EditText mTeamName = (EditText) saveTeamView.findViewById(R.id.team_name_dialog_editText);
-        builder.setTitle("Set Team Name");
+        builder.setTitle(R.string.save_team_name);
         builder.setView(saveTeamView);
         builder.setCancelable(false);
-        builder.setPositiveButton("Complete", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.complete, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 PokemonTeam pokemonTeam = pTeam;
                 pokemonTeam.setTeamName(mTeamName.getText().toString());
                 //does not allow a null team name
-                if(pokemonTeam.getTeamName() == null || pokemonTeam.getTeamName().equals("")){
-                    Toast.makeText(mApplication, "Please enter a team name", Toast.LENGTH_SHORT).show();
+                if(pokemonTeam.getTeamName() == null || pokemonTeam.getTeamName().isEmpty()){
+                    Toast.makeText(mApplication, R.string.enter_team_name, Toast.LENGTH_SHORT).show();
                 }
                 else {
                     //Set Active Pokemon Team
                     SharedPreferences.Editor edit = mPreferences.edit();
                     String json = new Gson().toJson(pokemonTeam, PokemonTeam.class);
-                    edit.putString("pokemon_team", json);
+                    edit.putString(PokemonUtils.POKEMON_TEAM_KEY, json);
                     edit.apply();
                     edit.commit();
                     //Add Team to Firebase under 'teams'
-                    String username = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
-                    DatabaseReference root = FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child(teamsRootName);
+                    String username = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, PokemonUtils.DEFAULT_NAME);
+                    DatabaseReference root = FirebaseDatabase.getInstance().getReference().child(PokemonUtils.FIREBASE_USER).child(username).child(PokemonUtils.FIREBASE_TEAMS);
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put(pokemonTeam.getTeamName(), json);
                     root.updateChildren(map);
 
                     // add first team as active team
-                    FirebaseDatabase.getInstance().getReference().child(headRootName).child(username).child("active_team").setValue(json);
+                    FirebaseDatabase.getInstance().getReference().child(PokemonUtils.FIREBASE_USER).child(username).child(PokemonUtils.FIREBASE_ACTIVE_TEAM).setValue(json);
                     //end SplashActivity
                     welcomeFinisher.finish();
                 }

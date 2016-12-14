@@ -25,6 +25,7 @@ import com.pokemonbattlearena.android.R;
 import com.pokemonbattlearena.android.engine.database.Move;
 import com.pokemonbattlearena.android.engine.database.Pokemon;
 import com.pokemonbattlearena.android.engine.match.PokemonTeam;
+import com.pokemonbattlearena.android.util.PokemonUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +47,6 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     private Button mSaveButton;
     private PokemonGridAdapter mAdapter;
     private OnPokemonTeamSelectedListener mCallback;
-    private int mTeamSize;
     private ArrayList<Pokemon> selectedTeamArrayList;
 
     public TeamsHomeFragment() {
@@ -66,7 +66,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         mGridView = (GridView)  view.findViewById(R.id.team_gridview);
         mCancelButton = (Button) view.findViewById(R.id.cancel_team_button);
         mSaveButton = (Button) view.findViewById(R.id.save_team_button);
-        selectedTeamArrayList = new ArrayList<>(mTeamSize);
+        selectedTeamArrayList = new ArrayList<>(PokemonUtils.TEAM_SIZE_INT);
         mApplication = PokemonBattleApplication.getInstance();
         mItemArray = (ArrayList<Pokemon>) mApplication.getBattleDatabase().getPokemons();
         mAdapter = new PokemonGridAdapter(getActivity(), mItemArray, R.layout.builder_grid_item);
@@ -91,18 +91,17 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
-        mTeamSize = args.getInt("teamSize");
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.save_team_button:
-                if (selectedTeamArrayList.size() >= mTeamSize) {
+                if (selectedTeamArrayList.size() >= PokemonUtils.TEAM_SIZE_INT) {
                     //prompts team name and completes the team setup / save
                     promptTeamName();
                 } else {
-                    Toast.makeText(mApplication, "You must have" +mTeamSize+" Pokemon in your team", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mApplication, "You must have" +PokemonUtils.TEAM_SIZE_STRING +" Pokemon in your team", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -126,7 +125,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         builder.setPositiveButton("Complete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                PokemonTeam pokemonTeam = new PokemonTeam(mTeamSize);
+                PokemonTeam pokemonTeam = new PokemonTeam(PokemonUtils.TEAM_SIZE_INT);
                 pokemonTeam.setTeamName(mTeamName.getText().toString());
                 //does not allow a null team name
                 if(pokemonTeam.getTeamName() == null || pokemonTeam.getTeamName().equals("")){
@@ -159,8 +158,8 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
         final List<Move> moveList = mApplication.getBattleDatabase().getMovesForPokemon(selectedPokemon);
         final List<Move> selectedMoves = new ArrayList<>();
         if (!selectedTeamArrayList.contains(selectedPokemon)) {
-            if (selectedTeamArrayList.size() >= mTeamSize) {
-                Toast.makeText(mApplication, "You can only select " + mTeamSize + " pokemon for your team", Toast.LENGTH_SHORT).show();
+            if (selectedTeamArrayList.size() >= PokemonUtils.TEAM_SIZE_INT) {
+                Toast.makeText(mApplication, "You can only select " + PokemonUtils.TEAM_SIZE_INT + " pokemon for your team", Toast.LENGTH_SHORT).show();
             } else {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 LayoutInflater inflater = LayoutInflater.from(getActivity());
@@ -182,10 +181,10 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                         }
                     }
                 });
-                builder.setTitle("Pick 4 Moves");
+                builder.setTitle(R.string.pick_move_title);
                 builder.setView(moveSelectionView);
                 builder.setCancelable(false);
-                builder.setPositiveButton("Save Moves", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.save_moves, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         selectedPokemon.setActiveMoveList(selectedMoves);
@@ -193,7 +192,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                         item.mCheckbox.setChecked(true);
                     }
                 });
-                builder.setNeutralButton("Default Moves", new DialogInterface.OnClickListener() {
+                builder.setNeutralButton(R.string.default_moves, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         List<Move> moves = mApplication.getBattleDatabase().getMovesForPokemon(selectedPokemon);
@@ -203,7 +202,7 @@ public class TeamsHomeFragment extends Fragment implements GridView.OnItemClickL
                         item.mCheckbox.setChecked(true);
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         selectedTeamArrayList.remove(selectedPokemon);

@@ -74,7 +74,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
         setSupportActionBar(toolbar);
         mPreferences = getSharedPreferences(PokemonUtils.PREFS_KEY, Context.MODE_PRIVATE);
         mWelcomeHelper = new WelcomeHelper(this, com.pokemonbattlearena.android.activity.SplashActivity.class);
-        mUsername = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example-name");
+        mUsername = mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, PokemonUtils.DEFAULT_NAME);
         mBottomBar = (BottomBar) findViewById(R.id.home_bottom_bar);
         mBottomBar.setDefaultTab(R.id.tab_battle);
         mBottomBar.setOnTabSelectListener(this);
@@ -161,7 +161,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
     }
 
     public void startMusic(int id) {
-        Uri ins = Uri.parse("android.resource://com.pokemonbattlearena.android/" + id);
+        Uri ins = Uri.parse(PokemonUtils.ROOT_URL + id);
         try{
             mMusic.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -178,7 +178,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
 
     public void setUpMusic(int startId, int endId){
         final int ENDID = endId;
-        Uri ins = Uri.parse("android.resource://com.pokemonbattlearena.android/" + startId);
+        Uri ins = Uri.parse(PokemonUtils.ROOT_URL+ startId);
         try {
             mMusic.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -242,7 +242,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
             case R.id.tab_chat:
                 if (mChatFragment != null && !mChatFragment.isAdded()) {
                     mFragmentManager.beginTransaction()
-                            .add(R.id.home_container, mChatFragment, "chat")
+                            .add(R.id.home_container, mChatFragment, getString(R.string.fragment_chat))
                             .hide(mSavedTeamsFragment)
                             .hide(mHomeFragment)
                             .commit();
@@ -260,7 +260,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
     @Override
     public void onBattleNowClicked() {
         Intent battleIntent = new Intent();
-        battleIntent.setAction("om.pokemonbattlearena.android.battle.START");
+        battleIntent.setAction(PokemonUtils.ACTION_START);
         battleIntent.putExtra(PokemonUtils.AI_BATTLE_KEY, false);
         startActivityForResult(battleIntent, PokemonUtils.BATTLE_REQUEST);
     }
@@ -268,7 +268,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
     @Override
     public void onAiBattleClicked() {
         Intent battleIntent = new Intent();
-        battleIntent.setAction("om.pokemonbattlearena.android.battle.START");
+        battleIntent.setAction(PokemonUtils.ACTION_START);
         battleIntent.putExtra(PokemonUtils.AI_BATTLE_KEY, true);
         startActivityForResult(battleIntent, PokemonUtils.BATTLE_REQUEST);
     }
@@ -310,7 +310,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
 
     @Override
     public String getHostId() {
-        return mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, "example");
+        return mPreferences.getString(PokemonUtils.PROFILE_NAME_KEY, PokemonUtils.DEFAULT_NAME);
     }
 
     @Override
@@ -337,11 +337,11 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
         if (mFragmentManager != null && mSavedTeamsFragment != null && mSavedTeamsFragment.isAdded()) {
             mTeamBuilderFragment = createTeamsHomeFragment();
             mFragmentManager.beginTransaction().remove(mSavedTeamsFragment).commit();
-            mFragmentManager.beginTransaction().add(R.id.home_container, mTeamBuilderFragment, "team_builder").commit();
+            mFragmentManager.beginTransaction().add(R.id.home_container, mTeamBuilderFragment, getString(R.string.fragment_team_builder)).commit();
             mFragmentManager.executePendingTransactions();
         } else if (mFragmentManager != null && mTeamBuilderFragment != null && mTeamBuilderFragment.isAdded()) {
             mFragmentManager.beginTransaction().remove(mTeamBuilderFragment).commit();
-            mFragmentManager.beginTransaction().add(R.id.home_container, mSavedTeamsFragment, "team_save").commit();
+            mFragmentManager.beginTransaction().add(R.id.home_container, mSavedTeamsFragment, getString(R.string.fragment_team_save)).commit();
             mFragmentManager.executePendingTransactions();
         }
     }
@@ -350,7 +350,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
         TeamsHomeFragment teamsHomeFragment = new TeamsHomeFragment();
         // Set the team size
         Bundle teamArgs = new Bundle();
-        teamArgs.putInt("teamSize", TEAM_SIZE_INT);
+        teamArgs.putInt(PokemonUtils.TEAM_SIZE_STRING, TEAM_SIZE_INT);
         teamsHomeFragment.setArguments(teamArgs);
         return teamsHomeFragment;
     }
@@ -370,7 +370,7 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
         SharedPreferences.Editor editor = mPreferences.edit();
         String orderedTeamJSON = new Gson().toJson(teamOrder);
         Log.d(TAG, "Setting saved team order: " + orderedTeamJSON);
-        editor.putString("orderedTeamJSON", orderedTeamJSON).apply();
+        editor.putString(PokemonUtils.ORDER_TEAM_JSON_KEY, orderedTeamJSON).apply();
         editor.commit();
 
         //add first team as your active team
@@ -383,16 +383,16 @@ public class HomeActivity extends BaseActivity implements OnTabSelectListener,
     private void setCurrentTeam(String pokemonJSON){
         SharedPreferences.Editor editor = mPreferences.edit();
         Log.d(TAG, "Setting current team: " + pokemonJSON);
-        editor.putString("pokemon_team", pokemonJSON).apply();
+        editor.putString(PokemonUtils.CURRENT_TEAM_KEY, pokemonJSON).apply();
         editor.commit();
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference().child("Users").child(mUsername).child("active_team");
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference().child(PokemonUtils.FIREBASE_USER).child(mUsername).child(PokemonUtils.FIREBASE_ACTIVE_TEAM);
         root.setValue(pokemonJSON);
     }
 
     @Override
     public ArrayList<String> retrieveTeamOrder() {
-        String orderedTeamJSON = mPreferences.getString("orderedTeamJSON", "mew");
-        if (!orderedTeamJSON.equals("mew")) {
+        String orderedTeamJSON = mPreferences.getString(PokemonUtils.ORDER_TEAM_JSON_KEY, PokemonUtils.DEFAULT_TEAM);
+        if (!orderedTeamJSON.equals(PokemonUtils.DEFAULT_TEAM)) {
             Log.d(TAG, "Got team order: " + orderedTeamJSON);
             return new Gson().fromJson(orderedTeamJSON, ArrayList.class);
         }
